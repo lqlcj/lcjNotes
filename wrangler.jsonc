@@ -1,0 +1,14 @@
+{
+  "name": "leyiligarden",
+  "compatibility_date": "2025-11-28",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  },
+  "kv_namespaces": [
+    {
+      "binding": "BLOG_KV",
+      "id": "4aba4eab2b90457ead620696f43b74ce"
+    }
+  ]
+}

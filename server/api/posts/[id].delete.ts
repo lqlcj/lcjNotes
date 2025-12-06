@@ -1,0 +1,60 @@
+import { getKVStorage } from '~/server/utils/kv';
+
+// 删除文章
+export default defineEventHandler(async (event) => {
+  // 验证身份
+  const authHeader = getHeader(event, 'authorization');
+  const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
+  
+  if (!adminPassword || authHeader !== `Bearer ${adminPassword}`) {
+    throw createError({
+      statusCode: 401,
+      message: '未授权访问'
+    });
+  }
+  
+  const id = getRouterParam(event, 'id');
+  const kv = getKVStorage(event);
+  
+  if (!id) {
+    throw createError({
+      statusCode: 400,
+      message: '缺少文章 ID'
+    });
+  }
+  
+  try {
+    const postKey = `post:${id}`;
+    const existingPost = await kv.getItem(postKey);
+    
+    if (!existingPost) {
+      throw createError({
+        statusCode: 404,
+        message: '文章不存在'
+      });
+    }
+    
+    // 删除文章
+    await kv.removeItem(postKey);
+    
+    // 从文章列表中移除
+    const postsListKey = 'posts:list';
+    const postsList = await kv.getItem(postsListKey) as string[] || [];
+    const updatedList = postsList.filter(postId => postId !== id);
+    await kv.setItem(postsListKey, updatedList);
+    
+    return {
+      success: true,
+      message: '文章已删除'
+    };
+  } catch (error: any) {
+    if (error.statusCode) {
+      throw error;
+    }
+    throw createError({
+      statusCode: 500,
+      message: error.message || '删除文章失败'
+    });
+  }
+});
+

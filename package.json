@@ -1,0 +1,25 @@
+{
+  "name": "mp3jam-nuxt",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "canvas-confetti": "^1.9.4",
+    "front-matter": "^4.0.2",
+    "github-markdown-css": "^5.8.1",
+    "gsap": "^3.13.0",
+    "markdown-it": "^14.1.0",
+    "nuxt": "^3.13.0",
+    "@pinia/nuxt": "^0.5.1",
+    "pinia": "^3.0.4"
+  },
+  "devDependencies": {
+    "@nuxt/devtools": "latest"
+  }
+}

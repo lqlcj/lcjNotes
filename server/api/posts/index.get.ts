@@ -1,0 +1,52 @@
+import { getKVStorage } from '~/server/utils/kv';
+
+// 获取所有文章列表（只返回元数据）
+export default defineEventHandler(async (event) => {
+  try {
+    // 获取 KV 存储
+    const kv = getKVStorage(event);
+    
+    // 从 KV 获取所有文章的 ID 列表
+    const postsListKey = 'posts:list';
+    const postsList = await kv.getItem(postsListKey) as string[] || [];
+    
+    // 获取所有文章的元数据
+    const posts = [];
+    for (const postId of postsList) {
+      const postKey = `post:${postId}`;
+      const postData = await kv.getItem(postKey) as any;
+      if (postData) {
+        // 只返回元数据，不返回完整内容
+        posts.push({
+          id: postId,
+          title: postData.title || '无标题',
+          date: postData.date || '',
+          cover: postData.cover || '',
+          ratio: postData.ratio || 0.75,
+          user: postData.user || 'lcj',
+          avatar: postData.avatar || '',
+          likes: postData.likes || 0,
+          // 不返回 body 内容，减少传输量
+        });
+      }
+    }
+    
+    // 按日期降序排序
+    posts.sort((a, b) => {
+      const dateA = a.date ? new Date(a.date).getTime() : 0;
+      const dateB = b.date ? new Date(b.date).getTime() : 0;
+      return dateB - dateA;
+    });
+    
+    return {
+      success: true,
+      data: posts
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      error: error.message || '获取文章列表失败'
+    };
+  }
+});
+
