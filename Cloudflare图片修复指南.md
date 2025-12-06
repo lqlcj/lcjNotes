@@ -10,9 +10,11 @@
 
 ## ✅ 解决方案
 
-### 方法一：使用静态生成（推荐）
+### ⚠️ 重要：你的项目需要 SSR！
 
-如果你的项目是纯静态站点（不需要 SSR），请使用以下配置：
+**你的项目包含 API 路由、后台管理、KV 存储等功能，必须使用 SSR 构建！**
+
+请使用以下配置（**不要使用 `generate`**）：
 
 #### 1. 更新 Cloudflare Pages 构建配置
 
@@ -24,8 +26,9 @@
 
    **构建命令：**
    ```
-   npm install && npm run generate
+   npm install && npm run build
    ```
+   ⚠️ **必须使用 `build`，不要使用 `generate`**（因为你的项目有 API 路由和 KV 存储）
 
    **构建输出目录：**
    ```
@@ -37,36 +40,25 @@
    /
    ```
 
-#### 2. 重新部署
+#### 2. 配置 KV 绑定（重要！）
 
-保存配置后，Cloudflare Pages 会自动触发新的构建。等待构建完成后，图片应该就能正常显示了。
+你的项目使用 Cloudflare KV 存储数据，必须配置 KV 绑定：
 
----
+1. 在 Cloudflare Dashboard 中创建 KV 命名空间：`BLOG_KV`
+2. 在 Pages 项目设置 → Functions → KV namespace bindings 中添加绑定：
+   - Variable name: `BLOG_KV`
+   - KV namespace: 选择你创建的命名空间
 
-### 方法二：使用 SSR 构建（如果需要服务端功能）
+#### 3. 配置环境变量
 
-如果你的项目需要 SSR 功能（如 API 路由、动态内容），请使用以下配置：
-
-#### 1. 更新 Cloudflare Pages 构建配置
-
-**构建命令：**
+在 Pages 项目设置 → Environment variables 中添加：
 ```
-npm install && npm run build
-```
-
-**构建输出目录：**
-```
-.output/public
+ADMIN_PASSWORD=你的管理员密码
 ```
 
-**根目录：**
-```
-/
-```
+#### 4. 重新部署
 
-#### 2. 确保 Nitro 配置正确
-
-`nuxt.config.ts` 中已经配置了 `nitro.preset: 'cloudflare-pages'`，这会将 SSR 应用正确输出到 `.output/public`。
+保存所有配置后，Cloudflare Pages 会自动触发新的构建。等待构建完成后，图片和 SSR 功能都应该正常工作了。
 
 ---
 
