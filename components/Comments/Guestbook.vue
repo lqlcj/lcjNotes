@@ -31,7 +31,13 @@
             placeholder="写下你想说的话..."
           ></textarea>
         </div>
-        <button type="submit" class="submit-btn" :disabled="submitting">
+        
+        <!-- Turnstile 验证 -->
+        <div class="form-group">
+          <div ref="turnstileContainer" class="turnstile-container"></div>
+        </div>
+        
+        <button type="submit" class="submit-btn" :disabled="submitting || !turnstileToken">
           {{ submitting ? '提交中...' : '提交留言' }}
         </button>
         <p v-if="submitError" class="error-message">{{ submitError }}</p>
@@ -78,13 +84,19 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
+
+const config = useRuntimeConfig();
+const turnstileSiteKey = config.public.turnstileSiteKey;
 
 const messages = ref([]);
 const loading = ref(false);
 const submitting = ref(false);
 const submitError = ref('');
 const submitSuccess = ref(false);
+const turnstileContainer = ref(null);
+const turnstileToken = ref('');
+let turnstileWidgetId = null;
 
 const form = ref({
   name: '',
@@ -108,8 +120,69 @@ const loadMessages = async () => {
   }
 };
 
+// 加载 Turnstile
+const loadTurnstile = () => {
+  if (!turnstileSiteKey) {
+    console.warn('Turnstile Site Key 未配置，跳过验证');
+    turnstileToken.value = 'skip'; // 允许跳过验证（开发环境）
+    return;
+  }
+
+  // 动态加载 Turnstile script
+  if (window.turnstile) {
+    renderTurnstile();
+    return;
+  }
+
+  const script = document.createElement('script');
+  script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+  script.async = true;
+  script.defer = true;
+  script.onload = () => {
+    renderTurnstile();
+  };
+  document.head.appendChild(script);
+};
+
+// 渲染 Turnstile widget
+const renderTurnstile = () => {
+  if (!window.turnstile || !turnstileContainer.value || !turnstileSiteKey) {
+    return;
+  }
+
+  turnstileWidgetId = window.turnstile.render(turnstileContainer.value, {
+    sitekey: turnstileSiteKey,
+    callback: (token) => {
+      turnstileToken.value = token;
+    },
+    'error-callback': () => {
+      turnstileToken.value = '';
+      submitError.value = '验证失败，请重试';
+    },
+    'expired-callback': () => {
+      turnstileToken.value = '';
+    },
+    theme: 'light',
+    size: 'normal'
+  });
+};
+
+// 重置 Turnstile
+const resetTurnstile = () => {
+  if (turnstileWidgetId && window.turnstile) {
+    window.turnstile.reset(turnstileWidgetId);
+    turnstileToken.value = '';
+  }
+};
+
 // 提交留言
 const submitMessage = async () => {
+  // 验证 Turnstile token
+  if (turnstileSiteKey && !turnstileToken.value) {
+    submitError.value = '请完成人机验证';
+    return;
+  }
+
   submitting.value = true;
   submitError.value = '';
   submitSuccess.value = false;
@@ -121,7 +194,8 @@ const submitMessage = async () => {
         name: form.value.name,
         email: form.value.email,
         website: form.value.website,
-        content: form.value.content
+        content: form.value.content,
+        turnstileToken: turnstileToken.value
       }
     });
     
@@ -134,6 +208,8 @@ const submitMessage = async () => {
         website: '',
         content: ''
       };
+      // 重置 Turnstile
+      resetTurnstile();
       // 重新加载留言列表
       await loadMessages();
       // 3秒后隐藏成功提示
@@ -143,6 +219,10 @@ const submitMessage = async () => {
     }
   } catch (error) {
     submitError.value = error?.data?.message || '提交失败，请重试';
+    // 验证失败时重置 Turnstile
+    if (error?.data?.message?.includes('验证')) {
+      resetTurnstile();
+    }
   } finally {
     submitting.value = false;
   }
@@ -163,6 +243,17 @@ const formatDate = (dateString) => {
 
 onMounted(() => {
   loadMessages();
+  // 延迟加载 Turnstile，确保 DOM 已渲染
+  setTimeout(() => {
+    loadTurnstile();
+  }, 100);
+});
+
+onUnmounted(() => {
+  // 清理 Turnstile
+  if (turnstileWidgetId && window.turnstile) {
+    window.turnstile.remove(turnstileWidgetId);
+  }
 });
 </script>
 
@@ -383,6 +474,12 @@ onMounted(() => {
 
 .message-website-link:hover {
   opacity: 1;
+}
+
+.turnstile-container {
+  display: flex;
+  justify-content: center;
+  margin: 15px 0;
 }
 
 @media (max-width: 768px) {

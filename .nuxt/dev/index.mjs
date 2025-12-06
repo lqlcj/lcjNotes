@@ -650,9 +650,12 @@ const _inlineRuntimeConfig = {
       }
     }
   },
-  "public": {},
+  "public": {
+    "turnstileSiteKey": ""
+  },
   "adminPassword": "admin123",
-  "r2PublicUrl": "https://photo.lcjlq.com"
+  "r2PublicUrl": "https://photo.lcjlq.com",
+  "turnstileSecretKey": ""
 };
 const envOptions = {
   prefix: "NITRO_",
@@ -2372,7 +2375,31 @@ const index_get$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePropert
   default: index_get$2
 }, Symbol.toStringTag, { value: 'Module' }));
 
+async function verifyTurnstile(token, secretKey, remoteip) {
+  if (!token || !secretKey) {
+    return false;
+  }
+  try {
+    const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        secret: secretKey,
+        response: token,
+        remoteip
+      })
+    });
+    const data = await response.json();
+    return data.success === true;
+  } catch (error) {
+    console.error("Turnstile verification error:", error);
+    return false;
+  }
+}
 const index_post$2 = defineEventHandler(async (event) => {
+  var _a, _b;
   const kv = getKVStorage(event);
   const body = await readBody(event);
   if (!body.name || !body.content) {
@@ -2384,6 +2411,26 @@ const index_post$2 = defineEventHandler(async (event) => {
   const authHeader = getHeader(event, "authorization");
   const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
   const isAdmin = adminPassword && authHeader === `Bearer ${adminPassword}`;
+  if (!isAdmin) {
+    const turnstileSecretKey = useRuntimeConfig().turnstileSecretKey || process.env.TURNSTILE_SECRET_KEY;
+    const turnstileToken = body.turnstileToken;
+    if (turnstileSecretKey) {
+      if (!turnstileToken) {
+        throw createError({
+          statusCode: 400,
+          message: "\u8BF7\u5B8C\u6210\u4EBA\u673A\u9A8C\u8BC1"
+        });
+      }
+      const clientIP = getHeader(event, "cf-connecting-ip") || ((_b = (_a = getHeader(event, "x-forwarded-for")) == null ? void 0 : _a.split(",")[0]) == null ? void 0 : _b.trim()) || "unknown";
+      const isValid = await verifyTurnstile(turnstileToken, turnstileSecretKey, clientIP);
+      if (!isValid) {
+        throw createError({
+          statusCode: 400,
+          message: "\u4EBA\u673A\u9A8C\u8BC1\u5931\u8D25\uFF0C\u8BF7\u91CD\u8BD5"
+        });
+      }
+    }
+  }
   try {
     const messagesListKey = "messages:list";
     const messagesList = await kv.getItem(messagesListKey) || [];

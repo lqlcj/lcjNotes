@@ -91,12 +91,14 @@ declare module 'nuxt/schema' {
 
    r2PublicUrl: string,
 
+   turnstileSecretKey: string,
+
    nitro: {
       envPrefix: string,
    },
   }
   interface PublicRuntimeConfig {
-
+   turnstileSiteKey: string,
   }
 }
 declare module 'vue' {

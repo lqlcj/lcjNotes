@@ -1,5 +1,32 @@
 import { getKVStorage } from '~/server/utils/kv';
 
+// 验证 Turnstile token
+async function verifyTurnstile(token: string, secretKey: string, remoteip?: string): Promise<boolean> {
+  if (!token || !secretKey) {
+    return false;
+  }
+
+  try {
+    const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        secret: secretKey,
+        response: token,
+        remoteip: remoteip
+      })
+    });
+
+    const data = await response.json();
+    return data.success === true;
+  } catch (error) {
+    console.error('Turnstile verification error:', error);
+    return false;
+  }
+}
+
 // 创建新留言（公开接口，不需要认证；如果提供认证token，可以设置自定义时间）
 export default defineEventHandler(async (event) => {
   const kv = getKVStorage(event);
@@ -17,6 +44,37 @@ export default defineEventHandler(async (event) => {
   const authHeader = getHeader(event, 'authorization');
   const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
   const isAdmin = adminPassword && authHeader === `Bearer ${adminPassword}`;
+  
+  // 如果不是管理员，验证 Turnstile token
+  if (!isAdmin) {
+    const turnstileSecretKey = useRuntimeConfig().turnstileSecretKey || process.env.TURNSTILE_SECRET_KEY;
+    const turnstileToken = body.turnstileToken;
+    
+    // 如果配置了 Turnstile，必须验证
+    if (turnstileSecretKey) {
+      if (!turnstileToken) {
+        throw createError({
+          statusCode: 400,
+          message: '请完成人机验证'
+        });
+      }
+      
+      // 获取客户端 IP
+      const clientIP = getHeader(event, 'cf-connecting-ip') || 
+                       getHeader(event, 'x-forwarded-for')?.split(',')[0]?.trim() || 
+                       'unknown';
+      
+      // 验证 Turnstile token
+      const isValid = await verifyTurnstile(turnstileToken, turnstileSecretKey, clientIP);
+      
+      if (!isValid) {
+        throw createError({
+          statusCode: 400,
+          message: '人机验证失败，请重试'
+        });
+      }
+    }
+  }
   
   try {
     // 生成新的留言 ID
