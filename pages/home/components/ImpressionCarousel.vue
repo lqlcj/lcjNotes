@@ -51,19 +51,12 @@
 <script setup>
   import { ref, onMounted, onUnmounted, computed } from 'vue'
 
-  // 使用 Vite 的 import.meta.glob 动态导入轮播图文件夹中的所有图片
-  const imageModules = import.meta.glob('~/assets/images/carousel/*.{jpg,jpeg,png,webp,gif}', {
-    eager: true,
-    import: 'default'
-  })
-
-  // 将导入的图片模块转换为数组，并按文件名排序
+  // 使用 public 目录下的图片，直接使用路径数组
   const images = computed(() => {
-    return Object.values(imageModules).sort((a, b) => {
-      const aName = a.split('/').pop()
-      const bName = b.split('/').pop()
-      return aName.localeCompare(bName)
-    })
+    // 轮播图文件名列表（按顺序）
+    const imageFiles = ['01.webp', '02.webp', '03.webp']
+    // 转换为 public 路径
+    return imageFiles.map(file => `/images/carousel/${file}`)
   })
 
   // DOM结构：[图3(克隆), 图1(真实), 图2(真实), 图3(真实), 图1(克隆)]

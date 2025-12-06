@@ -1,8 +1,9 @@
 // Notes 数据仓库 - 从 API 获取数据
 import { defineStore } from "pinia";
 import fm from "front-matter";
-import defaultCover from "~/assets/images/loading.webp";
-import defaultAvatar from "~/assets/images/home/avatar.webp";
+// 使用 public 目录下的图片
+const defaultCover = "/images/loading.webp";
+const defaultAvatar = "/images/home/avatar.webp";
 
 // Notes 数据仓库
 export const useNotesStore = defineStore("notes", {

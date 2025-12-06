@@ -23,13 +23,9 @@ export default defineNuxtConfig({
           },
           chunkFileNames: 'assets/js/[name]-[hash].js',
           entryFileNames: 'assets/js/[name]-[hash].js',
-          assetFileNames: (assetInfo) => {
-            // 确保图片资源使用正确的路径
-            if (assetInfo.name && /\.(png|jpe?g|gif|svg|webp|ico)$/i.test(assetInfo.name)) {
-              return 'assets/images/[name]-[hash][extname]'
-            }
-            return 'assets/[ext]/[name]-[hash].[ext]'
-          },
+          // 移除自定义 assetFileNames，让 Vite 使用默认行为
+          // Vite 会自动处理 import.meta.glob 导入的图片，保留路径映射关系
+          assetFileNames: 'assets/[ext]/[name]-[hash].[ext]',
         },
       },
       minify: 'esbuild',
@@ -90,6 +86,16 @@ export default defineNuxtConfig({
     // 🔥 关键修复：确保客户端资源正确输出到 dist 目录
     prerender: {
       crawlLinks: false
+    },
+    // 🔥 新增：确保 _nuxt 目录下的所有静态资源都能正确访问
+    // 这对于 Cloudflare Pages 的 SSR 模式很重要
+    routeRules: {
+      '/_nuxt/**': { 
+        headers: { 
+          'Cache-Control': 'public, max-age=31536000, immutable' 
+        },
+        cors: true
+      }
     }
   },
   

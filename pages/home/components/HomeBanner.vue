@@ -7,7 +7,8 @@
 </template>
 
 <script setup>
-  import logoImage from '~/assets/images/Logo2.webp'
+  // 使用 public 目录下的图片
+  const logoImage = '/images/Logo2.webp'
 </script>
 
 <style scoped>

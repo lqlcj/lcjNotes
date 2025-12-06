@@ -43,8 +43,8 @@
   // 导入错误边界组件
   import ErrorBoundary from '~/components/ErrorBoundary/ErrorBoundary.vue'
   import PageLoading from '~/components/Common/PageLoading.vue'
-  // 导入背景图片
-  import backgroundImage from '~/assets/images/background-body.webp'
+  // 使用 public 目录下的图片
+  const backgroundImage = '/images/background-body.webp'
   
   // 将图片路径转换为 CSS 可用的格式
   const backgroundImageUrl = `url("${backgroundImage}")`

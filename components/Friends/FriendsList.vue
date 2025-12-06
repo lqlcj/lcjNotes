@@ -47,7 +47,8 @@
 
 <script setup>
   import { ref, onMounted } from 'vue'
-  import defaultAvatar from '~/assets/images/home/avatar.webp'
+  // 使用 public 目录下的图片
+  const defaultAvatar = '/images/home/avatar.webp'
 
   const friends = ref([])
   const confirmingIndex = ref(null)

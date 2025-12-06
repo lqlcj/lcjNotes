@@ -20,7 +20,8 @@
 
 <script setup>
   import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
-  import heroAvatar from '~/assets/images/home/avatar.webp'
+  // 使用 public 目录下的图片
+  const heroAvatar = '/images/home/avatar.webp'
 
   // ========== 打字机效果逻辑 ==========
   // 功能：逐字显示文本，营造动态效果，循环显示两段文字2次

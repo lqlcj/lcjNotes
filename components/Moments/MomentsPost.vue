@@ -42,34 +42,10 @@
 <script setup>
   import { ref, onBeforeUnmount, computed, onMounted } from 'vue'
   import momentsData from '~/data/moments.json'
-  import avatarImage from '~/assets/images/home/avatar.webp'
+  // 使用 public 目录下的图片
+  const avatarImage = '/images/home/avatar.webp'
 
-  // 预加载 Moments 目录下的所有图片，生成一个「路径 -> 图片」映射
-  let rawMomentImages = {}
-  let momentsImageMap = {}
-
-  try {
-    rawMomentImages = import.meta.glob('~/assets/images/Moments/*', {
-      eager: true,
-      import: 'default'
-    })
-
-    momentsImageMap = Object.entries(rawMomentImages).reduce((acc, [key, value]) => {
-      // 将路径标准化，支持多种路径格式
-      const normalizedKey = key.replace(/.*\/assets\/images\/Moments\//, '')
-      // 支持 ~/assets/images/Moments/xxx 格式
-      acc[`~/assets/images/Moments/${normalizedKey}`] = value
-      // 支持 /src/assets/images/Moments/xxx 格式（兼容旧数据）
-      acc[`/src/assets/images/Moments/${normalizedKey}`] = value
-      // 支持相对路径
-      acc[`../../assets/images/Moments/${normalizedKey}`] = value
-      return acc
-    }, {})
-  } catch (error) {
-    console.error('加载 Moments 图片失败:', error)
-  }
-
-  // 处理图片路径
+  // 处理图片路径 - 将 assets 路径转换为 public 路径
   const resolveImagePath = (path) => {
     if (!path) return path
 
@@ -84,24 +60,27 @@
     }
 
     // 处理 Moments 图片路径（支持多种格式）
+    // 将 assets 路径转换为 public 路径
     if (
       path.startsWith('~/assets/images/Moments/') ||
       path.startsWith('/src/assets/images/Moments/') ||
       path.startsWith('../../assets/images/Moments/') ||
       path.includes('Moments/')
     ) {
-      // 尝试多种路径格式匹配
-      const resolved = momentsImageMap[path] || 
-                      momentsImageMap[path.replace(/.*\/Moments\//, '~/assets/images/Moments/')] ||
-                      momentsImageMap[path.replace(/.*\/Moments\//, '/src/assets/images/Moments/')] ||
-                      momentsImageMap[path.replace(/.*\/Moments\//, '../../assets/images/Moments/')]
-      
-      if (resolved) {
-        return resolved
-      }
-      
-      // 如果找不到，尝试直接使用原始路径（可能是外部 URL）
+      // 提取文件名
+      const fileName = path.split('/').pop() || path.split('\\').pop()
+      // 转换为 public 路径
+      return `/images/Moments/${fileName}`
+    }
+
+    // 如果已经是 /images/ 路径，直接返回
+    if (path.startsWith('/images/')) {
       return path
+    }
+
+    // 如果是其他 assets 路径，尝试转换
+    if (path.includes('assets/images/')) {
+      return path.replace(/.*\/assets\/images\//, '/images/')
     }
 
     return path

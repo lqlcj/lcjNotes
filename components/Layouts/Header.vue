@@ -28,7 +28,8 @@
 
 <script setup>
   import { computed } from 'vue'
-  import logoImage from '~/assets/images/logo.webp'
+  // 使用 public 目录下的图片
+  const logoImage = '/images/logo.webp'
   
   const route = useRoute()
 
