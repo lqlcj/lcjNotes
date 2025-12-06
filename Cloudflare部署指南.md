@@ -56,19 +56,23 @@ npm run build
 }
 ```
 
-#### 4. 设置环境变量
+#### 4. 设置环境变量和构建配置
 
 1. 在 Cloudflare Dashboard 中，进入 **"Workers & Pages"**
 2. 点击 **"Create application"** → **"Pages"** → **"Connect to Git"**（如果使用 Git）或 **"Upload assets"**（直接上传）
 3. 如果使用 Git：
    - 连接你的 Git 仓库（GitHub/GitLab/Bitbucket）
-   - 设置构建命令：`npm run build`
-   - 设置输出目录：`dist`
+   - **重要**：在构建设置中：
+     - **Framework preset**: 选择 **None**（不要选择 Nuxt，因为配置可能不兼容）
+     - **Build command**: `npm install && npm run build`（使用 npm install 代替 npm ci）
+     - **Build output directory**: `dist`
+     - **Root directory**: `/`（留空）
 4. 在项目设置中找到 **"Settings"** → **"Environment variables"**
 5. 添加环境变量：
    - **变量名**：`ADMIN_PASSWORD`
    - **变量值**：设置一个强密码（例如：`MySecurePassword123!`）
    - **环境**：Production（生产环境）
+   - **可选**：添加 `NODE_VERSION=20` 确保使用正确的 Node.js 版本
 
 #### 5. 部署
 
@@ -201,6 +205,37 @@ wrangler pages project list
 ---
 
 ## 🐛 常见问题
+
+### Q: 遇到 "npm ci" 错误？
+
+A: 这是 Cloudflare Pages 默认使用 `npm ci` 导致的。解决方法：
+
+**方法 1：修改构建命令（推荐）**
+1. 在 Cloudflare Dashboard 中，进入项目设置
+2. 找到 **"Builds & deployments"** → **"Build configuration"**
+3. 将 **Build command** 改为：`npm install && npm run build`
+4. 保存并重新部署
+
+**方法 2：使用 Wrangler CLI 部署**
+```bash
+# 本地构建
+npm install
+npm run build
+
+# 直接部署 dist 文件夹
+npx wrangler pages deploy dist
+```
+
+**方法 3：确保 package-lock.json 存在**
+```bash
+# 如果 package-lock.json 不存在，运行：
+npm install
+git add package-lock.json
+git commit -m "Add package-lock.json"
+git push
+```
+
+详细解决方案请查看 `部署问题解决.md`
 
 ### Q: 部署后 KV 不可用？
 
