@@ -23,7 +23,13 @@ export default defineNuxtConfig({
           },
           chunkFileNames: 'assets/js/[name]-[hash].js',
           entryFileNames: 'assets/js/[name]-[hash].js',
-          assetFileNames: 'assets/[ext]/[name]-[hash].[ext]',
+          assetFileNames: (assetInfo) => {
+            // 确保图片资源使用正确的路径
+            if (assetInfo.name && /\.(png|jpe?g|gif|svg|webp|ico)$/i.test(assetInfo.name)) {
+              return 'assets/images/[name]-[hash][extname]'
+            }
+            return 'assets/[ext]/[name]-[hash].[ext]'
+          },
         },
       },
       minify: 'esbuild',
@@ -44,7 +50,10 @@ export default defineNuxtConfig({
       ]
     },
     pageTransition: { name: 'page', mode: 'out-in' },
-    layoutTransition: { name: 'layout', mode: 'out-in' }
+    layoutTransition: { name: 'layout', mode: 'out-in' },
+    // 确保静态资源路径正确（Cloudflare Pages 部署）
+    baseURL: '/',
+    cdnURL: process.env.CDN_URL || undefined
   },
   
   // 路由配置
