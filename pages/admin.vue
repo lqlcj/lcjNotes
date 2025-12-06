@@ -142,8 +142,53 @@
                   <input v-model="formData.date" type="date" />
                 </div>
                 <div class="form-group">
-                  <label>封面图片 URL</label>
-                  <input v-model="formData.cover" type="text" placeholder="/images/01.webp" />
+                  <label>封面图片</label>
+                  <div class="cover-upload-section">
+                    <!-- 上传按钮 -->
+                    <div class="upload-area">
+                      <input 
+                        ref="fileInput"
+                        type="file" 
+                        accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                        @change="handleFileSelect"
+                        style="display: none;"
+                      />
+                      <button 
+                        type="button" 
+                        @click="triggerFileInput"
+                        class="btn-upload"
+                        :disabled="uploading"
+                      >
+                        {{ uploading ? '上传中...' : '📤 上传图片' }}
+                      </button>
+                      <span class="upload-hint">或直接输入图片 URL</span>
+                    </div>
+                    
+                    <!-- 预览 -->
+                    <div v-if="coverPreview" class="cover-preview">
+                      <img :src="coverPreview" alt="封面预览" />
+                      <button 
+                        type="button" 
+                        @click="clearCoverPreview"
+                        class="btn-remove-preview"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                    
+                    <!-- URL 输入 -->
+                    <input 
+                      v-model="formData.cover" 
+                      type="text" 
+                      placeholder="/images/01.webp 或 /r2/covers/xxx.jpg"
+                      class="cover-url-input"
+                    />
+                    
+                    <!-- 上传进度 -->
+                    <div v-if="uploading" class="upload-progress">
+                      <div class="progress-bar" :style="{ width: uploadProgress + '%' }"></div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -279,6 +324,12 @@ const formData = ref({
   body: ''
 });
 
+// 图片上传相关
+const fileInput = ref(null);
+const uploading = ref(false);
+const uploadProgress = ref(0);
+const coverPreview = ref('');
+
 // 检查是否已登录
 onMounted(() => {
   const token = localStorage.getItem('admin_token');
@@ -354,6 +405,10 @@ const editPost = async (post) => {
         likes: response.data.likes || 0,
         body: response.data.body
       };
+      // 如果有封面，显示预览
+      if (response.data.cover) {
+        coverPreview.value = response.data.cover;
+      }
       showCreateForm.value = true;
     }
   } catch (error) {
@@ -922,6 +977,105 @@ const closeMessageForm = () => {
   text-decoration: underline;
 }
 
+/* 图片上传样式 */
+.cover-upload-section {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.upload-area {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-upload {
+  padding: 8px 16px;
+  background: #6c5ce7;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s;
+}
+
+.btn-upload:hover:not(:disabled) {
+  background: #5a4fcf;
+}
+
+.btn-upload:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.upload-hint {
+  font-size: 12px;
+  color: #999;
+}
+
+.cover-preview {
+  position: relative;
+  width: 200px;
+  height: 150px;
+  border: 2px dashed #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+
+.cover-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.btn-remove-preview {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 24px;
+  height: 24px;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s;
+}
+
+.btn-remove-preview:hover {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.cover-url-input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.upload-progress {
+  width: 100%;
+  height: 4px;
+  background: #f0f0f0;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: #6c5ce7;
+  transition: width 0.3s;
+}
+
 @media (max-width: 768px) {
   .messages-grid {
     grid-template-columns: 1fr;
@@ -935,6 +1089,11 @@ const closeMessageForm = () => {
   .tab-btn {
     width: 100%;
     text-align: left;
+  }
+  
+  .cover-preview {
+    width: 100%;
+    max-width: 300px;
   }
 }
 </style>

@@ -95,7 +95,7 @@ export const useNotesStore = defineStore("notes", {
       try {
         const response = await $fetch('/api/posts');
         
-        if (response.success && response.data && response.data.length > 0) {
+        if (response.success && response.data && Array.isArray(response.data) && response.data.length > 0) {
           // 转换 API 返回的数据格式为组件需要的格式
           this.allPosts = response.data.map((item, index) => ({
             id: item.id,
@@ -116,14 +116,17 @@ export const useNotesStore = defineStore("notes", {
           // 标记为已加载
           this.isLoaded = true;
         } else {
-          // API 返回空数据或失败，回退到文件系统
-          console.log("API 返回空数据，回退到文件系统加载");
-          this.initPostsFromFiles();
+          // API 返回空数据，清空文章列表，不显示假数据
+          console.log("API 返回空数据，清空文章列表");
+          this.allPosts = [];
+          this.isLoaded = true;
+          // 不再回退到文件系统，避免显示假数据
         }
       } catch (error) {
         console.error("从 API 加载文章失败:", error);
-        // 如果 API 失败，尝试从本地文件加载（兼容模式）
-        this.initPostsFromFiles();
+        // API 失败时，清空文章列表，不显示假数据
+        this.allPosts = [];
+        this.isLoaded = true;
       }
     },
 

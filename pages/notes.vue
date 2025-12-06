@@ -50,7 +50,10 @@
     </div>
 
     <div v-if="allData.length === 0" class="empty-tip glass-card">
-      🍃 还没有文章，快去 posts/ 下新建一个 md 文件吧！
+      <p>📝 还没有文章</p>
+      <p style="margin-top: 10px; font-size: 0.9rem; color: #999;">
+        去 <a href="/admin" style="color: #6c5ce7; text-decoration: none;">后台管理</a> 创建你的第一篇文章吧！
+      </p>
     </div>
 
     </div>

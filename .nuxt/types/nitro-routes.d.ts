@@ -25,6 +25,12 @@ declare module "nitropack/types" {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/posts/index.get').default>>>>
       'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/posts/index.post').default>>>>
     }
+    '/api/r2/**:path': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/r2/[...path].get').default>>>>
+    }
+    '/api/upload/image': {
+      'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/upload/image.post').default>>>>
+    }
     '/__nuxt_error': {
       'default': Simplify<Serialize<Awaited<ReturnType<typeof import('../../node_modules/@nuxt/nitro-server/dist/runtime/handlers/renderer').default>>>>
     }

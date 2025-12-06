@@ -43,6 +43,7 @@ declare global {
   const fromNodeMiddleware: typeof import('../../node_modules/h3').fromNodeMiddleware
   const fromPlainHandler: typeof import('../../node_modules/h3').fromPlainHandler
   const fromWebHandler: typeof import('../../node_modules/h3').fromWebHandler
+  const generateFileName: typeof import('../../server/utils/r2').generateFileName
   const getCookie: typeof import('../../node_modules/h3').getCookie
   const getHeader: typeof import('../../node_modules/h3').getHeader
   const getHeaders: typeof import('../../node_modules/h3').getHeaders
@@ -50,6 +51,7 @@ declare global {
   const getMethod: typeof import('../../node_modules/h3').getMethod
   const getProxyRequestHeaders: typeof import('../../node_modules/h3').getProxyRequestHeaders
   const getQuery: typeof import('../../node_modules/h3').getQuery
+  const getR2Storage: typeof import('../../server/utils/r2').getR2Storage
   const getRequestFingerprint: typeof import('../../node_modules/h3').getRequestFingerprint
   const getRequestHeader: typeof import('../../node_modules/h3').getRequestHeader
   const getRequestHeaders: typeof import('../../node_modules/h3').getRequestHeaders
@@ -78,6 +80,7 @@ declare global {
   const isMethod: typeof import('../../node_modules/h3').isMethod
   const isPreflightRequest: typeof import('../../node_modules/h3').isPreflightRequest
   const isStream: typeof import('../../node_modules/h3').isStream
+  const isValidImageType: typeof import('../../server/utils/r2').isValidImageType
   const isWebResponse: typeof import('../../node_modules/h3').isWebResponse
   const lazyEventHandler: typeof import('../../node_modules/h3').lazyEventHandler
   const nitroPlugin: typeof import('../../node_modules/nitropack/dist/runtime/internal/plugin').nitroPlugin
@@ -141,3 +144,4 @@ export { appendCorsHeaders, appendCorsPreflightHeaders, appendHeader, appendHead
 export { buildAssetsURL as __buildAssetsURL, publicAssetsURL as __publicAssetsURL } from 'G:/newblog/node_modules/@nuxt/nitro-server/dist/runtime/utils/paths';
 export { defineAppConfig } from 'G:/newblog/node_modules/@nuxt/nitro-server/dist/runtime/utils/config';
 export { getKVStorage } from 'G:/newblog/server/utils/kv';
+export { getR2Storage, generateFileName, isValidImageType } from 'G:/newblog/server/utils/r2';
