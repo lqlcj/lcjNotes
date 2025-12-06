@@ -217,8 +217,7 @@
                 <label>时间（可选，留空则使用当前时间）</label>
                 <input 
                   v-model="messageForm.date" 
-                  type="datetime-local" 
-                  :value="messageForm.date || new Date().toISOString().slice(0, 16)"
+                  type="datetime-local"
                 />
               </div>
 
@@ -266,7 +265,7 @@ const messageForm = ref({
   email: '',
   website: '',
   content: '',
-  date: ''
+  date: new Date().toISOString().slice(0, 16) // 默认使用当前时间
 });
 
 const formData = ref({
@@ -539,7 +538,7 @@ const closeMessageForm = () => {
     email: '',
     website: '',
     content: '',
-    date: ''
+    date: new Date().toISOString().slice(0, 16) // 重置为当前时间
   };
 };
 </script>
