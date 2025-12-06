@@ -499,6 +499,100 @@ const closeForm = () => {
     likes: 0,
     body: ''
   };
+  coverPreview.value = '';
+  uploadProgress.value = 0;
+};
+
+// 触发文件选择
+const triggerFileInput = () => {
+  fileInput.value?.click();
+};
+
+// 处理文件选择
+const handleFileSelect = async (event) => {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  // 验证文件类型
+  const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+  if (!validTypes.includes(file.type)) {
+    alert('不支持的文件类型，仅支持：JPEG, PNG, WebP, GIF');
+    return;
+  }
+
+  // 验证文件大小（最大 10MB）
+  if (file.size > 10 * 1024 * 1024) {
+    alert('文件大小不能超过 10MB');
+    return;
+  }
+
+  // 显示预览
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    coverPreview.value = e.target?.result;
+  };
+  reader.readAsDataURL(file);
+
+  // 上传文件
+  await uploadImage(file);
+};
+
+// 上传图片到 R2
+const uploadImage = async (file) => {
+  uploading.value = true;
+  uploadProgress.value = 0;
+  const token = localStorage.getItem('admin_token');
+
+  try {
+    const formDataToSend = new FormData();
+    formDataToSend.append('file', file);
+
+    // 模拟上传进度
+    const progressInterval = setInterval(() => {
+      if (uploadProgress.value < 90) {
+        uploadProgress.value += 10;
+      }
+    }, 200);
+
+    const response = await $fetch('/api/upload/image', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: formDataToSend
+    });
+
+    clearInterval(progressInterval);
+    uploadProgress.value = 100;
+
+    if (response.success) {
+      // 设置封面 URL
+      formData.value.cover = response.data.url;
+      alert('图片上传成功！');
+    } else {
+      throw new Error('上传失败');
+    }
+  } catch (error) {
+    console.error('上传失败:', error);
+    alert(error?.data?.message || '图片上传失败，请重试');
+    coverPreview.value = '';
+  } finally {
+    uploading.value = false;
+    uploadProgress.value = 0;
+    // 清空文件输入
+    if (fileInput.value) {
+      fileInput.value.value = '';
+    }
+  }
+};
+
+// 清除封面预览
+const clearCoverPreview = () => {
+  coverPreview.value = '';
+  formData.value.cover = '';
+  if (fileInput.value) {
+    fileInput.value.value = '';
+  }
 };
 
 // 加载留言列表
