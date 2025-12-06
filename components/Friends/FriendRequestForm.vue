@@ -33,10 +33,17 @@
             <small class="form-hint">建议尺寸：64x64px，支持 jpg/png/gif</small>
           </div>
 
-          <button type="submit" :disabled="isSubmitting" class="submit-btn">
+          <!-- Turnstile 验证 -->
+          <div class="form-group">
+            <div ref="turnstileContainer" class="turnstile-container"></div>
+          </div>
+
+          <button type="submit" :disabled="isSubmitting || (turnstileSiteKey && !turnstileToken)" class="submit-btn">
             <span v-if="!isSubmitting">提交申请</span>
             <span v-else>提交中...</span>
           </button>
+          
+          <p v-if="submitError" class="error-message">{{ submitError }}</p>
         </form>
 
         <!-- 提交成功提示 -->
@@ -52,8 +59,10 @@
 </template>
 
 <script setup>
-  import { reactive, ref } from 'vue'
-  import { generateIssueLink } from '~/utils/githubApi'
+  import { reactive, ref, onMounted, onUnmounted, watch } from 'vue'
+
+  const config = useRuntimeConfig();
+  const turnstileSiteKey = config.public.turnstileSiteKey;
 
   const props = defineProps({
     isExpanded: {
@@ -73,6 +82,10 @@
 
   const isSubmitting = ref(false)
   const showSuccess = ref(false)
+  const submitError = ref('')
+  const turnstileContainer = ref(null)
+  const turnstileToken = ref('')
+  let turnstileWidgetId = null
 
   // 关闭表单
   const handleClose = () => {
@@ -113,32 +126,104 @@
     return true
   }
 
+  // 加载 Turnstile
+  const loadTurnstile = () => {
+    if (!turnstileSiteKey) {
+      console.warn('Turnstile Site Key 未配置，跳过验证');
+      turnstileToken.value = 'skip';
+      return;
+    }
+
+    if (window.turnstile) {
+      renderTurnstile();
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+    script.async = true;
+    script.defer = true;
+    script.onload = () => {
+      renderTurnstile();
+    };
+    document.head.appendChild(script);
+  };
+
+  // 渲染 Turnstile widget
+  const renderTurnstile = () => {
+    if (!window.turnstile || !turnstileContainer.value || !turnstileSiteKey) {
+      return;
+    }
+
+    turnstileWidgetId = window.turnstile.render(turnstileContainer.value, {
+      sitekey: turnstileSiteKey,
+      callback: (token) => {
+        turnstileToken.value = token;
+      },
+      'error-callback': () => {
+        turnstileToken.value = '';
+        submitError.value = '验证失败，请重试';
+      },
+      'expired-callback': () => {
+        turnstileToken.value = '';
+      },
+      theme: 'light',
+      size: 'normal'
+    });
+  };
+
+  // 重置 Turnstile
+  const resetTurnstile = () => {
+    if (turnstileWidgetId && window.turnstile) {
+      window.turnstile.reset(turnstileWidgetId);
+      turnstileToken.value = '';
+    }
+  };
+
   // 提交表单
   const handleSubmit = async () => {
     if (!validateForm()) {
       return
     }
 
+    // 验证 Turnstile token
+    if (turnstileSiteKey && !turnstileToken.value) {
+      submitError.value = '请完成人机验证';
+      return;
+    }
+
     isSubmitting.value = true
+    submitError.value = ''
 
     try {
-      // 使用方案一：生成 GitHub Issue 链接并跳转（推荐，无需 Token）
-      const issueLink = generateIssueLink(formData)
+      const response = await $fetch('/api/friends/requests', {
+        method: 'POST',
+        body: {
+          name: formData.name,
+          url: formData.url,
+          description: formData.description,
+          avatar: formData.avatar,
+          turnstileToken: turnstileToken.value
+        }
+      })
 
-      // 打开新窗口跳转到 GitHub Issue 创建页面
-      window.open(issueLink, '_blank', 'noopener,noreferrer')
-
-      // 显示成功提示
-      showSuccess.value = true
-
-      // 3秒后自动重置表单（可选）
-      setTimeout(() => {
-        resetForm()
-      }, 5000)
-
+      if (response.success) {
+        // 显示成功提示
+        showSuccess.value = true
+        // 重置 Turnstile
+        resetTurnstile()
+        // 3秒后自动重置表单
+        setTimeout(() => {
+          resetForm()
+        }, 5000)
+      }
     } catch (error) {
       console.error('提交失败:', error)
-      alert('提交失败，请稍后重试')
+      submitError.value = error?.data?.message || '提交失败，请稍后重试'
+      // 验证失败时重置 Turnstile
+      if (error?.data?.message?.includes('验证')) {
+        resetTurnstile()
+      }
     } finally {
       isSubmitting.value = false
     }
@@ -151,8 +236,34 @@
     formData.description = ''
     formData.avatar = ''
     showSuccess.value = false
+    submitError.value = ''
+    resetTurnstile()
     // 注意：不自动收起表单，让用户可以选择继续申请
   }
+
+  // 监听表单展开状态，展开时加载 Turnstile
+  watch(() => props.isExpanded, (newVal) => {
+    if (newVal) {
+      setTimeout(() => {
+        loadTurnstile();
+      }, 100);
+    }
+  });
+
+  onMounted(() => {
+    if (props.isExpanded) {
+      setTimeout(() => {
+        loadTurnstile();
+      }, 100);
+    }
+  });
+
+  onUnmounted(() => {
+    // 清理 Turnstile
+    if (turnstileWidgetId && window.turnstile) {
+      window.turnstile.remove(turnstileWidgetId);
+    }
+  });
 </script>
 
 <style scoped>
@@ -364,6 +475,19 @@
   .reset-btn:hover {
     background: #2c3e50;
     color: white;
+  }
+
+  .turnstile-container {
+    display: flex;
+    justify-content: center;
+    margin: 10px 0;
+  }
+
+  .error-message {
+    color: #e74c3c;
+    font-size: 0.85rem;
+    margin-top: 8px;
+    text-align: center;
   }
 
   /* 响应式设计 */

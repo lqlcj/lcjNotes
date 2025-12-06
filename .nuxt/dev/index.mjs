@@ -1868,6 +1868,13 @@ async function getIslandContext(event) {
 }
 
 const _lazy_zx2hf7 = () => Promise.resolve().then(function () { return login_post$1; });
+const _lazy_4YfJWk = () => Promise.resolve().then(function () { return _id__delete$7; });
+const _lazy_IKSiHr = () => Promise.resolve().then(function () { return index_get$5; });
+const _lazy_4MmXnu = () => Promise.resolve().then(function () { return index_post$5; });
+const _lazy_ZZQpVH = () => Promise.resolve().then(function () { return requests_get$1; });
+const _lazy_xIi3Jm = () => Promise.resolve().then(function () { return requests_post$1; });
+const _lazy_MNncAk = () => Promise.resolve().then(function () { return _id__delete$5; });
+const _lazy_RJAIjX = () => Promise.resolve().then(function () { return _id__put$3; });
 const _lazy_lt7cVk = () => Promise.resolve().then(function () { return _id__delete$3; });
 const _lazy_lFh496 = () => Promise.resolve().then(function () { return index_get$3; });
 const _lazy_0idvvs = () => Promise.resolve().then(function () { return index_post$3; });
@@ -1884,6 +1891,13 @@ const _lazy_SGBIuo = () => Promise.resolve().then(function () { return renderer$
 const handlers = [
   { route: '', handler: _bMBjWp, lazy: false, middleware: true, method: undefined },
   { route: '/api/auth/login', handler: _lazy_zx2hf7, lazy: true, middleware: false, method: "post" },
+  { route: '/api/friends/:id', handler: _lazy_4YfJWk, lazy: true, middleware: false, method: "delete" },
+  { route: '/api/friends', handler: _lazy_IKSiHr, lazy: true, middleware: false, method: "get" },
+  { route: '/api/friends', handler: _lazy_4MmXnu, lazy: true, middleware: false, method: "post" },
+  { route: '/api/friends/requests', handler: _lazy_ZZQpVH, lazy: true, middleware: false, method: "get" },
+  { route: '/api/friends/requests', handler: _lazy_xIi3Jm, lazy: true, middleware: false, method: "post" },
+  { route: '/api/friends/requests/:id', handler: _lazy_MNncAk, lazy: true, middleware: false, method: "delete" },
+  { route: '/api/friends/requests/:id', handler: _lazy_RJAIjX, lazy: true, middleware: false, method: "put" },
   { route: '/api/messages/:id', handler: _lazy_lt7cVk, lazy: true, middleware: false, method: "delete" },
   { route: '/api/messages', handler: _lazy_lFh496, lazy: true, middleware: false, method: "get" },
   { route: '/api/messages', handler: _lazy_0idvvs, lazy: true, middleware: false, method: "post" },
@@ -2280,6 +2294,394 @@ function getKVStorage(event) {
   }
 }
 
+const _id__delete$6 = defineEventHandler(async (event) => {
+  const authHeader = getHeader(event, "authorization");
+  const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
+  if (!adminPassword || authHeader !== `Bearer ${adminPassword}`) {
+    throw createError({
+      statusCode: 401,
+      message: "\u672A\u6388\u6743\u8BBF\u95EE"
+    });
+  }
+  const id = getRouterParam(event, "id");
+  if (!id) {
+    throw createError({
+      statusCode: 400,
+      message: "\u7F3A\u5C11\u53CB\u94FE ID"
+    });
+  }
+  try {
+    const kv = getKVStorage(event);
+    const friendKey = `friend:${id}`;
+    await kv.removeItem(friendKey);
+    const friendsListKey = "friends:list";
+    const friendsList = await kv.getItem(friendsListKey) || [];
+    const updatedList = friendsList.filter((friendId) => friendId !== id);
+    await kv.setItem(friendsListKey, updatedList);
+    return {
+      success: true,
+      message: "\u5220\u9664\u6210\u529F"
+    };
+  } catch (error) {
+    throw createError({
+      statusCode: 500,
+      message: error.message || "\u5220\u9664\u53CB\u94FE\u5931\u8D25"
+    });
+  }
+});
+
+const _id__delete$7 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: _id__delete$6
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const index_get$4 = defineEventHandler(async (event) => {
+  try {
+    const kv = getKVStorage(event);
+    const friendsListKey = "friends:list";
+    const friendsList = await kv.getItem(friendsListKey) || [];
+    const friends = [];
+    for (const id of friendsList) {
+      const friendKey = `friend:${id}`;
+      const friendData = await kv.getItem(friendKey);
+      if (friendData) {
+        friends.push(friendData);
+      }
+    }
+    friends.sort((a, b) => {
+      return new Date(b.date).getTime() - new Date(a.date).getTime();
+    });
+    return {
+      success: true,
+      data: friends
+    };
+  } catch (error) {
+    throw createError({
+      statusCode: 500,
+      message: error.message || "\u83B7\u53D6\u53CB\u94FE\u5217\u8868\u5931\u8D25"
+    });
+  }
+});
+
+const index_get$5 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: index_get$4
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const index_post$4 = defineEventHandler(async (event) => {
+  const authHeader = getHeader(event, "authorization");
+  const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
+  if (!adminPassword || authHeader !== `Bearer ${adminPassword}`) {
+    throw createError({
+      statusCode: 401,
+      message: "\u672A\u6388\u6743\u8BBF\u95EE"
+    });
+  }
+  const body = await readBody(event);
+  if (!body.name || !body.url) {
+    throw createError({
+      statusCode: 400,
+      message: "\u7F51\u7AD9\u540D\u79F0\u548C\u94FE\u63A5\u4E0D\u80FD\u4E3A\u7A7A"
+    });
+  }
+  try {
+    new URL(body.url);
+  } catch {
+    throw createError({
+      statusCode: 400,
+      message: "\u8BF7\u8F93\u5165\u6709\u6548\u7684\u7F51\u7AD9\u94FE\u63A5"
+    });
+  }
+  try {
+    const kv = getKVStorage(event);
+    const friendsListKey = "friends:list";
+    const friendsList = await kv.getItem(friendsListKey) || [];
+    const newId = friendsList.length > 0 ? String(Math.max(...friendsList.map((id) => parseInt(id))) + 1) : "1";
+    const friendData = {
+      id: newId,
+      name: body.name,
+      url: body.url,
+      description: body.description || "",
+      avatar: body.avatar || "/images/home/avatar.webp",
+      date: (/* @__PURE__ */ new Date()).toISOString().split("T")[0]
+    };
+    const friendKey = `friend:${newId}`;
+    await kv.setItem(friendKey, friendData);
+    friendsList.push(newId);
+    await kv.setItem(friendsListKey, friendsList);
+    return {
+      success: true,
+      data: friendData,
+      message: "\u53CB\u94FE\u6DFB\u52A0\u6210\u529F"
+    };
+  } catch (error) {
+    throw createError({
+      statusCode: 500,
+      message: error.message || "\u6DFB\u52A0\u53CB\u94FE\u5931\u8D25"
+    });
+  }
+});
+
+const index_post$5 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: index_post$4
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const requests_get = defineEventHandler(async (event) => {
+  const authHeader = getHeader(event, "authorization");
+  const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
+  if (!adminPassword || authHeader !== `Bearer ${adminPassword}`) {
+    throw createError({
+      statusCode: 401,
+      message: "\u672A\u6388\u6743\u8BBF\u95EE"
+    });
+  }
+  try {
+    const kv = getKVStorage(event);
+    const requestsListKey = "friend-requests:list";
+    const requestsList = await kv.getItem(requestsListKey) || [];
+    const requests = [];
+    for (const id of requestsList) {
+      const requestKey = `friend-request:${id}`;
+      const requestData = await kv.getItem(requestKey);
+      if (requestData) {
+        requests.push(requestData);
+      }
+    }
+    requests.sort((a, b) => {
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+    return {
+      success: true,
+      data: requests
+    };
+  } catch (error) {
+    throw createError({
+      statusCode: 500,
+      message: error.message || "\u83B7\u53D6\u7533\u8BF7\u5217\u8868\u5931\u8D25"
+    });
+  }
+});
+
+const requests_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: requests_get
+}, Symbol.toStringTag, { value: 'Module' }));
+
+async function verifyTurnstile(token, secretKey, remoteip) {
+  if (!token || !secretKey) {
+    return false;
+  }
+  try {
+    const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        secret: secretKey,
+        response: token,
+        remoteip
+      })
+    });
+    const data = await response.json();
+    return data.success === true;
+  } catch (error) {
+    console.error("Turnstile verification error:", error);
+    return false;
+  }
+}
+
+const requests_post = defineEventHandler(async (event) => {
+  var _a, _b, _c, _d;
+  const kv = getKVStorage(event);
+  const body = await readBody(event);
+  if (!body.name || !body.url) {
+    throw createError({
+      statusCode: 400,
+      message: "\u7F51\u7AD9\u540D\u79F0\u548C\u94FE\u63A5\u4E0D\u80FD\u4E3A\u7A7A"
+    });
+  }
+  try {
+    new URL(body.url);
+  } catch {
+    throw createError({
+      statusCode: 400,
+      message: "\u8BF7\u8F93\u5165\u6709\u6548\u7684\u7F51\u7AD9\u94FE\u63A5"
+    });
+  }
+  const turnstileSecretKey = useRuntimeConfig().turnstileSecretKey || process.env.TURNSTILE_SECRET_KEY;
+  const turnstileToken = body.turnstileToken;
+  if (turnstileSecretKey) {
+    if (!turnstileToken) {
+      throw createError({
+        statusCode: 400,
+        message: "\u8BF7\u5B8C\u6210\u4EBA\u673A\u9A8C\u8BC1"
+      });
+    }
+    const clientIP = getHeader(event, "cf-connecting-ip") || ((_b = (_a = getHeader(event, "x-forwarded-for")) == null ? void 0 : _a.split(",")[0]) == null ? void 0 : _b.trim()) || "unknown";
+    const isValid = await verifyTurnstile(turnstileToken, turnstileSecretKey, clientIP);
+    if (!isValid) {
+      throw createError({
+        statusCode: 400,
+        message: "\u4EBA\u673A\u9A8C\u8BC1\u5931\u8D25\uFF0C\u8BF7\u91CD\u8BD5"
+      });
+    }
+  }
+  try {
+    const requestsListKey = "friend-requests:list";
+    const requestsList = await kv.getItem(requestsListKey) || [];
+    const newId = requestsList.length > 0 ? String(Math.max(...requestsList.map((id) => parseInt(id))) + 1) : "1";
+    const requestData = {
+      id: newId,
+      name: body.name,
+      url: body.url,
+      description: body.description || "",
+      avatar: body.avatar || "",
+      status: "pending",
+      // pending, approved, rejected
+      createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+      ip: getHeader(event, "cf-connecting-ip") || ((_d = (_c = getHeader(event, "x-forwarded-for")) == null ? void 0 : _c.split(",")[0]) == null ? void 0 : _d.trim()) || "unknown"
+    };
+    const requestKey = `friend-request:${newId}`;
+    await kv.setItem(requestKey, requestData);
+    requestsList.push(newId);
+    await kv.setItem(requestsListKey, requestsList);
+    return {
+      success: true,
+      data: {
+        id: newId,
+        message: "\u7533\u8BF7\u5DF2\u63D0\u4EA4\uFF0C\u7B49\u5F85\u5BA1\u6838"
+      }
+    };
+  } catch (error) {
+    throw createError({
+      statusCode: 500,
+      message: error.message || "\u63D0\u4EA4\u7533\u8BF7\u5931\u8D25"
+    });
+  }
+});
+
+const requests_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: requests_post
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const _id__delete$4 = defineEventHandler(async (event) => {
+  const authHeader = getHeader(event, "authorization");
+  const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
+  if (!adminPassword || authHeader !== `Bearer ${adminPassword}`) {
+    throw createError({
+      statusCode: 401,
+      message: "\u672A\u6388\u6743\u8BBF\u95EE"
+    });
+  }
+  const id = getRouterParam(event, "id");
+  if (!id) {
+    throw createError({
+      statusCode: 400,
+      message: "\u7F3A\u5C11\u7533\u8BF7 ID"
+    });
+  }
+  try {
+    const kv = getKVStorage(event);
+    const requestKey = `friend-request:${id}`;
+    await kv.removeItem(requestKey);
+    const requestsListKey = "friend-requests:list";
+    const requestsList = await kv.getItem(requestsListKey) || [];
+    const updatedList = requestsList.filter((reqId) => reqId !== id);
+    await kv.setItem(requestsListKey, updatedList);
+    return {
+      success: true,
+      message: "\u5220\u9664\u6210\u529F"
+    };
+  } catch (error) {
+    throw createError({
+      statusCode: 500,
+      message: error.message || "\u5220\u9664\u7533\u8BF7\u5931\u8D25"
+    });
+  }
+});
+
+const _id__delete$5 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: _id__delete$4
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const _id__put$2 = defineEventHandler(async (event) => {
+  const authHeader = getHeader(event, "authorization");
+  const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
+  if (!adminPassword || authHeader !== `Bearer ${adminPassword}`) {
+    throw createError({
+      statusCode: 401,
+      message: "\u672A\u6388\u6743\u8BBF\u95EE"
+    });
+  }
+  const id = getRouterParam(event, "id");
+  const body = await readBody(event);
+  if (!id) {
+    throw createError({
+      statusCode: 400,
+      message: "\u7F3A\u5C11\u7533\u8BF7 ID"
+    });
+  }
+  if (!body.status || !["approved", "rejected"].includes(body.status)) {
+    throw createError({
+      statusCode: 400,
+      message: "\u65E0\u6548\u7684\u72B6\u6001\uFF0C\u5FC5\u987B\u662F approved \u6216 rejected"
+    });
+  }
+  try {
+    const kv = getKVStorage(event);
+    const requestKey = `friend-request:${id}`;
+    const requestData = await kv.getItem(requestKey);
+    if (!requestData) {
+      throw createError({
+        statusCode: 404,
+        message: "\u7533\u8BF7\u4E0D\u5B58\u5728"
+      });
+    }
+    requestData.status = body.status;
+    requestData.reviewedAt = (/* @__PURE__ */ new Date()).toISOString();
+    await kv.setItem(requestKey, requestData);
+    if (body.status === "approved") {
+      const friendsListKey = "friends:list";
+      const friendsList = await kv.getItem(friendsListKey) || [];
+      if (!friendsList.includes(id)) {
+        friendsList.push(id);
+        await kv.setItem(friendsListKey, friendsList);
+        const friendKey = `friend:${id}`;
+        const friendData = {
+          id,
+          name: requestData.name,
+          url: requestData.url,
+          description: requestData.description,
+          avatar: requestData.avatar || "/images/home/avatar.webp",
+          date: (/* @__PURE__ */ new Date()).toISOString().split("T")[0]
+        };
+        await kv.setItem(friendKey, friendData);
+      }
+    }
+    return {
+      success: true,
+      data: requestData
+    };
+  } catch (error) {
+    if (error.statusCode) {
+      throw error;
+    }
+    throw createError({
+      statusCode: 500,
+      message: error.message || "\u66F4\u65B0\u7533\u8BF7\u72B6\u6001\u5931\u8D25"
+    });
+  }
+});
+
+const _id__put$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: _id__put$2
+}, Symbol.toStringTag, { value: 'Module' }));
+
 const _id__delete$2 = defineEventHandler(async (event) => {
   const authHeader = getHeader(event, "authorization");
   const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
@@ -2375,29 +2777,6 @@ const index_get$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePropert
   default: index_get$2
 }, Symbol.toStringTag, { value: 'Module' }));
 
-async function verifyTurnstile(token, secretKey, remoteip) {
-  if (!token || !secretKey) {
-    return false;
-  }
-  try {
-    const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        secret: secretKey,
-        response: token,
-        remoteip
-      })
-    });
-    const data = await response.json();
-    return data.success === true;
-  } catch (error) {
-    console.error("Turnstile verification error:", error);
-    return false;
-  }
-}
 const index_post$2 = defineEventHandler(async (event) => {
   var _a, _b;
   const kv = getKVStorage(event);

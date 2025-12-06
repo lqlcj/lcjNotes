@@ -82,15 +82,17 @@
   const loadFriends = async () => {
     try {
       isLoading.value = true
-      // 动态导入 JSON 文件
-      const friendsData = await import('~/data/friends.json')
-      const data = friendsData.default || []
-      
-      // 处理头像路径
-      friends.value = data.map(friend => ({
-        ...friend,
-        avatar: resolveAvatarPath(friend.avatar)
-      }))
+      // 从 API 加载已批准的友链
+      const response = await $fetch('/api/friends')
+      if (response.success && response.data) {
+        // 处理头像路径
+        friends.value = response.data.map(friend => ({
+          ...friend,
+          avatar: friend.avatar || defaultAvatar
+        }))
+      } else {
+        friends.value = []
+      }
     } catch (error) {
       console.error('加载友链数据失败:', error)
       friends.value = []

@@ -127,6 +127,7 @@ declare global {
   const useRuntimeConfig: typeof import('../../node_modules/nitropack/dist/runtime/internal/config').useRuntimeConfig
   const useSession: typeof import('../../node_modules/h3').useSession
   const useStorage: typeof import('../../node_modules/nitropack/dist/runtime/internal/storage').useStorage
+  const verifyTurnstile: typeof import('../../server/utils/turnstile').verifyTurnstile
   const writeEarlyHints: typeof import('../../node_modules/h3').writeEarlyHints
 }
 export { useNitroApp } from 'nitropack/runtime/internal/app';
@@ -145,3 +146,4 @@ export { buildAssetsURL as __buildAssetsURL, publicAssetsURL as __publicAssetsUR
 export { defineAppConfig } from 'G:/newblog/node_modules/@nuxt/nitro-server/dist/runtime/utils/config';
 export { getKVStorage } from 'G:/newblog/server/utils/kv';
 export { getR2Storage, generateFileName, isValidImageType } from 'G:/newblog/server/utils/r2';
+export { verifyTurnstile } from 'G:/newblog/server/utils/turnstile';

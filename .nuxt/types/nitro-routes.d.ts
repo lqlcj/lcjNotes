@@ -6,6 +6,21 @@ declare module "nitropack/types" {
     '/api/auth/login': {
       'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/auth/login.post').default>>>>
     }
+    '/api/friends/:id': {
+      'delete': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/friends/[id].delete').default>>>>
+    }
+    '/api/friends': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/friends/index.get').default>>>>
+      'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/friends/index.post').default>>>>
+    }
+    '/api/friends/requests': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/friends/requests.get').default>>>>
+      'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/friends/requests.post').default>>>>
+    }
+    '/api/friends/requests/:id': {
+      'delete': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/friends/requests/[id].delete').default>>>>
+      'put': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/friends/requests/[id].put').default>>>>
+    }
     '/api/messages/:id': {
       'delete': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/messages/[id].delete').default>>>>
     }

@@ -42,6 +42,12 @@
           >
             留言管理
           </button>
+          <button 
+            @click="activeTab = 'friends'" 
+            :class="['tab-btn', { active: activeTab === 'friends' }]"
+          >
+            友链管理
+          </button>
         </div>
 
         <!-- 文章管理 -->
@@ -116,6 +122,74 @@
                 </div>
                 <div v-if="message.website" class="message-website">
                   <a :href="message.website" target="_blank">{{ message.website }}</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 友链管理 -->
+        <div v-if="activeTab === 'friends'" class="tab-content">
+          <div class="admin-actions">
+            <button @click="showFriendForm = true" class="btn-primary">
+              + 添加友链
+            </button>
+          </div>
+          
+          <!-- 申请列表 -->
+          <div class="friends-requests-section">
+            <h3 class="section-title">待审核申请</h3>
+            <div v-if="friendsRequestsLoading" class="loading">加载中...</div>
+            <div v-else-if="friendsRequests.length === 0" class="empty">
+              暂无待审核申请
+            </div>
+            <div v-else class="requests-grid">
+              <div 
+                v-for="request in friendsRequests" 
+                :key="request.id" 
+                class="request-card glass-card"
+              >
+                <div class="request-header">
+                  <h4>{{ request.name }}</h4>
+                  <span :class="['status-badge', request.status]">
+                    {{ request.status === 'pending' ? '待审核' : request.status === 'approved' ? '已批准' : '已拒绝' }}
+                  </span>
+                </div>
+                <div class="request-info">
+                  <p><strong>链接：</strong><a :href="request.url" target="_blank">{{ request.url }}</a></p>
+                  <p v-if="request.description"><strong>描述：</strong>{{ request.description }}</p>
+                  <p><strong>申请时间：</strong>{{ formatDate(request.createdAt) }}</p>
+                </div>
+                <div v-if="request.status === 'pending'" class="request-actions">
+                  <button @click="approveFriendRequest(request.id)" class="btn-approve">批准</button>
+                  <button @click="rejectFriendRequest(request.id)" class="btn-reject">拒绝</button>
+                  <button @click="deleteFriendRequest(request.id)" class="btn-delete">删除</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 已批准友链 -->
+          <div class="friends-approved-section">
+            <h3 class="section-title">已批准友链</h3>
+            <div v-if="friendsLoading" class="loading">加载中...</div>
+            <div v-else-if="approvedFriends.length === 0" class="empty">
+              暂无已批准友链
+            </div>
+            <div v-else class="friends-grid">
+              <div 
+                v-for="friend in approvedFriends" 
+                :key="friend.id" 
+                class="friend-card glass-card"
+              >
+                <div class="friend-header">
+                  <h4>{{ friend.name }}</h4>
+                  <button @click="deleteFriend(friend.id)" class="btn-delete">删除</button>
+                </div>
+                <div class="friend-info">
+                  <p><strong>链接：</strong><a :href="friend.url" target="_blank">{{ friend.url }}</a></p>
+                  <p v-if="friend.description"><strong>描述：</strong>{{ friend.description }}</p>
+                  <p><strong>添加时间：</strong>{{ friend.date }}</p>
                 </div>
               </div>
             </div>
@@ -223,6 +297,50 @@
           </div>
         </div>
 
+        <!-- 添加友链表单 -->
+        <div v-if="showFriendForm" class="form-modal">
+          <div class="form-content glass-card">
+            <div class="form-header">
+              <h2>添加友链</h2>
+              <button @click="closeFriendForm" class="close-btn">×</button>
+            </div>
+            
+            <form @submit.prevent="handleFriendSubmit">
+              <div class="form-group">
+                <label>网站名称 *</label>
+                <input v-model="friendForm.name" type="text" required placeholder="例如：我的博客" />
+              </div>
+
+              <div class="form-group">
+                <label>网站链接 *</label>
+                <input v-model="friendForm.url" type="url" required placeholder="https://example.com" />
+              </div>
+
+              <div class="form-group">
+                <label>网站描述</label>
+                <textarea 
+                  v-model="friendForm.description" 
+                  rows="3" 
+                  placeholder="简单介绍一下这个网站..."
+                ></textarea>
+              </div>
+
+              <div class="form-group">
+                <label>网站图标（可选）</label>
+                <input v-model="friendForm.avatar" type="url" placeholder="https://example.com/avatar.jpg" />
+                <small style="color: #999; font-size: 12px; margin-top: 4px; display: block;">建议尺寸：64x64px，支持 jpg/png/gif</small>
+              </div>
+
+              <div class="form-actions">
+                <button type="button" @click="closeFriendForm" class="btn-secondary">取消</button>
+                <button type="submit" class="btn-primary" :disabled="submittingFriend">
+                  {{ submittingFriend ? '添加中...' : '添加' }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
         <!-- 创建留言表单 -->
         <div v-if="showMessageForm" class="form-modal">
           <div class="form-content glass-card">
@@ -305,12 +423,27 @@ const messagesLoading = ref(false);
 const showMessageForm = ref(false);
 const submittingMessage = ref(false);
 
+// 友链管理相关
+const friendsRequests = ref([]);
+const friendsRequestsLoading = ref(false);
+const approvedFriends = ref([]);
+const friendsLoading = ref(false);
+const showFriendForm = ref(false);
+const submittingFriend = ref(false);
+
 const messageForm = ref({
   name: '',
   email: '',
   website: '',
   content: '',
   date: new Date().toISOString().slice(0, 16) // 默认使用当前时间
+});
+
+const friendForm = ref({
+  name: '',
+  url: '',
+  description: '',
+  avatar: ''
 });
 
 const formData = ref({
@@ -337,6 +470,8 @@ onMounted(() => {
     isAuthenticated.value = true;
     loadPosts();
     loadMessages();
+    loadFriendsRequests();
+    loadApprovedFriends();
   }
 });
 
@@ -688,6 +823,215 @@ const closeMessageForm = () => {
     website: '',
     content: '',
     date: new Date().toISOString().slice(0, 16) // 重置为当前时间
+  };
+};
+
+// 加载友链申请列表
+const loadFriendsRequests = async () => {
+  friendsRequestsLoading.value = true;
+  const token = localStorage.getItem('admin_token');
+  try {
+    const response = await $fetch('/api/friends/requests', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    if (response.success) {
+      friendsRequests.value = response.data;
+    }
+  } catch (error) {
+    console.error('加载友链申请失败:', error);
+  } finally {
+    friendsRequestsLoading.value = false;
+  }
+};
+
+// 加载已批准友链
+const loadApprovedFriends = async () => {
+  friendsLoading.value = true;
+  try {
+    const response = await $fetch('/api/friends');
+    if (response.success) {
+      approvedFriends.value = response.data;
+    }
+  } catch (error) {
+    console.error('加载已批准友链失败:', error);
+  } finally {
+    friendsLoading.value = false;
+  }
+};
+
+// 批准友链申请
+const approveFriendRequest = async (id) => {
+  if (!confirm('确定要批准这个友链申请吗？')) {
+    return;
+  }
+  
+  const token = localStorage.getItem('admin_token');
+  try {
+    const response = await $fetch(`/api/friends/requests/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: {
+        status: 'approved'
+      }
+    });
+    
+    if (response.success) {
+      alert('批准成功');
+      loadFriendsRequests();
+      loadApprovedFriends();
+    }
+  } catch (error) {
+    alert(error?.data?.message || '批准失败');
+  }
+};
+
+// 拒绝友链申请
+const rejectFriendRequest = async (id) => {
+  if (!confirm('确定要拒绝这个友链申请吗？')) {
+    return;
+  }
+  
+  const token = localStorage.getItem('admin_token');
+  try {
+    const response = await $fetch(`/api/friends/requests/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: {
+        status: 'rejected'
+      }
+    });
+    
+    if (response.success) {
+      alert('已拒绝');
+      loadFriendsRequests();
+    }
+  } catch (error) {
+    alert(error?.data?.message || '操作失败');
+  }
+};
+
+// 删除友链申请
+const deleteFriendRequest = async (id) => {
+  if (!confirm('确定要删除这个申请吗？')) {
+    return;
+  }
+  
+  const token = localStorage.getItem('admin_token');
+  try {
+    const response = await $fetch(`/api/friends/requests/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    
+    if (response.success) {
+      alert('删除成功');
+      loadFriendsRequests();
+    }
+  } catch (error) {
+    alert(error?.data?.message || '删除失败');
+  }
+};
+
+// 删除已批准友链
+const deleteFriend = async (id) => {
+  if (!confirm('确定要删除这个友链吗？')) {
+    return;
+  }
+  
+  const token = localStorage.getItem('admin_token');
+  try {
+    const response = await $fetch(`/api/friends/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    
+    if (response.success) {
+      alert('删除成功');
+      loadApprovedFriends();
+    }
+  } catch (error) {
+    alert(error?.data?.message || '删除失败');
+  }
+};
+
+// 提交友链表单
+const handleFriendSubmit = async () => {
+  // 验证表单
+  if (!friendForm.value.name.trim()) {
+    alert('请输入网站名称');
+    return;
+  }
+  
+  if (!friendForm.value.url.trim()) {
+    alert('请输入网站链接');
+    return;
+  }
+  
+  // 验证 URL 格式
+  try {
+    new URL(friendForm.value.url);
+  } catch {
+    alert('请输入有效的网站链接（需要包含 http:// 或 https://）');
+    return;
+  }
+  
+  // 如果提供了头像，验证 URL
+  if (friendForm.value.avatar && friendForm.value.avatar.trim()) {
+    try {
+      new URL(friendForm.value.avatar);
+    } catch {
+      alert('请输入有效的图标链接');
+      return;
+    }
+  }
+  
+  submittingFriend.value = true;
+  const token = localStorage.getItem('admin_token');
+  
+  try {
+    const response = await $fetch('/api/friends', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: {
+        name: friendForm.value.name,
+        url: friendForm.value.url,
+        description: friendForm.value.description,
+        avatar: friendForm.value.avatar
+      }
+    });
+    
+    if (response.success) {
+      alert('友链添加成功');
+      closeFriendForm();
+      loadApprovedFriends();
+    }
+  } catch (error) {
+    alert(error?.data?.message || '添加失败');
+  } finally {
+    submittingFriend.value = false;
+  }
+};
+
+// 关闭友链表单
+const closeFriendForm = () => {
+  showFriendForm.value = false;
+  friendForm.value = {
+    name: '',
+    url: '',
+    description: '',
+    avatar: ''
   };
 };
 </script>
@@ -1188,6 +1532,137 @@ const closeMessageForm = () => {
   .cover-preview {
     width: 100%;
     max-width: 300px;
+  }
+}
+
+/* 友链管理样式 */
+.friends-requests-section,
+.friends-approved-section {
+  margin-bottom: 40px;
+}
+
+.section-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.requests-grid,
+.friends-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+}
+
+.request-card,
+.friend-card {
+  padding: 20px;
+}
+
+.request-header,
+.friend-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.request-header h4,
+.friend-header h4 {
+  margin: 0;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.status-badge.pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-badge.approved {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-badge.rejected {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.request-info,
+.friend-info {
+  margin-bottom: 15px;
+}
+
+.request-info p,
+.friend-info p {
+  margin: 8px 0;
+  font-size: 0.9rem;
+  color: #666;
+  line-height: 1.6;
+}
+
+.request-info a,
+.friend-info a {
+  color: #6c5ce7;
+  text-decoration: none;
+}
+
+.request-info a:hover,
+.friend-info a:hover {
+  text-decoration: underline;
+}
+
+.request-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-approve {
+  padding: 6px 16px;
+  background: #27ae60;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 0.3s;
+}
+
+.btn-approve:hover {
+  background: #229954;
+}
+
+.btn-reject {
+  padding: 6px 16px;
+  background: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 0.3s;
+}
+
+.btn-reject:hover {
+  background: #c0392b;
+}
+
+@media (max-width: 768px) {
+  .requests-grid,
+  .friends-grid {
+    grid-template-columns: 1fr;
   }
 }
 </style>
