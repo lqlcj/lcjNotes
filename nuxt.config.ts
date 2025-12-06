@@ -92,6 +92,7 @@ export default defineNuxtConfig({
   // 运行时配置
   runtimeConfig: {
     adminPassword: process.env.ADMIN_PASSWORD || 'admin123', // 默认密码，生产环境请修改
+    r2PublicUrl: process.env.R2_PUBLIC_URL || 'https://photo.lcjlq.com', // R2 公共访问域名
     public: {
       // 公共配置
     }

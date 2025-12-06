@@ -651,7 +651,8 @@ const _inlineRuntimeConfig = {
     }
   },
   "public": {},
-  "adminPassword": "admin123"
+  "adminPassword": "admin123",
+  "r2PublicUrl": "https://photo.lcjlq.com"
 };
 const envOptions = {
   prefix: "NITRO_",
@@ -1453,22 +1454,7 @@ const plugins = [
 _iS2Hx_aRY6b5luI5ZFAVScoHeBMFBXD6z47xxZowt8
 ];
 
-const assets = {
-  "/index.mjs": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"19a2b-21/NW71nV+JRcY83JJRI8HNK1n8\"",
-    "mtime": "2025-12-06T20:25:29.216Z",
-    "size": 105003,
-    "path": "index.mjs"
-  },
-  "/index.mjs.map": {
-    "type": "application/json",
-    "etag": "\"61136-+/SNuDJ/IJ9gQAEAo/ZxUchMabA\"",
-    "mtime": "2025-12-06T20:25:29.216Z",
-    "size": 397622,
-    "path": "index.mjs.map"
-  }
-};
+const assets = {};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));
@@ -2862,7 +2848,8 @@ const image_post = defineEventHandler(async (event) => {
         // 缓存 1 年
       }
     });
-    const publicUrl = `/r2/${fileName}`;
+    const r2PublicUrl = useRuntimeConfig().r2PublicUrl;
+    const publicUrl = r2PublicUrl ? `${r2PublicUrl}/${fileName}` : `/api/r2/${fileName}`;
     return {
       success: true,
       data: {

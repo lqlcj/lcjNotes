@@ -89,6 +89,8 @@ declare module 'nuxt/schema' {
 
    adminPassword: string,
 
+   r2PublicUrl: string,
+
    nitro: {
       envPrefix: string,
    },

@@ -61,9 +61,11 @@ export default defineEventHandler(async (event) => {
     });
 
     // 生成公共访问 URL
-    // 注意：需要配置 R2 的公共域名或自定义域名
-    // 这里返回相对路径，前端会拼接完整的 URL
-    const publicUrl = `/r2/${fileName}`;
+    // 优先使用配置的 R2 公共域名，如果没有配置则使用代理路由
+    const r2PublicUrl = useRuntimeConfig().r2PublicUrl;
+    const publicUrl = r2PublicUrl 
+      ? `${r2PublicUrl}/${fileName}` 
+      : `/api/r2/${fileName}`;
 
     return {
       success: true,
