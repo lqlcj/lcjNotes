@@ -53,6 +53,7 @@ export default defineNuxtConfig({
     layoutTransition: { name: 'layout', mode: 'out-in' },
     // 确保静态资源路径正确（Cloudflare Pages 部署）
     baseURL: '/',
+    buildAssetsDir: '/_nuxt/', // 保持默认的 _nuxt 目录，确保资源路径正确
     cdnURL: process.env.CDN_URL || undefined
   },
   
@@ -77,6 +78,18 @@ export default defineNuxtConfig({
       kv: {
         driver: 'memory' // 本地开发使用内存存储，生产环境会自动使用 Cloudflare KV
       }
+    },
+    // 🔥 关键修复：确保静态资源正确复制和处理
+    publicAssets: [
+      {
+        baseURL: '/',
+        dir: 'public',
+        maxAge: 60 * 60 * 24 * 7 // 7 days
+      }
+    ],
+    // 🔥 关键修复：确保客户端资源正确输出到 dist 目录
+    prerender: {
+      crawlLinks: false
     }
   },
   
