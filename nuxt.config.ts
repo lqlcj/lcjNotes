@@ -86,16 +86,6 @@ export default defineNuxtConfig({
     // 🔥 关键修复：确保客户端资源正确输出到 dist 目录
     prerender: {
       crawlLinks: false
-    },
-    // 🔥 新增：确保 _nuxt 目录下的所有静态资源都能正确访问
-    // 这对于 Cloudflare Pages 的 SSR 模式很重要
-    routeRules: {
-      '/_nuxt/**': { 
-        headers: { 
-          'Cache-Control': 'public, max-age=31536000, immutable' 
-        },
-        cors: true
-      }
     }
   },
   

@@ -1,0 +1,2 @@
+const a=".app-container[data-v-85c836b9]{background-image:var(--v174ba384);background-position:50%;background-repeat:no-repeat;background-size:cover;display:flex;flex-direction:column;min-height:100vh}.main-content[data-v-85c836b9]{flex:1;width:100%}@media(max-width:768px){.main-content[data-v-85c836b9]{padding-bottom:70px}}";export{a as default};
+//# sourceMappingURL=entry-styles-8.mjs-DtbtYiU3.js.map

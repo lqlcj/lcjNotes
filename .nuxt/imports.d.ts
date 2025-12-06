@@ -35,4 +35,3 @@ export { generateIssueLink, createIssueViaAPI } from '../utils/githubApi';
 export { useLoadingStore } from '../stores/loadingStore';
 export { useNotesStore } from '../stores/notesStore';
 export { defineStore, acceptHMRUpdate, usePinia, storeToRefs } from '../node_modules/@pinia/nuxt/dist/runtime/composables';
-export { useNuxtDevTools } from '../node_modules/@nuxt/devtools/dist/runtime/use-nuxt-devtools';
