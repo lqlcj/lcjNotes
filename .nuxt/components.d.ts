@@ -22,7 +22,6 @@ export const CommonPageLoading: typeof import("../components/Common/PageLoading.
 export const ErrorBoundary: typeof import("../components/ErrorBoundary/ErrorBoundary.vue")['default']
 export const FriendsFriendRequestForm: typeof import("../components/Friends/FriendRequestForm.vue")['default']
 export const FriendsList: typeof import("../components/Friends/FriendsList.vue")['default']
-export const FriendsSection: typeof import("../components/Friends/FriendsSection.vue")['default']
 export const HeaderBarPageHeader: typeof import("../components/HeaderBar/PageHeader.vue")['default']
 export const LayoutsFooter: typeof import("../components/Layouts/Footer.vue")['default']
 export const LayoutsHeader: typeof import("../components/Layouts/Header.vue")['default']
@@ -58,7 +57,6 @@ export const LazyCommonPageLoading: LazyComponent<typeof import("../components/C
 export const LazyErrorBoundary: LazyComponent<typeof import("../components/ErrorBoundary/ErrorBoundary.vue")['default']>
 export const LazyFriendsFriendRequestForm: LazyComponent<typeof import("../components/Friends/FriendRequestForm.vue")['default']>
 export const LazyFriendsList: LazyComponent<typeof import("../components/Friends/FriendsList.vue")['default']>
-export const LazyFriendsSection: LazyComponent<typeof import("../components/Friends/FriendsSection.vue")['default']>
 export const LazyHeaderBarPageHeader: LazyComponent<typeof import("../components/HeaderBar/PageHeader.vue")['default']>
 export const LazyLayoutsFooter: LazyComponent<typeof import("../components/Layouts/Footer.vue")['default']>
 export const LazyLayoutsHeader: LazyComponent<typeof import("../components/Layouts/Header.vue")['default']>

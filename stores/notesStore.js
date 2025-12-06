@@ -1,6 +1,5 @@
 // Notes 数据仓库 - 从 API 获取数据
 import { defineStore } from "pinia";
-import fm from "front-matter";
 // 使用 public 目录下的图片
 const defaultCover = "/images/loading.webp";
 const defaultAvatar = "/images/home/avatar.webp";
@@ -130,78 +129,6 @@ export const useNotesStore = defineStore("notes", {
       }
     },
 
-    // 兼容模式：从本地文件加载（如果 API 不可用）
-    initPostsFromFiles() {
-      console.log("Pinia: 尝试从本地文件加载文章...");
-      
-      try {
-        // 用于提取元数据（只解析 front-matter，不存储完整内容）
-        const mdFilesForMeta = import.meta.glob("~/posts/*.md", {
-          query: "?raw",
-          import: "default",
-          eager: true, // 必须 eager，用于提取元数据
-        });
-
-        const posts = [];
-        let index = 0;
-
-        // 只解析 front-matter，提取元数据，不存储完整内容
-        for (const path in mdFilesForMeta) {
-          const content = mdFilesForMeta[path];
-          try {
-            // 只解析 front-matter，提取元数据
-            const parsed = fm(content);
-            const attr = parsed.attributes;
-
-            posts.push({
-              id: index++,
-              title: attr.title || "无标题",
-              img: attr.cover || defaultCover,
-              aspectRatio: attr.ratio || 0.75,
-              user: attr.user || "lcj",
-              avatar: attr.avatar || defaultAvatar,
-              likes: attr.likes || 0,
-              date: attr.date || "2025-01-01",
-              isLiked: false,
-              filePath: path, // 存储原始路径，用于懒加载内容
-            });
-          } catch (e) {
-            console.error("解析失败", path, e);
-          }
-        }
-
-        console.log(`从文件系统加载了 ${posts.length} 篇文章`);
-
-        // 按日期排序并存入 state
-        this.allPosts = posts.sort((a, b) => {
-          // 处理空日期：空日期使用最小日期（1970-01-01）
-          const dateA = a.date && a.date.trim() ? new Date(a.date) : new Date(0);
-          const dateB = b.date && b.date.trim() ? new Date(b.date) : new Date(0);
-          
-          // 获取时间戳进行比较
-          const timeA = dateA.getTime();
-          const timeB = dateB.getTime();
-          
-          // 如果日期相同，按 id 降序（后添加的在前，因为 id 是递增的）
-          if (timeB === timeA) {
-            return b.id - a.id;
-          }
-          
-          // 降序排序：最新的在前
-          return timeB - timeA;
-        });
-
-        // 读取本地缓存的点赞状态
-        this.loadLikesFromStorage();
-
-        // 标记为已加载（即使没有文章也要标记，避免重复加载）
-        this.isLoaded = true;
-      } catch (error) {
-        console.error("从本地文件加载失败:", error);
-        // 即使出错也要标记为已加载，避免无限重试
-        this.isLoaded = true;
-      }
-    },
 
     // 动作：读取本地点赞缓存
     loadLikesFromStorage() {

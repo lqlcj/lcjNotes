@@ -31,7 +31,6 @@ export { setInterval } from '#app/compat/interval';
 export { definePageMeta } from '../node_modules/nuxt/dist/pages/runtime/composables';
 export { defineLazyHydrationComponent } from '#app/composables/lazy-hydration';
 export { useConfetti } from '../composables/useConfetti';
-export { generateIssueLink, createIssueViaAPI } from '../utils/githubApi';
 export { useLoadingStore } from '../stores/loadingStore';
 export { useNotesStore } from '../stores/notesStore';
 export { defineStore, acceptHMRUpdate, usePinia, storeToRefs } from '../node_modules/@pinia/nuxt/dist/runtime/composables';

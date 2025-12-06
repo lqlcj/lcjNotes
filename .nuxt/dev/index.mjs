@@ -1457,7 +1457,22 @@ const plugins = [
 _iS2Hx_aRY6b5luI5ZFAVScoHeBMFBXD6z47xxZowt8
 ];
 
-const assets = {};
+const assets = {
+  "/index.mjs": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"20814-GrxVEeSHZATMokR+Iu35ZFNSmmQ\"",
+    "mtime": "2025-12-06T21:42:53.531Z",
+    "size": 133140,
+    "path": "index.mjs"
+  },
+  "/index.mjs.map": {
+    "type": "application/json",
+    "etag": "\"781a7-AwFLN7TL+ZRR2c0ojvkUSiCEY00\"",
+    "mtime": "2025-12-06T21:42:53.531Z",
+    "size": 491943,
+    "path": "index.mjs.map"
+  }
+};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));
@@ -1868,17 +1883,23 @@ async function getIslandContext(event) {
 }
 
 const _lazy_zx2hf7 = () => Promise.resolve().then(function () { return login_post$1; });
-const _lazy_4YfJWk = () => Promise.resolve().then(function () { return _id__delete$7; });
-const _lazy_IKSiHr = () => Promise.resolve().then(function () { return index_get$5; });
-const _lazy_4MmXnu = () => Promise.resolve().then(function () { return index_post$5; });
+const _lazy_4YfJWk = () => Promise.resolve().then(function () { return _id__delete$9; });
+const _lazy_IKSiHr = () => Promise.resolve().then(function () { return index_get$7; });
+const _lazy_4MmXnu = () => Promise.resolve().then(function () { return index_post$7; });
 const _lazy_ZZQpVH = () => Promise.resolve().then(function () { return requests_get$1; });
 const _lazy_xIi3Jm = () => Promise.resolve().then(function () { return requests_post$1; });
-const _lazy_MNncAk = () => Promise.resolve().then(function () { return _id__delete$5; });
-const _lazy_RJAIjX = () => Promise.resolve().then(function () { return _id__put$3; });
-const _lazy_lt7cVk = () => Promise.resolve().then(function () { return _id__delete$3; });
-const _lazy_lFh496 = () => Promise.resolve().then(function () { return index_get$3; });
-const _lazy_0idvvs = () => Promise.resolve().then(function () { return index_post$3; });
-const _lazy_OVZbUj = () => Promise.resolve().then(function () { return migrate_post$1; });
+const _lazy_MNncAk = () => Promise.resolve().then(function () { return _id__delete$7; });
+const _lazy_RJAIjX = () => Promise.resolve().then(function () { return _id__put$5; });
+const _lazy_lt7cVk = () => Promise.resolve().then(function () { return _id__delete$5; });
+const _lazy_lFh496 = () => Promise.resolve().then(function () { return index_get$5; });
+const _lazy_0idvvs = () => Promise.resolve().then(function () { return index_post$5; });
+const _lazy_OVZbUj = () => Promise.resolve().then(function () { return migrate_post$3; });
+const _lazy_lrS_AC = () => Promise.resolve().then(function () { return _id__delete$3; });
+const _lazy_1qViY_ = () => Promise.resolve().then(function () { return _id__get$3; });
+const _lazy_zWW14Y = () => Promise.resolve().then(function () { return _id__put$3; });
+const _lazy_Jg_zdx = () => Promise.resolve().then(function () { return index_get$3; });
+const _lazy_w6NqhW = () => Promise.resolve().then(function () { return index_post$3; });
+const _lazy_ECEL1o = () => Promise.resolve().then(function () { return migrate_post$1; });
 const _lazy_OfG0mY = () => Promise.resolve().then(function () { return _id__delete$1; });
 const _lazy_fB2AUZ = () => Promise.resolve().then(function () { return _id__get$1; });
 const _lazy_pzWvnF = () => Promise.resolve().then(function () { return _id__put$1; });
@@ -1902,6 +1923,12 @@ const handlers = [
   { route: '/api/messages', handler: _lazy_lFh496, lazy: true, middleware: false, method: "get" },
   { route: '/api/messages', handler: _lazy_0idvvs, lazy: true, middleware: false, method: "post" },
   { route: '/api/migrate', handler: _lazy_OVZbUj, lazy: true, middleware: false, method: "post" },
+  { route: '/api/moments/:id', handler: _lazy_lrS_AC, lazy: true, middleware: false, method: "delete" },
+  { route: '/api/moments/:id', handler: _lazy_1qViY_, lazy: true, middleware: false, method: "get" },
+  { route: '/api/moments/:id', handler: _lazy_zWW14Y, lazy: true, middleware: false, method: "put" },
+  { route: '/api/moments', handler: _lazy_Jg_zdx, lazy: true, middleware: false, method: "get" },
+  { route: '/api/moments', handler: _lazy_w6NqhW, lazy: true, middleware: false, method: "post" },
+  { route: '/api/moments/migrate', handler: _lazy_ECEL1o, lazy: true, middleware: false, method: "post" },
   { route: '/api/posts/:id', handler: _lazy_OfG0mY, lazy: true, middleware: false, method: "delete" },
   { route: '/api/posts/:id', handler: _lazy_fB2AUZ, lazy: true, middleware: false, method: "get" },
   { route: '/api/posts/:id', handler: _lazy_pzWvnF, lazy: true, middleware: false, method: "put" },
@@ -2272,29 +2299,29 @@ const login_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProper
 
 function getKVStorage(event) {
   var _a, _b;
+  const env = (_b = (_a = event.context) == null ? void 0 : _a.cloudflare) == null ? void 0 : _b.env;
+  if (env == null ? void 0 : env.BLOG_KV) {
+    return {
+      async getItem(key) {
+        const value = await env.BLOG_KV.get(key);
+        return value ? JSON.parse(value) : null;
+      },
+      async setItem(key, value) {
+        return await env.BLOG_KV.put(key, JSON.stringify(value));
+      },
+      async removeItem(key) {
+        return await env.BLOG_KV.delete(key);
+      }
+    };
+  }
   try {
     return useStorage("kv");
   } catch (e) {
-    const env = (_b = (_a = event.context) == null ? void 0 : _a.cloudflare) == null ? void 0 : _b.env;
-    if (env == null ? void 0 : env.BLOG_KV) {
-      return {
-        async getItem(key) {
-          const value = await env.BLOG_KV.get(key);
-          return value ? JSON.parse(value) : null;
-        },
-        async setItem(key, value) {
-          return await env.BLOG_KV.put(key, JSON.stringify(value));
-        },
-        async removeItem(key) {
-          return await env.BLOG_KV.delete(key);
-        }
-      };
-    }
-    throw new Error("KV storage not available");
+    throw new Error("KV storage not available. Please configure BLOG_KV binding in Cloudflare Pages.");
   }
 }
 
-const _id__delete$6 = defineEventHandler(async (event) => {
+const _id__delete$8 = defineEventHandler(async (event) => {
   const authHeader = getHeader(event, "authorization");
   const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
   if (!adminPassword || authHeader !== `Bearer ${adminPassword}`) {
@@ -2330,12 +2357,12 @@ const _id__delete$6 = defineEventHandler(async (event) => {
   }
 });
 
-const _id__delete$7 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const _id__delete$9 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: _id__delete$6
+  default: _id__delete$8
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const index_get$4 = defineEventHandler(async (event) => {
+const index_get$6 = defineEventHandler(async (event) => {
   try {
     const kv = getKVStorage(event);
     const friendsListKey = "friends:list";
@@ -2363,12 +2390,12 @@ const index_get$4 = defineEventHandler(async (event) => {
   }
 });
 
-const index_get$5 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const index_get$7 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: index_get$4
+  default: index_get$6
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const index_post$4 = defineEventHandler(async (event) => {
+const index_post$6 = defineEventHandler(async (event) => {
   const authHeader = getHeader(event, "authorization");
   const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
   if (!adminPassword || authHeader !== `Bearer ${adminPassword}`) {
@@ -2422,9 +2449,9 @@ const index_post$4 = defineEventHandler(async (event) => {
   }
 });
 
-const index_post$5 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const index_post$7 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: index_post$4
+  default: index_post$6
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const requests_get = defineEventHandler(async (event) => {
@@ -2567,7 +2594,7 @@ const requests_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePro
   default: requests_post
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const _id__delete$4 = defineEventHandler(async (event) => {
+const _id__delete$6 = defineEventHandler(async (event) => {
   const authHeader = getHeader(event, "authorization");
   const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
   if (!adminPassword || authHeader !== `Bearer ${adminPassword}`) {
@@ -2603,12 +2630,12 @@ const _id__delete$4 = defineEventHandler(async (event) => {
   }
 });
 
-const _id__delete$5 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const _id__delete$7 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: _id__delete$4
+  default: _id__delete$6
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const _id__put$2 = defineEventHandler(async (event) => {
+const _id__put$4 = defineEventHandler(async (event) => {
   const authHeader = getHeader(event, "authorization");
   const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
   if (!adminPassword || authHeader !== `Bearer ${adminPassword}`) {
@@ -2677,12 +2704,12 @@ const _id__put$2 = defineEventHandler(async (event) => {
   }
 });
 
-const _id__put$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const _id__put$5 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: _id__put$2
+  default: _id__put$4
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const _id__delete$2 = defineEventHandler(async (event) => {
+const _id__delete$4 = defineEventHandler(async (event) => {
   const authHeader = getHeader(event, "authorization");
   const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
   if (!adminPassword || authHeader !== `Bearer ${adminPassword}`) {
@@ -2728,12 +2755,12 @@ const _id__delete$2 = defineEventHandler(async (event) => {
   }
 });
 
-const _id__delete$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const _id__delete$5 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: _id__delete$2
+  default: _id__delete$4
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const index_get$2 = defineEventHandler(async (event) => {
+const index_get$4 = defineEventHandler(async (event) => {
   try {
     const kv = getKVStorage(event);
     const messagesListKey = "messages:list";
@@ -2772,12 +2799,12 @@ const index_get$2 = defineEventHandler(async (event) => {
   }
 });
 
-const index_get$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const index_get$5 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: index_get$2
+  default: index_get$4
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const index_post$2 = defineEventHandler(async (event) => {
+const index_post$4 = defineEventHandler(async (event) => {
   var _a, _b;
   const kv = getKVStorage(event);
   const body = await readBody(event);
@@ -2854,12 +2881,12 @@ const index_post$2 = defineEventHandler(async (event) => {
   }
 });
 
-const index_post$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const index_post$5 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: index_post$2
+  default: index_post$4
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const migrate_post = defineEventHandler(async (event) => {
+const migrate_post$2 = defineEventHandler(async (event) => {
   var _a;
   const authHeader = getHeader(event, "authorization");
   const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
@@ -2913,6 +2940,337 @@ const migrate_post = defineEventHandler(async (event) => {
         success: false,
         message: "\u8FC1\u79FB\u811A\u672C\u9700\u8981\u5728\u672C\u5730\u73AF\u5883\u8FD0\u884C\uFF0C\u6216\u8005\u624B\u52A8\u5728\u540E\u53F0\u521B\u5EFA\u6587\u7AE0",
         hint: "\u8BF7\u5728\u672C\u5730\u8FD0\u884C\u6B64 API\uFF0C\u6216\u8005\u76F4\u63A5\u5728\u540E\u53F0\u7BA1\u7406\u754C\u9762\u521B\u5EFA\u6587\u7AE0"
+      };
+    }
+    throw createError({
+      statusCode: 500,
+      message: error.message || "\u8FC1\u79FB\u5931\u8D25"
+    });
+  }
+});
+
+const migrate_post$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: migrate_post$2
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const _id__delete$2 = defineEventHandler(async (event) => {
+  const authHeader = getHeader(event, "authorization");
+  const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
+  if (!adminPassword || authHeader !== `Bearer ${adminPassword}`) {
+    throw createError({
+      statusCode: 401,
+      message: "\u672A\u6388\u6743\u8BBF\u95EE"
+    });
+  }
+  const id = getRouterParam(event, "id");
+  if (!id) {
+    throw createError({
+      statusCode: 400,
+      message: "\u7F3A\u5C11\u52A8\u6001 ID"
+    });
+  }
+  try {
+    const kv = getKVStorage(event);
+    const momentKey = `moment:${id}`;
+    await kv.removeItem(momentKey);
+    const momentsListKey = "moments:list";
+    const momentsList = await kv.getItem(momentsListKey) || [];
+    const updatedList = momentsList.filter((momentId) => momentId !== id);
+    await kv.setItem(momentsListKey, updatedList);
+    return {
+      success: true,
+      message: "\u5220\u9664\u6210\u529F"
+    };
+  } catch (error) {
+    throw createError({
+      statusCode: 500,
+      message: error.message || "\u5220\u9664\u670B\u53CB\u5708\u52A8\u6001\u5931\u8D25"
+    });
+  }
+});
+
+const _id__delete$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: _id__delete$2
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const _id__get$2 = defineEventHandler(async (event) => {
+  const id = getRouterParam(event, "id");
+  if (!id) {
+    throw createError({
+      statusCode: 400,
+      message: "\u7F3A\u5C11\u52A8\u6001 ID"
+    });
+  }
+  try {
+    const kv = getKVStorage(event);
+    const momentKey = `moment:${id}`;
+    const momentData = await kv.getItem(momentKey);
+    if (!momentData) {
+      throw createError({
+        statusCode: 404,
+        message: "\u52A8\u6001\u4E0D\u5B58\u5728"
+      });
+    }
+    return {
+      success: true,
+      data: momentData
+    };
+  } catch (error) {
+    if (error.statusCode) {
+      throw error;
+    }
+    throw createError({
+      statusCode: 500,
+      message: error.message || "\u83B7\u53D6\u670B\u53CB\u5708\u52A8\u6001\u5931\u8D25"
+    });
+  }
+});
+
+const _id__get$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: _id__get$2
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const _id__put$2 = defineEventHandler(async (event) => {
+  var _a, _b, _c, _d;
+  const authHeader = getHeader(event, "authorization");
+  const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
+  if (!adminPassword || authHeader !== `Bearer ${adminPassword}`) {
+    throw createError({
+      statusCode: 401,
+      message: "\u672A\u6388\u6743\u8BBF\u95EE"
+    });
+  }
+  const id = getRouterParam(event, "id");
+  const body = await readBody(event);
+  if (!id) {
+    throw createError({
+      statusCode: 400,
+      message: "\u7F3A\u5C11\u52A8\u6001 ID"
+    });
+  }
+  try {
+    const kv = getKVStorage(event);
+    const momentKey = `moment:${id}`;
+    const momentData = await kv.getItem(momentKey);
+    if (!momentData) {
+      throw createError({
+        statusCode: 404,
+        message: "\u52A8\u6001\u4E0D\u5B58\u5728"
+      });
+    }
+    const updatedData = {
+      ...momentData,
+      author: {
+        nickname: ((_a = body.author) == null ? void 0 : _a.nickname) || ((_b = momentData.author) == null ? void 0 : _b.nickname) || "Leyili",
+        avatar: ((_c = body.author) == null ? void 0 : _c.avatar) || ((_d = momentData.author) == null ? void 0 : _d.avatar) || "/images/home/avatar.webp"
+      },
+      content: body.content !== void 0 ? body.content : momentData.content,
+      timestamp: body.timestamp !== void 0 ? body.timestamp : momentData.timestamp,
+      images: body.images !== void 0 ? body.images : momentData.images || []
+    };
+    await kv.setItem(momentKey, updatedData);
+    return {
+      success: true,
+      data: updatedData,
+      message: "\u670B\u53CB\u5708\u52A8\u6001\u66F4\u65B0\u6210\u529F"
+    };
+  } catch (error) {
+    if (error.statusCode) {
+      throw error;
+    }
+    throw createError({
+      statusCode: 500,
+      message: error.message || "\u66F4\u65B0\u670B\u53CB\u5708\u52A8\u6001\u5931\u8D25"
+    });
+  }
+});
+
+const _id__put$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: _id__put$2
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const index_get$2 = defineEventHandler(async (event) => {
+  try {
+    const kv = getKVStorage(event);
+    const momentsListKey = "moments:list";
+    const momentsList = await kv.getItem(momentsListKey) || [];
+    const moments = [];
+    for (const id of momentsList) {
+      const momentKey = `moment:${id}`;
+      const momentData = await kv.getItem(momentKey);
+      if (momentData) {
+        moments.push(momentData);
+      }
+    }
+    moments.sort((a, b) => {
+      const timeA = a.timestamp ? new Date(a.timestamp.replace("\u521B\u5EFA\u65F6\u95F4: ", "")).getTime() : 0;
+      const timeB = b.timestamp ? new Date(b.timestamp.replace("\u521B\u5EFA\u65F6\u95F4: ", "")).getTime() : 0;
+      return timeB - timeA;
+    });
+    return {
+      success: true,
+      data: moments
+    };
+  } catch (error) {
+    throw createError({
+      statusCode: 500,
+      message: error.message || "\u83B7\u53D6\u670B\u53CB\u5708\u52A8\u6001\u5931\u8D25"
+    });
+  }
+});
+
+const index_get$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: index_get$2
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const index_post$2 = defineEventHandler(async (event) => {
+  var _a, _b;
+  const authHeader = getHeader(event, "authorization");
+  const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
+  if (!adminPassword || authHeader !== `Bearer ${adminPassword}`) {
+    throw createError({
+      statusCode: 401,
+      message: "\u672A\u6388\u6743\u8BBF\u95EE"
+    });
+  }
+  const body = await readBody(event);
+  if (!body.content) {
+    throw createError({
+      statusCode: 400,
+      message: "\u5185\u5BB9\u4E0D\u80FD\u4E3A\u7A7A"
+    });
+  }
+  try {
+    const kv = getKVStorage(event);
+    const momentsListKey = "moments:list";
+    const momentsList = await kv.getItem(momentsListKey) || [];
+    const newId = momentsList.length > 0 ? String(Math.max(...momentsList.map((id) => parseInt(id))) + 1) : "1";
+    const now = /* @__PURE__ */ new Date();
+    const timestamp = `\u521B\u5EFA\u65F6\u95F4: ${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
+    const momentData = {
+      id: parseInt(newId),
+      author: {
+        nickname: ((_a = body.author) == null ? void 0 : _a.nickname) || "Leyili",
+        avatar: ((_b = body.author) == null ? void 0 : _b.avatar) || "/images/home/avatar.webp"
+      },
+      content: body.content,
+      timestamp: body.timestamp || timestamp,
+      images: body.images || []
+    };
+    const momentKey = `moment:${newId}`;
+    await kv.setItem(momentKey, momentData);
+    momentsList.push(newId);
+    await kv.setItem(momentsListKey, momentsList);
+    return {
+      success: true,
+      data: momentData,
+      message: "\u670B\u53CB\u5708\u52A8\u6001\u521B\u5EFA\u6210\u529F"
+    };
+  } catch (error) {
+    throw createError({
+      statusCode: 500,
+      message: error.message || "\u521B\u5EFA\u670B\u53CB\u5708\u52A8\u6001\u5931\u8D25"
+    });
+  }
+});
+
+const index_post$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: index_post$2
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const migrate_post = defineEventHandler(async (event) => {
+  var _a, _b, _c;
+  const authHeader = getHeader(event, "authorization");
+  const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
+  if (!adminPassword || authHeader !== `Bearer ${adminPassword}`) {
+    throw createError({
+      statusCode: 401,
+      message: "\u672A\u6388\u6743\u8BBF\u95EE"
+    });
+  }
+  try {
+    const kv = getKVStorage(event);
+    const fs = await import('node:fs/promises');
+    const path = await import('node:path');
+    const momentsJsonPath = path.join(process.cwd(), "data", "moments.json");
+    const jsonContent = await fs.readFile(momentsJsonPath, "utf-8");
+    const momentsData = JSON.parse(jsonContent);
+    if (!Array.isArray(momentsData)) {
+      throw new Error("moments.json \u683C\u5F0F\u9519\u8BEF\uFF0C\u5E94\u8BE5\u662F\u6570\u7EC4");
+    }
+    const momentsListKey = "moments:list";
+    const existingList = await kv.getItem(momentsListKey) || [];
+    const existingIds = new Set(existingList);
+    const migratedMoments = [];
+    const newIds = [];
+    for (const moment of momentsData) {
+      const momentId = moment.id ? String(moment.id) : String(Date.now());
+      if (existingIds.has(momentId)) {
+        continue;
+      }
+      let timestamp = moment.timestamp;
+      if (!timestamp || !timestamp.includes("\u521B\u5EFA\u65F6\u95F4:")) {
+        const now = /* @__PURE__ */ new Date();
+        timestamp = `\u521B\u5EFA\u65F6\u95F4: ${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
+      }
+      const processImagePath = (path2) => {
+        if (!path2) return path2;
+        if (path2.startsWith("/images/")) {
+          return path2;
+        }
+        if (path2.startsWith("~/assets/images/Moments/") || path2.startsWith("/src/assets/images/Moments/") || path2.includes("Moments/")) {
+          const fileName = path2.split("/").pop() || path2.split("\\").pop();
+          return `/images/Moments/${fileName}`;
+        }
+        if (path2.includes("home/avatar.webp") || path2.includes("avatar.webp")) {
+          return "/images/home/avatar.webp";
+        }
+        if (path2.includes("assets/images/")) {
+          return path2.replace(/.*\/assets\/images\//, "/images/");
+        }
+        return path2;
+      };
+      const avatarPath = processImagePath((_a = moment.author) == null ? void 0 : _a.avatar);
+      const processedImages = (moment.images || []).map((img) => processImagePath(img));
+      const momentData = {
+        id: parseInt(momentId),
+        author: {
+          nickname: ((_b = moment.author) == null ? void 0 : _b.nickname) || "Leyili",
+          avatar: avatarPath || "/images/home/avatar.webp"
+        },
+        content: moment.content || "",
+        timestamp,
+        images: processedImages
+      };
+      const momentKey = `moment:${momentId}`;
+      await kv.setItem(momentKey, momentData);
+      existingList.push(momentId);
+      existingIds.add(momentId);
+      newIds.push(momentId);
+      migratedMoments.push(momentData);
+    }
+    await kv.setItem(momentsListKey, existingList);
+    return {
+      success: true,
+      message: `\u6210\u529F\u8FC1\u79FB ${migratedMoments.length} \u6761\u670B\u53CB\u5708\u52A8\u6001`,
+      data: {
+        migrated: migratedMoments.length,
+        skipped: momentsData.length - migratedMoments.length,
+        total: existingList.length
+      }
+    };
+  } catch (error) {
+    if (error.code === "ENOENT" || ((_c = error.message) == null ? void 0 : _c.includes("fs"))) {
+      return {
+        success: false,
+        message: "\u8FC1\u79FB\u811A\u672C\u9700\u8981\u5728\u672C\u5730\u73AF\u5883\u8FD0\u884C\uFF0C\u6216\u8005\u624B\u52A8\u5728\u540E\u53F0\u521B\u5EFA\u670B\u53CB\u5708\u52A8\u6001",
+        hint: "\u8BF7\u5728\u672C\u5730\u8FD0\u884C\u6B64 API\uFF0C\u6216\u8005\u76F4\u63A5\u5728\u540E\u53F0\u7BA1\u7406\u754C\u9762\u521B\u5EFA\u670B\u53CB\u5708\u52A8\u6001"
       };
     }
     throw createError({

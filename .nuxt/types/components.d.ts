@@ -22,7 +22,6 @@ interface _GlobalComponents {
   'ErrorBoundary': typeof import("../../components/ErrorBoundary/ErrorBoundary.vue")['default']
   'FriendsFriendRequestForm': typeof import("../../components/Friends/FriendRequestForm.vue")['default']
   'FriendsList': typeof import("../../components/Friends/FriendsList.vue")['default']
-  'FriendsSection': typeof import("../../components/Friends/FriendsSection.vue")['default']
   'HeaderBarPageHeader': typeof import("../../components/HeaderBar/PageHeader.vue")['default']
   'LayoutsFooter': typeof import("../../components/Layouts/Footer.vue")['default']
   'LayoutsHeader': typeof import("../../components/Layouts/Header.vue")['default']
@@ -58,7 +57,6 @@ interface _GlobalComponents {
   'LazyErrorBoundary': LazyComponent<typeof import("../../components/ErrorBoundary/ErrorBoundary.vue")['default']>
   'LazyFriendsFriendRequestForm': LazyComponent<typeof import("../../components/Friends/FriendRequestForm.vue")['default']>
   'LazyFriendsList': LazyComponent<typeof import("../../components/Friends/FriendsList.vue")['default']>
-  'LazyFriendsSection': LazyComponent<typeof import("../../components/Friends/FriendsSection.vue")['default']>
   'LazyHeaderBarPageHeader': LazyComponent<typeof import("../../components/HeaderBar/PageHeader.vue")['default']>
   'LazyLayoutsFooter': LazyComponent<typeof import("../../components/Layouts/Footer.vue")['default']>
   'LazyLayoutsHeader': LazyComponent<typeof import("../../components/Layouts/Header.vue")['default']>

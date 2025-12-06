@@ -1,5 +1,18 @@
-// 数据迁移脚本：将本地 markdown 文件导入到 KV
-// 这个 API 只需要运行一次，用于将现有的 posts/*.md 文件迁移到 KV
+/**
+ * 数据迁移脚本：将本地 markdown 文件导入到 KV
+ * 
+ * ⚠️ 注意：这是一个一次性迁移工具，仅在首次部署时需要
+ * 
+ * 使用场景：
+ * - 将现有的 posts/*.md 文件迁移到 Cloudflare KV
+ * - 迁移完成后，后续文章管理通过 /admin 后台进行
+ * 
+ * 使用方法：
+ * 1. 在本地环境运行：curl -X POST http://localhost:3000/api/migrate -H "Authorization: Bearer YOUR_PASSWORD"
+ * 2. 迁移完成后，可以删除此文件（可选）
+ * 
+ * 注意：此脚本在 Cloudflare Workers 环境中无法运行（需要文件系统访问）
+ */
 export default defineEventHandler(async (event) => {
   // 验证身份
   const authHeader = getHeader(event, 'authorization');

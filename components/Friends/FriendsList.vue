@@ -54,30 +54,6 @@
   const confirmingIndex = ref(null)
   const isLoading = ref(true)
 
-  // 处理头像路径 - 将路径字符串转换为实际导入的模块
-  const resolveAvatarPath = (path) => {
-    if (!path) return defaultAvatar
-    
-    // 如果路径是 /src/assets/ 格式，使用默认头像（因为路径无效）
-    if (path.startsWith('/src/assets/')) {
-      return defaultAvatar
-    }
-    
-    // 如果路径是 ~/assets/ 格式，也使用默认头像（因为字符串路径无法直接使用）
-    // 在 Nuxt 中，需要使用导入的方式
-    if (path.startsWith('~/assets/')) {
-      // 如果路径指向默认头像，直接返回
-      if (path.includes('home/avatar.webp')) {
-        return defaultAvatar
-      }
-      // 其他情况返回默认头像
-      return defaultAvatar
-    }
-    
-    // 其他情况返回默认头像
-    return defaultAvatar
-  }
-
   // 加载友链数据
   const loadFriends = async () => {
     try {

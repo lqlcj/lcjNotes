@@ -41,9 +41,13 @@
 
 <script setup>
   import { ref, onBeforeUnmount, computed, onMounted } from 'vue'
-  import momentsData from '~/data/moments.json'
   // 使用 public 目录下的图片
   const avatarImage = '/images/home/avatar.webp'
+
+  // 数据状态
+  const momentsDataFromAPI = ref([])
+  const isLoadingData = ref(true)
+  const useFallbackData = ref(false)
 
   // 处理图片路径 - 将 assets 路径转换为 public 路径
   const resolveImagePath = (path) => {
@@ -86,14 +90,53 @@
     return path
   }
 
+  // 从 API 加载数据
+  const loadMomentsFromAPI = async () => {
+    try {
+      isLoadingData.value = true
+      const response = await $fetch('/api/moments')
+      if (response.success && response.data && Array.isArray(response.data) && response.data.length > 0) {
+        // API 有数据，使用 API 数据
+        momentsDataFromAPI.value = response.data
+        useFallbackData.value = false
+      } else {
+        // API 返回空数据或失败，使用回退数据（JSON）
+        console.log('API 返回空数据，使用 JSON 回退数据')
+        useFallbackData.value = true
+      }
+    } catch (error) {
+      console.error('从 API 加载朋友圈数据失败，使用回退数据:', error)
+      useFallbackData.value = true
+    } finally {
+      isLoadingData.value = false
+    }
+  }
+
+  // 回退数据（从 JSON 文件加载）
+  const fallbackData = ref([])
+  
+  // 异步加载 JSON 数据
+  const loadFallbackData = async () => {
+    try {
+      const momentsDataModule = await import('~/data/moments.json')
+      fallbackData.value = momentsDataModule.default || momentsDataModule || []
+      console.log('加载 JSON 回退数据成功，共', fallbackData.value.length, '条')
+    } catch (error) {
+      console.warn('无法加载回退数据:', error)
+      fallbackData.value = []
+    }
+  }
+
   // 处理所有数据，转换图片路径
   const allPosts = computed(() => {
     try {
-      if (!momentsData || !Array.isArray(momentsData)) {
-        console.warn('momentsData 不是有效数组')
+      const dataSource = useFallbackData.value ? fallbackData.value : momentsDataFromAPI.value
+      
+      if (!dataSource || !Array.isArray(dataSource) || dataSource.length === 0) {
         return []
       }
-      return momentsData.map(post => ({
+      
+      return dataSource.map(post => ({
         ...post,
         author: {
           ...post.author,
@@ -157,6 +200,12 @@
       event.target.src = avatarImage
     }
   }
+
+  // 组件挂载时加载数据
+  onMounted(() => {
+    loadFallbackData()
+    loadMomentsFromAPI()
+  })
 
   // 组件卸载时恢复背景滚动
   onBeforeUnmount(() => {

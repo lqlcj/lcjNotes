@@ -68,11 +68,12 @@ export default defineNuxtConfig({
   // 建议在 nuxt.config.ts 中明确指定 preset，这样构建产物会直接适配 Cloudflare Workers
   nitro: {
     preset: 'cloudflare-pages',  // 👈 这里改一下，告诉 Nuxt 我们要用 Pages
-    // 存储配置：本地开发使用内存存储，避免 cloudflareKV 驱动错误
-    // 在生产环境（Cloudflare）中，KV binding 会通过 wrangler.jsonc 自动配置
+    // 存储配置：本地开发使用内存存储
+    // ⚠️ 注意：在生产环境（Cloudflare Pages）中，代码会直接使用 BLOG_KV binding，不会使用这里的配置
+    // 这里的配置仅用于本地开发环境
     storage: {
       kv: {
-        driver: 'memory' // 本地开发使用内存存储，生产环境会自动使用 Cloudflare KV
+        driver: 'memory' // 本地开发使用内存存储，生产环境会直接使用 Cloudflare KV binding
       }
     },
     // 🔥 关键修复：确保静态资源正确复制和处理
