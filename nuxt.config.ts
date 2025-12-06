@@ -61,7 +61,7 @@ export default defineNuxtConfig({
 
   // 建议在 nuxt.config.ts 中明确指定 preset，这样构建产物会直接适配 Cloudflare Workers
   nitro: {
-    preset: 'cloudflare_module',
+    preset: 'cloudflare-pages',  // 👈 这里改一下，告诉 Nuxt 我们要用 Pages
     // 存储配置：本地开发使用内存存储，避免 cloudflareKV 驱动错误
     // 在生产环境（Cloudflare）中，KV binding 会通过 wrangler.jsonc 自动配置
     storage: {
