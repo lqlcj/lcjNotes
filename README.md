@@ -64,8 +64,7 @@ newblog/
 │   ├── images/            # 图片资源
 │   │   ├── background-body.webp
 │   │   ├── carousel/      # 轮播图
-│   │   ├── home/          # 首页图片
-│   │   └── Moments/       # 动态图片
+│   │   └── home/          # 首页图片
 │   ├── styles/            # 样式文件
 │   │   ├── fonts.css      # 字体定义
 │   │   └── styles.css     # 全局样式
@@ -97,8 +96,7 @@ newblog/
 │   └── layout.js       # 布局配置
 │
 ├── data/               # 数据文件
-│   ├── friends.json   # 友链数据
-│   └── moments.json   # 动态数据
+│   └── friends.json   # 友链数据（可选，已迁移到 KV）
 │
 ├── pages/              # 页面路由
 │   ├── index.vue      # 首页（欢迎页）

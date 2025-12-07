@@ -3,15 +3,15 @@
     <div class="admin-container">
       <!-- 登录界面 -->
       <div v-if="!isAuthenticated" class="login-form glass-card">
-        <h2>管理员</h2>
+        <h2>login</h2>
         <form @submit.prevent="handleLogin">
           <div class="form-group">
-            <label>用户名</label>
-            <input v-model="loginUsername" type="text" placeholder="请输入用户名" required />
+            <label>name</label>
+            <input v-model="loginUsername" type="text" required />
           </div>
           <div class="form-group">
-            <label>密码</label>
-            <input v-model="loginPassword" type="password" placeholder="请输入管理员密码" required />
+            <label>pwd</label>
+            <input v-model="loginPassword" type="password" required />
           </div>
           <button type="submit" class="btn-primary" :disabled="loggingIn">
             {{ loggingIn ? '登录中...' : '登录' }}
@@ -23,7 +23,7 @@
       <!-- 管理界面 -->
       <div v-else class="admin-panel">
         <div class="admin-header">
-          <h1>管理员</h1>
+          <h1>admin</h1>
           <button @click="handleLogout" class="btn-secondary">退出</button>
         </div>
 
@@ -40,6 +40,9 @@
           </button>
           <button @click="activeTab = 'moments'" :class="['tab-btn', { active: activeTab === 'moments' }]">
             朋友圈管理
+          </button>
+          <button @click="activeTab = 'bookmarks'" :class="['tab-btn', { active: activeTab === 'bookmarks' }]">
+            书签管理
           </button>
         </div>
 
@@ -209,6 +212,38 @@
                 </div>
                 <div v-if="moment.images && moment.images.length > 0" class="moment-images">
                   <span class="image-count">{{ moment.images.length }} 张图片</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 书签管理 -->
+        <div v-if="activeTab === 'bookmarks'" class="tab-content">
+          <div class="admin-actions">
+            <button @click="showBookmarkForm = true" class="btn-primary">
+              + 新建书签
+            </button>
+          </div>
+
+          <!-- 书签列表 -->
+          <div class="bookmarks-list">
+            <div v-if="bookmarksLoading" class="loading">加载中...</div>
+            <div v-else-if="bookmarks.length === 0" class="empty">
+              还没有书签，点击上方按钮创建第一个吧！
+            </div>
+            <div v-else class="bookmarks-grid">
+              <div v-for="bookmark in bookmarks" :key="bookmark.id" class="bookmark-card glass-card">
+                <div class="bookmark-header">
+                  <div class="bookmark-info">
+                    <h4>{{ bookmark.name }}</h4>
+                    <p class="bookmark-url">{{ bookmark.url }}</p>
+                    <p v-if="bookmark.description" class="bookmark-description">{{ bookmark.description }}</p>
+                  </div>
+                  <div class="bookmark-actions">
+                    <button @click="editBookmark(bookmark)" class="btn-edit">编辑</button>
+                    <button @click="deleteBookmark(bookmark.id)" class="btn-delete">删除</button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -391,7 +426,7 @@
                 <div class="form-group" style="margin-top: 15px;">
                   <label>或手动输入图片URL（每行一个）</label>
                   <textarea v-model="momentImagesText" rows="3"
-                    placeholder="/images/Moments/m1.webp&#10;/images/Moments/m2.webp"></textarea>
+                    placeholder="https://your-r2-domain.com/image1.webp&#10;https://your-r2-domain.com/image2.webp"></textarea>
                   <small class="form-hint">每行输入一个图片URL</small>
                 </div>
               </div>
@@ -400,6 +435,40 @@
                 <button type="button" @click="closeMomentForm" class="btn-secondary">取消</button>
                 <button type="submit" class="btn-primary" :disabled="submittingMoment">
                   {{ submittingMoment ? '保存中...' : (editingMoment ? '更新' : '创建') }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- 创建/编辑书签表单 -->
+        <div v-if="showBookmarkForm" class="form-modal">
+          <div class="form-content glass-card">
+            <div class="form-header">
+              <h2>{{ editingBookmark ? '编辑书签' : '新建书签' }}</h2>
+              <button @click="closeBookmarkForm" class="close-btn">×</button>
+            </div>
+
+            <form @submit.prevent="handleBookmarkSubmit">
+              <div class="form-group">
+                <label>网站名称 *</label>
+                <input v-model="bookmarkFormData.name" type="text" required placeholder="例如：GitHub" />
+              </div>
+
+              <div class="form-group">
+                <label>网站链接 *</label>
+                <input v-model="bookmarkFormData.url" type="url" required placeholder="https://github.com" />
+              </div>
+
+              <div class="form-group">
+                <label>网站介绍（可选）</label>
+                <textarea v-model="bookmarkFormData.description" rows="3" placeholder="网站简介..."></textarea>
+              </div>
+
+              <div class="form-actions">
+                <button type="button" @click="closeBookmarkForm" class="btn-secondary">取消</button>
+                <button type="submit" class="btn-primary" :disabled="submittingBookmark">
+                  {{ submittingBookmark ? '保存中...' : (editingBookmark ? '更新' : '创建') }}
                 </button>
               </div>
             </form>
@@ -505,6 +574,18 @@
   const showMomentForm = ref(false);
   const editingMoment = ref(null);
   const submittingMoment = ref(false);
+
+  // 书签管理相关
+  const bookmarks = ref([]);
+  const bookmarksLoading = ref(false);
+  const showBookmarkForm = ref(false);
+  const editingBookmark = ref(null);
+  const submittingBookmark = ref(false);
+  const bookmarkFormData = ref({
+    name: '',
+    url: '',
+    description: ''
+  });
   const momentFormData = ref({
     content: '',
     timestamp: '',
@@ -618,6 +699,7 @@
       loadFriendsRequests();
       loadApprovedFriends();
       loadMoments();
+      loadBookmarks();
     }
   });
 
@@ -1421,6 +1503,120 @@
       momentFileInput.value.value = '';
     }
   };
+
+  // 加载书签列表
+  const loadBookmarks = async () => {
+    bookmarksLoading.value = true;
+    try {
+      const response = await $fetch('/api/bookmarks');
+      if (response.success) {
+        bookmarks.value = response.data || [];
+      }
+    } catch (error) {
+      console.error('加载书签失败:', error);
+    } finally {
+      bookmarksLoading.value = false;
+    }
+  };
+
+  // 编辑书签
+  const editBookmark = (bookmark) => {
+    editingBookmark.value = bookmark;
+    bookmarkFormData.value = {
+      name: bookmark.name || '',
+      url: bookmark.url || '',
+      description: bookmark.description || ''
+    };
+    showBookmarkForm.value = true;
+  };
+
+  // 删除书签
+  const deleteBookmark = async (id) => {
+    if (!confirm('确定要删除这个书签吗？')) return;
+
+    const token = localStorage.getItem('admin_token');
+    try {
+      const response = await $fetch(`/api/bookmarks/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.success) {
+        showSuccess('删除成功');
+        loadBookmarks();
+      } else {
+        alert(response.message || '删除失败');
+      }
+    } catch (error) {
+      alert(error?.data?.message || '删除失败');
+    }
+  };
+
+  // 提交书签表单
+  const handleBookmarkSubmit = async () => {
+    if (!bookmarkFormData.value.name.trim() || !bookmarkFormData.value.url.trim()) {
+      alert('请填写网站名称和链接');
+      return;
+    }
+
+    submittingBookmark.value = true;
+    const token = localStorage.getItem('admin_token');
+
+    try {
+      if (editingBookmark.value) {
+        // 更新书签
+        const response = await $fetch(`/api/bookmarks/${editingBookmark.value.id}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: bookmarkFormData.value
+        });
+
+        if (response.success) {
+          showSuccess('更新成功');
+          closeBookmarkForm();
+          loadBookmarks();
+        } else {
+          alert(response.message || '更新失败');
+        }
+      } else {
+        // 创建书签
+        const response = await $fetch('/api/bookmarks', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: bookmarkFormData.value
+        });
+
+        if (response.success) {
+          showSuccess('创建成功');
+          closeBookmarkForm();
+          loadBookmarks();
+        } else {
+          alert(response.message || '创建失败');
+        }
+      }
+    } catch (error) {
+      alert(error?.data?.message || '操作失败');
+    } finally {
+      submittingBookmark.value = false;
+    }
+  };
+
+  // 关闭书签表单
+  const closeBookmarkForm = () => {
+    showBookmarkForm.value = false;
+    editingBookmark.value = null;
+    bookmarkFormData.value = {
+      name: '',
+      url: '',
+      description: ''
+    };
+  };
 </script>
 
 <style scoped>
@@ -1762,6 +1958,64 @@
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 15px;
+  }
+
+  /* 书签管理样式 */
+  .bookmarks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+  }
+
+  .bookmark-card {
+    padding: 20px;
+  }
+
+  .bookmark-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .bookmark-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .bookmark-info h4 {
+    margin: 0 0 8px 0;
+    color: #333;
+    font-size: 16px;
+    font-weight: 600;
+    word-break: break-word;
+  }
+
+  .bookmark-url {
+    margin: 8px 0 0 0;
+    color: #999;
+    font-size: 12px;
+    word-break: break-all;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
+  }
+
+  .bookmark-description {
+    margin: 8px 0;
+    color: #666;
+    font-size: 14px;
+    line-height: 1.5;
+    word-break: break-word;
+  }
+
+  .bookmark-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
   }
 
   .moment-author {

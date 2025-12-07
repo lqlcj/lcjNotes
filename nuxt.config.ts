@@ -42,7 +42,9 @@ export default defineNuxtConfig({
         { name: 'viewport', content: 'width=device-width, initial-scale=1.0' }
       ],
       link: [
-        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+        { rel: 'icon', type: 'image/svg+xml', href: '/images/logo.svg' },
+        { rel: 'shortcut icon', type: 'image/svg+xml', href: '/images/logo.svg' },
+        { rel: 'apple-touch-icon', href: '/images/logo.svg' },
         { rel: 'stylesheet', href: '/styles/styles.css' }
       ]
     },

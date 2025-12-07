@@ -74,50 +74,6 @@
   // 数据状态
   const momentsDataFromAPI = ref([])
   const isLoadingData = ref(true)
-  const useFallbackData = ref(false)
-
-  // 处理图片路径 - 将 assets 路径转换为 public 路径
-  const resolveImagePath = (path) => {
-    if (!path) return path
-
-    // 处理头像路径（支持多种格式）
-    if (
-      !path || 
-      path.trim() === '' ||
-      path === '~/assets/images/home/avatar.webp' ||
-      path === '/src/assets/images/home/avatar.webp' ||
-      path === '@/assets/images/home/avatar.webp' ||
-      path.includes('avatar.webp')
-    ) {
-      return avatarImage
-    }
-
-    // 处理 Moments 图片路径（支持多种格式）
-    // 将 assets 路径转换为 public 路径
-    if (
-      path.startsWith('~/assets/images/Moments/') ||
-      path.startsWith('/src/assets/images/Moments/') ||
-      path.startsWith('../../assets/images/Moments/') ||
-      path.includes('Moments/')
-    ) {
-      // 提取文件名
-      const fileName = path.split('/').pop() || path.split('\\').pop()
-      // 转换为 public 路径
-      return `/images/Moments/${fileName}`
-    }
-
-    // 如果已经是 /images/ 路径，直接返回
-    if (path.startsWith('/images/')) {
-      return path
-    }
-
-    // 如果是其他 assets 路径，尝试转换
-    if (path.includes('assets/images/')) {
-      return path.replace(/.*\/assets\/images\//, '/images/')
-    }
-
-    return path
-  }
 
   // 从 API 加载数据
   const loadMomentsFromAPI = async () => {
@@ -125,54 +81,26 @@
       isLoadingData.value = true
       const response = await $fetch('/api/moments')
       if (response.success && response.data && Array.isArray(response.data) && response.data.length > 0) {
-        // API 有数据，使用 API 数据
         momentsDataFromAPI.value = response.data
-        useFallbackData.value = false
       } else {
-        // API 返回空数据或失败，使用回退数据（JSON）
-        console.log('API 返回空数据，使用 JSON 回退数据')
-        useFallbackData.value = true
+        momentsDataFromAPI.value = []
       }
     } catch (error) {
-      console.error('从 API 加载朋友圈数据失败，使用回退数据:', error)
-      useFallbackData.value = true
+      console.error('从 API 加载朋友圈数据失败:', error)
+      momentsDataFromAPI.value = []
     } finally {
       isLoadingData.value = false
     }
   }
 
-  // 回退数据（从 JSON 文件加载）
-  const fallbackData = ref([])
-  
-  // 异步加载 JSON 数据
-  const loadFallbackData = async () => {
-    try {
-      const momentsDataModule = await import('~/data/moments.json')
-      fallbackData.value = momentsDataModule.default || momentsDataModule || []
-      console.log('加载 JSON 回退数据成功，共', fallbackData.value.length, '条')
-    } catch (error) {
-      console.warn('无法加载回退数据:', error)
-      fallbackData.value = []
-    }
-  }
-
-  // 处理所有数据，转换图片路径
+  // 处理所有数据
   const allPosts = computed(() => {
     try {
-      const dataSource = useFallbackData.value ? fallbackData.value : momentsDataFromAPI.value
-      
-      if (!dataSource || !Array.isArray(dataSource) || dataSource.length === 0) {
+      if (!momentsDataFromAPI.value || !Array.isArray(momentsDataFromAPI.value) || momentsDataFromAPI.value.length === 0) {
         return []
       }
       
-      return dataSource.map(post => ({
-        ...post,
-        author: {
-          ...post.author,
-          avatar: resolveImagePath(post.author?.avatar)
-        },
-        images: post.images ? post.images.map(img => resolveImagePath(img)) : []
-      }))
+      return momentsDataFromAPI.value
     } catch (error) {
       console.error('处理 Moments 数据失败:', error)
       return []
@@ -243,7 +171,6 @@
 
   // 组件挂载时加载数据
   onMounted(() => {
-    loadFallbackData()
     loadMomentsFromAPI()
   })
 

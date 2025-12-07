@@ -1366,7 +1366,7 @@ const _TXLV4rBvqsYiKFUYas4nE2ajd4M1kbGvbTN66ecZKaY = (function(nitro) {
 
 const rootDir = "G:/newblog";
 
-const appHead = {"meta":[{"charset":"utf-8"},{"name":"viewport","content":"width=device-width, initial-scale=1.0"}],"link":[{"rel":"icon","type":"image/x-icon","href":"/favicon.ico"},{"rel":"stylesheet","href":"/styles/styles.css"}],"style":[],"script":[],"noscript":[],"title":"♥Leyili"};
+const appHead = {"meta":[{"charset":"utf-8"},{"name":"viewport","content":"width=device-width, initial-scale=1.0"}],"link":[{"rel":"icon","type":"image/svg+xml","href":"/images/logo.svg"},{"rel":"shortcut icon","type":"image/svg+xml","href":"/images/logo.svg"},{"rel":"apple-touch-icon","href":"/images/logo.svg"},{"rel":"stylesheet","href":"/styles/styles.css"}],"style":[],"script":[],"noscript":[],"title":"♥Leyili"};
 
 const appRootTag = "div";
 
@@ -1457,22 +1457,7 @@ const plugins = [
 _iS2Hx_aRY6b5luI5ZFAVScoHeBMFBXD6z47xxZowt8
 ];
 
-const assets = {
-  "/index.mjs": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"20f52-Rfy/ovN0g/koGt5NkWWCDGCwvc0\"",
-    "mtime": "2025-12-07T10:55:48.341Z",
-    "size": 134994,
-    "path": "index.mjs"
-  },
-  "/index.mjs.map": {
-    "type": "application/json",
-    "etag": "\"7a4b6-/hBOXbWC689eEV09FpfarZYt67Y\"",
-    "mtime": "2025-12-07T10:55:48.341Z",
-    "size": 500918,
-    "path": "index.mjs.map"
-  }
-};
+const assets = {};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));
@@ -1883,6 +1868,10 @@ async function getIslandContext(event) {
 }
 
 const _lazy_zx2hf7 = () => Promise.resolve().then(function () { return login_post$1; });
+const _lazy_RvTCwd = () => Promise.resolve().then(function () { return _id__delete$b; });
+const _lazy_no3o7m = () => Promise.resolve().then(function () { return _id__put$7; });
+const _lazy_0FJHDg = () => Promise.resolve().then(function () { return index_get$9; });
+const _lazy_HuENRb = () => Promise.resolve().then(function () { return index_post$9; });
 const _lazy_4YfJWk = () => Promise.resolve().then(function () { return _id__delete$9; });
 const _lazy_IKSiHr = () => Promise.resolve().then(function () { return index_get$7; });
 const _lazy_4MmXnu = () => Promise.resolve().then(function () { return index_post$7; });
@@ -1898,7 +1887,6 @@ const _lazy_1qViY_ = () => Promise.resolve().then(function () { return _id__get$
 const _lazy_zWW14Y = () => Promise.resolve().then(function () { return _id__put$3; });
 const _lazy_Jg_zdx = () => Promise.resolve().then(function () { return index_get$3; });
 const _lazy_w6NqhW = () => Promise.resolve().then(function () { return index_post$3; });
-const _lazy_ECEL1o = () => Promise.resolve().then(function () { return migrate_post$1; });
 const _lazy_OfG0mY = () => Promise.resolve().then(function () { return _id__delete$1; });
 const _lazy_fB2AUZ = () => Promise.resolve().then(function () { return _id__get$1; });
 const _lazy_pzWvnF = () => Promise.resolve().then(function () { return _id__put$1; });
@@ -1911,6 +1899,10 @@ const _lazy_SGBIuo = () => Promise.resolve().then(function () { return renderer$
 const handlers = [
   { route: '', handler: _bMBjWp, lazy: false, middleware: true, method: undefined },
   { route: '/api/auth/login', handler: _lazy_zx2hf7, lazy: true, middleware: false, method: "post" },
+  { route: '/api/bookmarks/:id', handler: _lazy_RvTCwd, lazy: true, middleware: false, method: "delete" },
+  { route: '/api/bookmarks/:id', handler: _lazy_no3o7m, lazy: true, middleware: false, method: "put" },
+  { route: '/api/bookmarks', handler: _lazy_0FJHDg, lazy: true, middleware: false, method: "get" },
+  { route: '/api/bookmarks', handler: _lazy_HuENRb, lazy: true, middleware: false, method: "post" },
   { route: '/api/friends/:id', handler: _lazy_4YfJWk, lazy: true, middleware: false, method: "delete" },
   { route: '/api/friends', handler: _lazy_IKSiHr, lazy: true, middleware: false, method: "get" },
   { route: '/api/friends', handler: _lazy_4MmXnu, lazy: true, middleware: false, method: "post" },
@@ -1926,7 +1918,6 @@ const handlers = [
   { route: '/api/moments/:id', handler: _lazy_zWW14Y, lazy: true, middleware: false, method: "put" },
   { route: '/api/moments', handler: _lazy_Jg_zdx, lazy: true, middleware: false, method: "get" },
   { route: '/api/moments', handler: _lazy_w6NqhW, lazy: true, middleware: false, method: "post" },
-  { route: '/api/moments/migrate', handler: _lazy_ECEL1o, lazy: true, middleware: false, method: "post" },
   { route: '/api/posts/:id', handler: _lazy_OfG0mY, lazy: true, middleware: false, method: "delete" },
   { route: '/api/posts/:id', handler: _lazy_fB2AUZ, lazy: true, middleware: false, method: "get" },
   { route: '/api/posts/:id', handler: _lazy_pzWvnF, lazy: true, middleware: false, method: "put" },
@@ -2304,6 +2295,77 @@ const login_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProper
 function getKVStorage(event) {
   var _a, _b;
   const env = (_b = (_a = event.context) == null ? void 0 : _a.cloudflare) == null ? void 0 : _b.env;
+  if (env == null ? void 0 : env.BLOG_D2) {
+    const db = env.BLOG_D2;
+    const initTable = async () => {
+      var _a2;
+      try {
+        await db.exec(`
+          CREATE TABLE IF NOT EXISTS kv_store (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL
+          )
+        `);
+      } catch (e) {
+        if (!((_a2 = e.message) == null ? void 0 : _a2.includes("already exists"))) {
+          console.log("D2 table initialization note:", e.message || e);
+        }
+      }
+    };
+    initTable().catch(() => {
+    });
+    return {
+      async getItem(key) {
+        var _a2;
+        try {
+          await initTable();
+          const result = await db.prepare("SELECT value FROM kv_store WHERE key = ?").bind(key).first();
+          if (result && result.value) {
+            return JSON.parse(result.value);
+          }
+          return null;
+        } catch (e) {
+          console.error("D2 getItem error:", e.message || e, "key:", key);
+          if ((_a2 = e.message) == null ? void 0 : _a2.includes("no such table")) {
+            await initTable();
+            return null;
+          }
+          return null;
+        }
+      },
+      async setItem(key, value) {
+        var _a2;
+        try {
+          await initTable();
+          const jsonValue = JSON.stringify(value);
+          await db.prepare("INSERT INTO kv_store (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").bind(key, jsonValue).run();
+          return true;
+        } catch (e) {
+          console.error("D2 setItem error:", e.message || e, "key:", key);
+          if ((_a2 = e.message) == null ? void 0 : _a2.includes("no such table")) {
+            await initTable();
+            await db.prepare("INSERT INTO kv_store (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").bind(key, JSON.stringify(value)).run();
+            return true;
+          }
+          throw e;
+        }
+      },
+      async removeItem(key) {
+        var _a2;
+        try {
+          await initTable();
+          await db.prepare("DELETE FROM kv_store WHERE key = ?").bind(key).run();
+          return true;
+        } catch (e) {
+          console.error("D2 removeItem error:", e.message || e, "key:", key);
+          if ((_a2 = e.message) == null ? void 0 : _a2.includes("no such table")) {
+            return true;
+          }
+          throw e;
+        }
+      }
+    };
+  }
   if (env == null ? void 0 : env.BLOG_KV) {
     return {
       async getItem(key) {
@@ -2321,9 +2383,218 @@ function getKVStorage(event) {
   try {
     return useStorage("kv");
   } catch (e) {
-    throw new Error("KV storage not available. Please configure BLOG_KV binding in Cloudflare Pages.");
+    throw new Error("Storage not available. Please configure BLOG_D2 or BLOG_KV binding in Cloudflare Pages.");
   }
 }
+
+const _id__delete$a = defineEventHandler(async (event) => {
+  const authHeader = getHeader(event, "authorization");
+  const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
+  if (!adminPassword || authHeader !== `Bearer ${adminPassword}`) {
+    throw createError({
+      statusCode: 401,
+      message: "\u672A\u6388\u6743\u8BBF\u95EE"
+    });
+  }
+  const id = getRouterParam(event, "id");
+  if (!id) {
+    throw createError({
+      statusCode: 400,
+      message: "\u4E66\u7B7E ID \u4E0D\u80FD\u4E3A\u7A7A"
+    });
+  }
+  try {
+    const kv = getKVStorage(event);
+    const bookmarkKey = `bookmark:${id}`;
+    const existingBookmark = await kv.getItem(bookmarkKey);
+    if (!existingBookmark) {
+      throw createError({
+        statusCode: 404,
+        message: "\u4E66\u7B7E\u4E0D\u5B58\u5728"
+      });
+    }
+    await kv.removeItem(bookmarkKey);
+    const bookmarksListKey = "bookmarks:list";
+    const bookmarksList = await kv.getItem(bookmarksListKey) || [];
+    const updatedList = bookmarksList.filter((bookmarkId) => bookmarkId !== id);
+    await kv.setItem(bookmarksListKey, updatedList);
+    return {
+      success: true,
+      message: "\u4E66\u7B7E\u5220\u9664\u6210\u529F"
+    };
+  } catch (error) {
+    throw createError({
+      statusCode: 500,
+      message: error.message || "\u5220\u9664\u4E66\u7B7E\u5931\u8D25"
+    });
+  }
+});
+
+const _id__delete$b = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: _id__delete$a
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const _id__put$6 = defineEventHandler(async (event) => {
+  const authHeader = getHeader(event, "authorization");
+  const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
+  if (!adminPassword || authHeader !== `Bearer ${adminPassword}`) {
+    throw createError({
+      statusCode: 401,
+      message: "\u672A\u6388\u6743\u8BBF\u95EE"
+    });
+  }
+  const id = getRouterParam(event, "id");
+  const body = await readBody(event);
+  if (!id) {
+    throw createError({
+      statusCode: 400,
+      message: "\u4E66\u7B7E ID \u4E0D\u80FD\u4E3A\u7A7A"
+    });
+  }
+  if (!body.name || !body.url) {
+    throw createError({
+      statusCode: 400,
+      message: "\u7F51\u7AD9\u540D\u79F0\u548C\u94FE\u63A5\u4E0D\u80FD\u4E3A\u7A7A"
+    });
+  }
+  try {
+    new URL(body.url);
+  } catch {
+    throw createError({
+      statusCode: 400,
+      message: "\u8BF7\u8F93\u5165\u6709\u6548\u7684\u7F51\u7AD9\u94FE\u63A5"
+    });
+  }
+  try {
+    const kv = getKVStorage(event);
+    const bookmarkKey = `bookmark:${id}`;
+    const existingBookmark = await kv.getItem(bookmarkKey);
+    if (!existingBookmark) {
+      throw createError({
+        statusCode: 404,
+        message: "\u4E66\u7B7E\u4E0D\u5B58\u5728"
+      });
+    }
+    const bookmarkData = {
+      ...existingBookmark,
+      name: body.name,
+      url: body.url,
+      description: body.description || "",
+      updatedAt: (/* @__PURE__ */ new Date()).toISOString()
+    };
+    await kv.setItem(bookmarkKey, bookmarkData);
+    return {
+      success: true,
+      data: bookmarkData,
+      message: "\u4E66\u7B7E\u66F4\u65B0\u6210\u529F"
+    };
+  } catch (error) {
+    throw createError({
+      statusCode: 500,
+      message: error.message || "\u66F4\u65B0\u4E66\u7B7E\u5931\u8D25"
+    });
+  }
+});
+
+const _id__put$7 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: _id__put$6
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const index_get$8 = defineEventHandler(async (event) => {
+  try {
+    const kv = getKVStorage(event);
+    const bookmarksListKey = "bookmarks:list";
+    const bookmarksList = await kv.getItem(bookmarksListKey) || [];
+    const bookmarks = [];
+    for (const id of bookmarksList) {
+      const bookmarkKey = `bookmark:${id}`;
+      const bookmarkData = await kv.getItem(bookmarkKey);
+      if (bookmarkData) {
+        bookmarks.push(bookmarkData);
+      }
+    }
+    bookmarks.sort((a, b) => {
+      const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return timeB - timeA;
+    });
+    return {
+      success: true,
+      data: bookmarks
+    };
+  } catch (error) {
+    throw createError({
+      statusCode: 500,
+      message: error.message || "\u83B7\u53D6\u4E66\u7B7E\u5217\u8868\u5931\u8D25"
+    });
+  }
+});
+
+const index_get$9 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: index_get$8
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const index_post$8 = defineEventHandler(async (event) => {
+  const authHeader = getHeader(event, "authorization");
+  const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
+  if (!adminPassword || authHeader !== `Bearer ${adminPassword}`) {
+    throw createError({
+      statusCode: 401,
+      message: "\u672A\u6388\u6743\u8BBF\u95EE"
+    });
+  }
+  const body = await readBody(event);
+  if (!body.name || !body.url) {
+    throw createError({
+      statusCode: 400,
+      message: "\u7F51\u7AD9\u540D\u79F0\u548C\u94FE\u63A5\u4E0D\u80FD\u4E3A\u7A7A"
+    });
+  }
+  try {
+    new URL(body.url);
+  } catch {
+    throw createError({
+      statusCode: 400,
+      message: "\u8BF7\u8F93\u5165\u6709\u6548\u7684\u7F51\u7AD9\u94FE\u63A5"
+    });
+  }
+  try {
+    const kv = getKVStorage(event);
+    const bookmarksListKey = "bookmarks:list";
+    const bookmarksList = await kv.getItem(bookmarksListKey) || [];
+    const newId = bookmarksList.length > 0 ? String(Math.max(...bookmarksList.map((id) => parseInt(id))) + 1) : "1";
+    const bookmarkData = {
+      id: newId,
+      name: body.name,
+      url: body.url,
+      description: body.description || "",
+      createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+      updatedAt: (/* @__PURE__ */ new Date()).toISOString()
+    };
+    const bookmarkKey = `bookmark:${newId}`;
+    await kv.setItem(bookmarkKey, bookmarkData);
+    bookmarksList.push(newId);
+    await kv.setItem(bookmarksListKey, bookmarksList);
+    return {
+      success: true,
+      data: bookmarkData,
+      message: "\u4E66\u7B7E\u6DFB\u52A0\u6210\u529F"
+    };
+  } catch (error) {
+    throw createError({
+      statusCode: 500,
+      message: error.message || "\u6DFB\u52A0\u4E66\u7B7E\u5931\u8D25"
+    });
+  }
+});
+
+const index_post$9 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: index_post$8
+}, Symbol.toStringTag, { value: 'Module' }));
 
 const _id__delete$8 = defineEventHandler(async (event) => {
   const authHeader = getHeader(event, "authorization");
@@ -3001,7 +3272,7 @@ const _id__put$2 = defineEventHandler(async (event) => {
       ...momentData,
       author: {
         nickname: ((_a = body.author) == null ? void 0 : _a.nickname) || ((_b = momentData.author) == null ? void 0 : _b.nickname) || "Leyili",
-        avatar: ((_c = body.author) == null ? void 0 : _c.avatar) || ((_d = momentData.author) == null ? void 0 : _d.avatar) || "/images/home/avatar.webp"
+        avatar: ((_c = body.author) == null ? void 0 : _c.avatar) || ((_d = momentData.author) == null ? void 0 : _d.avatar) || "/images/lcj.svg"
       },
       content: body.content !== void 0 ? body.content : momentData.content,
       timestamp: body.timestamp !== void 0 ? body.timestamp : momentData.timestamp,
@@ -3099,83 +3370,30 @@ const index_post$2 = defineEventHandler(async (event) => {
   try {
     const kv = getKVStorage(event);
     const momentsListKey = "moments:list";
-    let momentsList = await kv.getItem(momentsListKey) || [];
-    if (momentsList.length === 0) {
-      const recoveredIds = [];
-      for (let id = 1; id <= 1e3; id++) {
-        const momentKey2 = `moment:${id}`;
-        const momentData2 = await kv.getItem(momentKey2);
-        if (momentData2) {
-          recoveredIds.push(String(id));
-        }
-      }
-      if (recoveredIds.length > 0) {
-        momentsList = recoveredIds;
-        await kv.setItem(momentsListKey, momentsList);
-        console.log(`\u6062\u590D\u4E86 ${recoveredIds.length} \u6761\u65E7\u670B\u53CB\u5708\u6570\u636E`);
-      }
-    }
-    let newId;
-    if (momentsList.length > 0) {
-      const maxId = Math.max(...momentsList.map((id) => parseInt(id) || 0));
-      newId = String(maxId + 1);
-    } else {
-      let candidateId = 1;
-      while (true) {
-        const momentKey2 = `moment:${candidateId}`;
-        const existing = await kv.getItem(momentKey2);
-        if (!existing) {
-          newId = String(candidateId);
-          break;
-        }
-        candidateId++;
-        if (candidateId > 1e4) {
-          newId = String(Date.now());
-          break;
-        }
-      }
-    }
-    const momentKey = `moment:${newId}`;
-    const existingMoment = await kv.getItem(momentKey);
-    if (existingMoment) {
-      let candidateId = parseInt(newId) + 1;
-      while (true) {
-        const checkKey = `moment:${candidateId}`;
-        const check = await kv.getItem(checkKey);
-        if (!check) {
-          newId = String(candidateId);
-          break;
-        }
-        candidateId++;
-        if (candidateId > 1e4) {
-          newId = String(Date.now());
-          break;
-        }
-      }
-    }
+    const momentsList = await kv.getItem(momentsListKey) || [];
+    const newId = momentsList.length > 0 ? String(Math.max(...momentsList.map((id) => parseInt(id) || 0)) + 1) : "1";
     const now = /* @__PURE__ */ new Date();
     const timestamp = `\u521B\u5EFA\u65F6\u95F4: ${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
     const momentData = {
       id: parseInt(newId),
       author: {
         nickname: ((_a = body.author) == null ? void 0 : _a.nickname) || "Leyili",
-        avatar: ((_b = body.author) == null ? void 0 : _b.avatar) || "/images/home/avatar.webp"
+        avatar: ((_b = body.author) == null ? void 0 : _b.avatar) || "/images/lcj.svg"
       },
       content: body.content,
       timestamp: body.timestamp || timestamp,
       images: body.images || []
     };
     await kv.setItem(`moment:${newId}`, momentData);
-    if (!momentsList.includes(newId)) {
-      momentsList.push(newId);
-      await kv.setItem(momentsListKey, momentsList);
-    }
+    momentsList.push(newId);
+    await kv.setItem(momentsListKey, momentsList);
     return {
       success: true,
       data: momentData,
       message: "\u670B\u53CB\u5708\u52A8\u6001\u521B\u5EFA\u6210\u529F"
     };
   } catch (error) {
+    console.error("\u521B\u5EFA\u670B\u53CB\u5708\u52A8\u6001\u5931\u8D25:", error);
     throw createError({
       statusCode: 500,
       message: error.message || "\u521B\u5EFA\u670B\u53CB\u5708\u52A8\u6001\u5931\u8D25"
@@ -3186,107 +3404,6 @@ const index_post$2 = defineEventHandler(async (event) => {
 const index_post$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
   default: index_post$2
-}, Symbol.toStringTag, { value: 'Module' }));
-
-const migrate_post = defineEventHandler(async (event) => {
-  var _a, _b, _c;
-  const authHeader = getHeader(event, "authorization");
-  const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
-  if (!adminPassword || authHeader !== `Bearer ${adminPassword}`) {
-    throw createError({
-      statusCode: 401,
-      message: "\u672A\u6388\u6743\u8BBF\u95EE"
-    });
-  }
-  try {
-    const kv = getKVStorage(event);
-    const fs = await import('node:fs/promises');
-    const path = await import('node:path');
-    const momentsJsonPath = path.join(process.cwd(), "data", "moments.json");
-    const jsonContent = await fs.readFile(momentsJsonPath, "utf-8");
-    const momentsData = JSON.parse(jsonContent);
-    if (!Array.isArray(momentsData)) {
-      throw new Error("moments.json \u683C\u5F0F\u9519\u8BEF\uFF0C\u5E94\u8BE5\u662F\u6570\u7EC4");
-    }
-    const momentsListKey = "moments:list";
-    const existingList = await kv.getItem(momentsListKey) || [];
-    const existingIds = new Set(existingList);
-    const migratedMoments = [];
-    const newIds = [];
-    for (const moment of momentsData) {
-      const momentId = moment.id ? String(moment.id) : String(Date.now());
-      if (existingIds.has(momentId)) {
-        continue;
-      }
-      let timestamp = moment.timestamp;
-      if (!timestamp || !timestamp.includes("\u521B\u5EFA\u65F6\u95F4:")) {
-        const now = /* @__PURE__ */ new Date();
-        timestamp = `\u521B\u5EFA\u65F6\u95F4: ${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
-      }
-      const processImagePath = (path2) => {
-        if (!path2) return path2;
-        if (path2.startsWith("/images/")) {
-          return path2;
-        }
-        if (path2.startsWith("~/assets/images/Moments/") || path2.startsWith("/src/assets/images/Moments/") || path2.includes("Moments/")) {
-          const fileName = path2.split("/").pop() || path2.split("\\").pop();
-          return `/images/Moments/${fileName}`;
-        }
-        if (path2.includes("home/avatar.webp") || path2.includes("avatar.webp")) {
-          return "/images/home/avatar.webp";
-        }
-        if (path2.includes("assets/images/")) {
-          return path2.replace(/.*\/assets\/images\//, "/images/");
-        }
-        return path2;
-      };
-      const avatarPath = processImagePath((_a = moment.author) == null ? void 0 : _a.avatar);
-      const processedImages = (moment.images || []).map((img) => processImagePath(img));
-      const momentData = {
-        id: parseInt(momentId),
-        author: {
-          nickname: ((_b = moment.author) == null ? void 0 : _b.nickname) || "Leyili",
-          avatar: avatarPath || "/images/home/avatar.webp"
-        },
-        content: moment.content || "",
-        timestamp,
-        images: processedImages
-      };
-      const momentKey = `moment:${momentId}`;
-      await kv.setItem(momentKey, momentData);
-      existingList.push(momentId);
-      existingIds.add(momentId);
-      newIds.push(momentId);
-      migratedMoments.push(momentData);
-    }
-    await kv.setItem(momentsListKey, existingList);
-    return {
-      success: true,
-      message: `\u6210\u529F\u8FC1\u79FB ${migratedMoments.length} \u6761\u670B\u53CB\u5708\u52A8\u6001`,
-      data: {
-        migrated: migratedMoments.length,
-        skipped: momentsData.length - migratedMoments.length,
-        total: existingList.length
-      }
-    };
-  } catch (error) {
-    if (error.code === "ENOENT" || ((_c = error.message) == null ? void 0 : _c.includes("fs"))) {
-      return {
-        success: false,
-        message: "\u8FC1\u79FB\u811A\u672C\u9700\u8981\u5728\u672C\u5730\u73AF\u5883\u8FD0\u884C\uFF0C\u6216\u8005\u624B\u52A8\u5728\u540E\u53F0\u521B\u5EFA\u670B\u53CB\u5708\u52A8\u6001",
-        hint: "\u8BF7\u5728\u672C\u5730\u8FD0\u884C\u6B64 API\uFF0C\u6216\u8005\u76F4\u63A5\u5728\u540E\u53F0\u7BA1\u7406\u754C\u9762\u521B\u5EFA\u670B\u53CB\u5708\u52A8\u6001"
-      };
-    }
-    throw createError({
-      statusCode: 500,
-      message: error.message || "\u8FC1\u79FB\u5931\u8D25"
-    });
-  }
-});
-
-const migrate_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
-  __proto__: null,
-  default: migrate_post
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const _id__delete = defineEventHandler(async (event) => {

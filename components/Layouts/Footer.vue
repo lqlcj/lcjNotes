@@ -16,11 +16,6 @@
       </div>
 
       <div class="right-section">
-        <div class="social-row">
-          <!-- <a href="#" target="_blank" class="social-btn facebook">FACEBOOK</a> -->
-          <a href="https://twitter.com/Cli13146688" target="_blank" class="social-btn twitter">TWITTER</a>
-        </div>
-
         <span class="copyright">LCJLQ.COM.2025</span>
       </div>
 

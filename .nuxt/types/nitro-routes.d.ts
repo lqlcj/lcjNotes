@@ -6,6 +6,14 @@ declare module "nitropack/types" {
     '/api/auth/login': {
       'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/auth/login.post').default>>>>
     }
+    '/api/bookmarks/:id': {
+      'delete': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/bookmarks/[id].delete').default>>>>
+      'put': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/bookmarks/[id].put').default>>>>
+    }
+    '/api/bookmarks': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/bookmarks/index.get').default>>>>
+      'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/bookmarks/index.post').default>>>>
+    }
     '/api/friends/:id': {
       'delete': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/friends/[id].delete').default>>>>
     }
@@ -36,9 +44,6 @@ declare module "nitropack/types" {
     '/api/moments': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/moments/index.get').default>>>>
       'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/moments/index.post').default>>>>
-    }
-    '/api/moments/migrate': {
-      'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/moments/migrate.post').default>>>>
     }
     '/api/posts/:id': {
       'delete': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/posts/[id].delete').default>>>>
