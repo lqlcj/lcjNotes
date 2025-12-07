@@ -80,15 +80,20 @@ export function getMimeTypeFromExt(ext: string): string {
  */
 export function extractR2KeyFromUrl(url: string): string | null {
   if (!url || typeof url !== 'string') {
-    console.log('extractR2KeyFromUrl: URL为空或不是字符串');
     return null;
   }
 
   // 清理URL：移除查询参数和锚点
   let cleanUrl = url.split('?')[0].split('#')[0].trim();
   
+  // 方法1: 使用正则表达式直接从URL中提取assets/路径（最通用）
+  const assetsMatch = cleanUrl.match(/assets\/[^?#\s]+/);
+  if (assetsMatch) {
+    return assetsMatch[0];
+  }
+  
   try {
-    // 处理完整URL (https://photo.lcjlq.com/assets/...)
+    // 方法2: 处理完整URL (https://photo.lcjlq.com/assets/...)
     if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://')) {
       const urlObj = new URL(cleanUrl);
       const path = urlObj.pathname;
@@ -96,34 +101,32 @@ export function extractR2KeyFromUrl(url: string): string | null {
       const key = path.startsWith('/') ? path.substring(1) : path;
       // 检查是否是assets目录下的文件
       if (key.startsWith('assets/')) {
-        console.log(`extractR2KeyFromUrl: 从完整URL提取key: ${key}`);
         return key;
       }
-      console.log(`extractR2KeyFromUrl: 完整URL但不是assets目录: ${key}`);
       return null;
     }
 
-    // 处理代理路由 (/api/r2/assets/...)
+    // 方法3: 处理代理路由 (/api/r2/assets/...)
     if (cleanUrl.startsWith('/api/r2/')) {
       const key = cleanUrl.replace('/api/r2/', '');
       if (key.startsWith('assets/')) {
-        console.log(`extractR2KeyFromUrl: 从代理路由提取key: ${key}`);
         return key;
       }
-      console.log(`extractR2KeyFromUrl: 代理路由但不是assets目录: ${key}`);
       return null;
     }
 
-    // 如果URL直接是key格式 (assets/...)
+    // 方法4: 如果URL直接是key格式 (assets/...)
     if (cleanUrl.startsWith('assets/')) {
-      console.log(`extractR2KeyFromUrl: 直接key格式: ${cleanUrl}`);
       return cleanUrl;
     }
 
-    console.log(`extractR2KeyFromUrl: 无法识别的URL格式: ${cleanUrl}`);
     return null;
   } catch (error) {
-    console.error('提取R2 key失败:', error, 'URL:', cleanUrl);
+    // 如果URL解析失败，尝试最后的备用方法：直接查找assets/
+    const fallbackMatch = cleanUrl.match(/assets\/[^?#\s]+/);
+    if (fallbackMatch) {
+      return fallbackMatch[0];
+    }
     return null;
   }
 }

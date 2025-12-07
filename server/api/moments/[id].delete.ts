@@ -58,17 +58,17 @@ export default defineEventHandler(async (event) => {
             try {
               await r2.delete(r2Key);
               console.log(`✓ 已删除R2图片: ${r2Key}`);
-            } catch (deleteError) {
+            } catch (deleteError: any) {
               // 如果删除失败，记录日志但不中断流程
-              console.error(`✗ 删除R2图片失败 ${r2Key}:`, deleteError);
+              console.error(`✗ 删除R2图片失败 ${r2Key}:`, deleteError?.message || deleteError);
             }
           } else {
             console.log(`⚠ 无法从URL提取R2 key，跳过: ${imageUrl}`);
           }
         }
-      } catch (r2Error) {
+      } catch (r2Error: any) {
         // R2操作失败，记录日志但不中断删除流程
-        console.error('删除朋友圈图片时出错:', r2Error);
+        console.error('删除朋友圈图片时出错:', r2Error?.message || r2Error);
       }
     } else {
       console.log('朋友圈动态没有图片，跳过图片删除');
