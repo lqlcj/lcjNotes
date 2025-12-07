@@ -284,19 +284,25 @@
   .comments-container {
     margin-top: 0;
     padding: 0;
-    background: #faf9f6;
-    border: 1px solid #d4c5b0;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    background: #fcfbf9;
+    border: 1px solid rgba(104, 68, 77, 0.15);
+    border-radius: 16px;
+    box-shadow:
+      0 8px 32px rgba(255, 165, 0, 0.08),
+      0 4px 16px rgba(255, 200, 150, 0.12),
+      0 2px 8px rgba(0, 0, 0, 0.04);
     position: relative;
     overflow: hidden;
-    transition: all 0.3s ease;
+    transition: all 0.3s ease-in-out;
     width: 100%;
   }
 
   .comments-container:hover {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    border-color: rgba(104, 68, 77, 0.3);
+    box-shadow:
+      0 12px 40px rgba(255, 165, 0, 0.12),
+      0 6px 20px rgba(255, 200, 150, 0.18),
+      0 3px 12px rgba(0, 0, 0, 0.06);
+    border-color: rgba(104, 68, 77, 0.25);
   }
 
   .comments-header {
@@ -304,18 +310,14 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid rgba(212, 197, 176, 0.3);
-    background: linear-gradient(135deg,
-        rgba(255, 221, 225, 0.05) 0%,
-        rgba(212, 197, 176, 0.05) 100%);
+    border-bottom: 1px solid rgba(104, 68, 77, 0.1);
+    background: rgba(252, 251, 249, 0.5);
     cursor: pointer;
-    transition: background 0.3s ease;
+    transition: background 0.3s ease-in-out;
   }
 
   .comments-header:hover {
-    background: linear-gradient(135deg,
-        rgba(255, 221, 225, 0.1) 0%,
-        rgba(212, 197, 176, 0.1) 100%);
+    background: rgba(252, 251, 249, 0.8);
   }
 
   .header-left {
@@ -331,13 +333,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform 0.3s ease;
+    transition: all 0.3s ease-in-out;
     color: #68444d;
     font-size: 18px;
   }
 
   .toggle-btn:hover {
-    opacity: 0.8;
+    color: #8b5a6b;
+    transform: translateY(-2px);
   }
 
   .toggle-icon {
@@ -376,12 +379,15 @@
   }
 
   .glass-card {
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(252, 251, 249, 0.95);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.8);
-    border-radius: 8px;
+    border: 1px solid rgba(104, 68, 77, 0.15);
+    border-radius: 12px;
     padding: 20px;
     margin: 20px;
+    box-shadow:
+      0 4px 16px rgba(255, 165, 0, 0.06),
+      0 2px 8px rgba(255, 200, 150, 0.1);
   }
 
   .comment-form {
@@ -410,25 +416,29 @@
   .form-group textarea {
     width: 100%;
     padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
+    border: 1px solid rgba(104, 68, 77, 0.2);
+    border-radius: 8px;
     font-size: 14px;
     box-sizing: border-box;
     font-family: inherit;
-    transition: all 0.3s ease;
+    background: rgba(252, 251, 249, 0.8);
+    color: #68444d;
+    transition: all 0.3s ease-in-out;
   }
 
   .form-group input:hover,
   .form-group textarea:hover {
-    border-color: #68444d;
+    border-color: rgba(104, 68, 77, 0.3);
     box-shadow: 0 0 0 3px rgba(104, 68, 77, 0.05);
   }
 
   .form-group input:focus,
   .form-group textarea:focus {
     outline: none;
-    border-color: #68444d;
-    box-shadow: 0 0 0 3px rgba(104, 68, 77, 0.1);
+    border-color: rgba(104, 68, 77, 0.4);
+    box-shadow:
+      0 0 0 3px rgba(104, 68, 77, 0.1),
+      0 2px 8px rgba(255, 165, 0, 0.05);
   }
 
   .form-group textarea {
@@ -442,16 +452,21 @@
     background: #68444d;
     color: white;
     border: none;
-    border-radius: 6px;
+    border-radius: 12px;
     font-size: 16px;
     cursor: pointer;
-    transition: all 0.3s;
+    transition: all 0.3s ease-in-out;
     font-weight: 500;
+    box-shadow:
+      0 4px 12px rgba(104, 68, 77, 0.2),
+      0 2px 6px rgba(255, 165, 0, 0.1);
   }
 
   .submit-btn:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(104, 68, 77, 0.3);
+    box-shadow:
+      0 6px 16px rgba(104, 68, 77, 0.3),
+      0 3px 8px rgba(255, 165, 0, 0.15);
     background: #5a3a42;
   }
 
@@ -493,13 +508,15 @@
   .message-item {
     padding: 15px;
     margin: 0;
-    transition: all 0.3s ease;
+    transition: all 0.3s ease-in-out;
     cursor: default;
   }
 
   .message-item:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(104, 68, 77, 0.15);
+    box-shadow:
+      0 6px 16px rgba(104, 68, 77, 0.15),
+      0 3px 8px rgba(255, 165, 0, 0.08);
     border-color: rgba(104, 68, 77, 0.3);
   }
 
@@ -535,7 +552,9 @@
   .message-item:hover .message-avatar {
     transform: scale(1.1);
     background: linear-gradient(135deg, #68444d 0%, #8b5a6b 100%);
-    box-shadow: 0 2px 8px rgba(104, 68, 77, 0.3);
+    box-shadow:
+      0 2px 8px rgba(104, 68, 77, 0.3),
+      0 1px 4px rgba(255, 165, 0, 0.1);
   }
 
   .message-info h4 {
@@ -561,20 +580,21 @@
     text-decoration: none;
     font-size: 18px;
     opacity: 0.7;
-    transition: all 0.3s ease;
+    transition: all 0.3s ease-in-out;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: rgba(104, 68, 77, 0.05);
+    background: rgba(104, 68, 77, 0.08);
   }
 
   .message-website-link:hover {
     opacity: 1;
     transform: scale(1.15) rotate(15deg);
-    background: rgba(104, 68, 77, 0.15);
+    background: rgba(104, 68, 77, 0.2);
+    box-shadow: 0 2px 6px rgba(104, 68, 77, 0.2);
   }
 
   .turnstile-container {

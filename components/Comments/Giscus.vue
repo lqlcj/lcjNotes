@@ -202,20 +202,26 @@
   .comments-container {
     margin-top: 0;
     padding: 0;
-    background: #faf9f6;
-    border: 1px solid #d4c5b0;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    background: #fcfbf9;
+    border: 1px solid rgba(104, 68, 77, 0.15);
+    border-radius: 16px;
+    box-shadow:
+      0 8px 32px rgba(255, 165, 0, 0.08),
+      0 4px 16px rgba(255, 200, 150, 0.12),
+      0 2px 8px rgba(0, 0, 0, 0.04);
     position: relative;
     overflow: hidden;
-    transition: all 0.3s ease;
+    transition: all 0.3s ease-in-out;
     width: 100%;
   }
 
   .comments-container:hover {
     transform: translateY(-4px);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    border-color: #c4b5a0;
+    box-shadow:
+      0 12px 40px rgba(255, 165, 0, 0.12),
+      0 6px 20px rgba(255, 200, 150, 0.18),
+      0 3px 12px rgba(0, 0, 0, 0.06);
+    border-color: rgba(104, 68, 77, 0.25);
   }
 
   .comments-container::before {
@@ -226,9 +232,9 @@
     right: 0;
     height: 2px;
     background: linear-gradient(90deg,
-        rgba(255, 221, 225, 0.6) 0%,
-        rgba(224, 195, 252, 0.6) 50%,
-        rgba(142, 197, 252, 0.6) 100%);
+        rgba(255, 165, 0, 0.3) 0%,
+        rgba(255, 200, 150, 0.4) 50%,
+        rgba(104, 68, 77, 0.3) 100%);
     border-radius: 16px 16px 0 0;
     z-index: 1;
   }
@@ -236,10 +242,8 @@
   .comments-header {
     padding: 12px 20px 10px;
     text-align: center;
-    border-bottom: 1px solid rgba(224, 195, 252, 0.2);
-    background: linear-gradient(135deg,
-        rgba(255, 221, 225, 0.05) 0%,
-        rgba(224, 195, 252, 0.05) 100%);
+    border-bottom: 1px solid rgba(104, 68, 77, 0.1);
+    background: rgba(252, 251, 249, 0.5);
     position: relative;
     z-index: 1;
   }
@@ -263,12 +267,8 @@
     font-family: 'Caveat', cursive;
     font-size: 1.5rem;
     margin: 0 0 3px 0;
-    color: #6c5ce7;
+    color: #68444d;
     font-weight: 500;
-    background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
   }
 
   .comments-subtitle {
@@ -294,19 +294,19 @@
   }
 
   .giscus-wrapper::-webkit-scrollbar-track {
-    background: rgba(224, 195, 252, 0.1);
+    background: rgba(255, 255, 255, 0.5);
     border-radius: 8px;
   }
 
   .giscus-wrapper::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, rgba(162, 155, 254, 0.6) 0%, rgba(108, 92, 231, 0.6) 100%);
+    background: rgba(104, 68, 77, 0.2);
     border-radius: 8px;
     border: 1px solid transparent;
     background-clip: padding-box;
   }
 
   .giscus-wrapper::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, rgba(162, 155, 254, 0.8) 0%, rgba(108, 92, 231, 0.8) 100%);
+    background: rgba(104, 68, 77, 0.3);
     background-clip: padding-box;
   }
 
@@ -323,7 +323,7 @@
 
   .error-title {
     font-size: 1.2rem;
-    color: #6c5ce7;
+    color: #68444d;
     margin: 0 0 12px 0;
     font-weight: 600;
   }
@@ -347,18 +347,22 @@
     align-items: center;
     gap: 8px;
     padding: 10px 20px;
-    background: rgba(162, 155, 254, 0.1);
-    color: #6c5ce7;
-    border: 1px solid rgba(162, 155, 254, 0.3);
+    background: rgba(104, 68, 77, 0.1);
+    color: #68444d;
+    border: 1px solid rgba(104, 68, 77, 0.2);
     border-radius: 12px;
     font-size: 0.9rem;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.3s ease-in-out;
   }
 
   .retry-btn:hover {
-    background: rgba(162, 155, 254, 0.2);
-    border-color: rgba(162, 155, 254, 0.5);
+    background: rgba(104, 68, 77, 0.15);
+    border-color: rgba(104, 68, 77, 0.3);
+    transform: translateY(-2px);
+    box-shadow:
+      0 4px 12px rgba(104, 68, 77, 0.15),
+      0 2px 6px rgba(255, 165, 0, 0.08);
   }
 
   .retry-btn span:first-child {

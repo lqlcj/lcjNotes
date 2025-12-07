@@ -15,8 +15,9 @@
               <span class="homepage title">Hello, Traveler.</span>
               <span class="homepage description">
                 In an era shaped by algorithmic feeds, personal sites—kept alive only by interest and enthusiasm—feel
-                like small islands in a vast ocean. Yet some people still choose to visit these quiet places.
-
+                like small islands in a vast ocean.
+                <br></br>
+                Yet some people still choose to visit these quiet places.
                 If you're one of these islands, I'd be glad to have you as a neighbor on the Friends page.
               </span>
             </div>
