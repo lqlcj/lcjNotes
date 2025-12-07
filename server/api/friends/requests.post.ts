@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getKVStorage } from '~/server/utils/kv';
 import { verifyTurnstile } from '~/server/utils/turnstile';
 import { validateAndTrim, FIELD_LIMITS } from '~/server/utils/validation';

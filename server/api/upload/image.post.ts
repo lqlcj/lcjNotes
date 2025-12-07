@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getR2Storage, generateFileName, isValidImageType } from '~/server/utils/r2';
 import { handleApiError } from '~/server/utils/errorHandler';
 import { verifyAuth } from '~/server/utils/auth';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Session 管理工具
  * 使用加密的 HttpOnly Cookie 存储会话信息

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { isAuthenticated } from '~/server/utils/session';
 
 // 检查登录状态

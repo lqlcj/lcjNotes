@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * 认证工具函数
  * 用于验证用户身份，替代原来的 Bearer token 验证

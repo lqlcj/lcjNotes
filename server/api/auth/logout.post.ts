@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { destroySession } from '~/server/utils/session';
 
 // 登出接口

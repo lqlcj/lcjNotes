@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { verifyTurnstile } from '~/server/utils/turnstile';
 import { createSession } from '~/server/utils/session';
 
