@@ -12,16 +12,16 @@
         <div class="homepage down">
           <div class="line text-blocks-line">
             <div class="text-block text-block-left">
-              <span class="homepage title">Hello, Traveler.</span><br /><br />
+              <span class="homepage title">Hello, Traveler.</span>
               <span class="homepage description">
                 In an era shaped by algorithmic feeds, personal sites—kept alive only by interest and enthusiasm—feel
                 like small islands in a vast ocean. Yet some people still choose to visit these quiet places.
 
-                If you’re one of these islands, I’d be glad to have you as a neighbor on the Friends page.
+                If you're one of these islands, I'd be glad to have you as a neighbor on the Friends page.
               </span>
             </div>
             <div class="text-block text-block-right">
-              <span class="homepage title">欢迎来到我的小窝.</span><br /><br />
+              <span class="homepage title">欢迎来到我的小窝.</span>
               <span class="homepage description wenkai-font">
                 在这个只有算法推荐的时代，靠兴趣发电的个人小站就像汪洋中的一座座渺小岛屿，不过，仍旧有那么一群人愿意访问这个宁静的地方，
                 如果你也是千万岛屿中的一个，非常欢迎你在友情链接页面成为我的邻居！
@@ -39,18 +39,11 @@
           </div>
         </div>
 
-        <!-- 分隔线3 -->
-
         <!-- Notes 组件 -->
         <NotesSection />
 
         <!-- 留言板组件 -->
         <Guestbook />
-
-        <!-- All-in-one底部区域 -->
-        <div class="bottom-sector">
-          <img :src="homeRightRadiusImg" style="margin-left: 2px" alt="" />
-        </div>
       </div>
     </div>
   </div>
@@ -63,12 +56,6 @@
   import NotesSection from './home/components/NotesSection.vue'
   import Guestbook from '~/components/Comments/Guestbook.vue'
 
-  // 导入使用的图片资源
-  import homeRightRadiusImg from '../vue/images/home/right-radius.png'
-  import sinImg from '../vue/images/sin.png'
-  import buttonImg from '../vue/images/home/button.png'
-  import shadowButtonImg from '../vue/images/home/shadow-button-download.png'
-
   // 处理下载按钮点击
   const handleDownload = () => {
     console.log('下载按钮被点击')
@@ -77,9 +64,9 @@
 
   // 计算样式对象，用于动态绑定背景图
   const styles = computed(() => ({
-    '--sin-bg': `url(${sinImg})`,
-    '--button-bg': `url(${buttonImg})`,
-    '--shadow-button-bg': `url(${shadowButtonImg})`
+    '--sin-bg': 'url(/images/sin.png)',
+    '--button-bg': 'url(/images/home/button.png)',
+    '--shadow-button-bg': 'url(/images/home/shadow-button-download.png)'
   }))
 </script>
 
@@ -207,15 +194,17 @@
   .homepage.title {
     font-size: 34px;
     font-family: 'Conv_FuturaStd-Light', Arial;
-    text-align: left;
+    text-align: center;
     line-height: 36pt;
     color: #68444d;
     word-wrap: break-word;
     overflow-wrap: break-word;
+    display: block;
+    margin-bottom: 20px;
   }
 
   .homepage.description {
-    font-size: 14px;
+    font-size: 15px;
     font-family: 'Conv_FuturaStd-Medium', Arial;
     text-align: left;
     line-height: 18pt;
@@ -223,6 +212,7 @@
     word-wrap: break-word;
     overflow-wrap: break-word;
     hyphens: auto;
+    display: block;
   }
 
   /* 系统楷体样式 */
@@ -256,6 +246,7 @@
   /* 文本块布局 */
   .text-blocks-line {
     width: 80%;
+    max-width: calc(80% - 6px);
     margin: 0 auto;
     display: flex;
     justify-content: space-between;
@@ -345,7 +336,7 @@
     }
 
     .preview-container :deep(.banner-logo) {
-      max-width: 250px;
+      max-width: 320px;
     }
 
     /* 分隔线间距调整 */
@@ -401,16 +392,16 @@
     .homepage.title {
       font-size: 24px;
       line-height: 30px;
-      margin-bottom: 15px;
+      margin-bottom: 10px;
       display: block;
       text-align: center !important;
     }
 
     .homepage.description {
-      font-size: 13px;
+      font-size: 15px;
       line-height: 20px;
       display: block;
-      margin-top: 10px;
+      margin-top: 0;
       text-align: center !important;
     }
 
@@ -483,7 +474,7 @@
 
     /* Banner 小屏适配 */
     .preview-container :deep(.banner-logo) {
-      max-width: 200px;
+      max-width: 280px;
     }
 
     /* 标题和描述进一步缩小 */
@@ -495,7 +486,7 @@
     }
 
     .homepage.description {
-      font-size: 12px;
+      font-size: 14px;
       line-height: 18px;
       text-align: center !important;
     }
@@ -548,7 +539,7 @@
     }
 
     .homepage.description {
-      font-size: 11px;
+      font-size: 15px;
       line-height: 16px;
       text-align: center !important;
     }

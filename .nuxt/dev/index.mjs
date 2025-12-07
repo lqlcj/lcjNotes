@@ -1460,16 +1460,16 @@ _iS2Hx_aRY6b5luI5ZFAVScoHeBMFBXD6z47xxZowt8
 const assets = {
   "/index.mjs": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"210ea-jM4fMaVCL2hb6xaEg+Yqp6tfnfs\"",
-    "mtime": "2025-12-07T10:03:30.575Z",
-    "size": 135402,
+    "etag": "\"20f52-Rfy/ovN0g/koGt5NkWWCDGCwvc0\"",
+    "mtime": "2025-12-07T10:55:48.341Z",
+    "size": 134994,
     "path": "index.mjs"
   },
   "/index.mjs.map": {
     "type": "application/json",
-    "etag": "\"7a4c5-7Pi21A3lyvX1i7aOgsH+5nON6NM\"",
-    "mtime": "2025-12-07T10:03:30.575Z",
-    "size": 500933,
+    "etag": "\"7a4b6-/hBOXbWC689eEV09FpfarZYt67Y\"",
+    "mtime": "2025-12-07T10:55:48.341Z",
+    "size": 500918,
     "path": "index.mjs.map"
   }
 };
@@ -1893,7 +1893,6 @@ const _lazy_RJAIjX = () => Promise.resolve().then(function () { return _id__put$
 const _lazy_lt7cVk = () => Promise.resolve().then(function () { return _id__delete$5; });
 const _lazy_lFh496 = () => Promise.resolve().then(function () { return index_get$5; });
 const _lazy_0idvvs = () => Promise.resolve().then(function () { return index_post$5; });
-const _lazy_OVZbUj = () => Promise.resolve().then(function () { return migrate_post$3; });
 const _lazy_lrS_AC = () => Promise.resolve().then(function () { return _id__delete$3; });
 const _lazy_1qViY_ = () => Promise.resolve().then(function () { return _id__get$3; });
 const _lazy_zWW14Y = () => Promise.resolve().then(function () { return _id__put$3; });
@@ -1922,7 +1921,6 @@ const handlers = [
   { route: '/api/messages/:id', handler: _lazy_lt7cVk, lazy: true, middleware: false, method: "delete" },
   { route: '/api/messages', handler: _lazy_lFh496, lazy: true, middleware: false, method: "get" },
   { route: '/api/messages', handler: _lazy_0idvvs, lazy: true, middleware: false, method: "post" },
-  { route: '/api/migrate', handler: _lazy_OVZbUj, lazy: true, middleware: false, method: "post" },
   { route: '/api/moments/:id', handler: _lazy_lrS_AC, lazy: true, middleware: false, method: "delete" },
   { route: '/api/moments/:id', handler: _lazy_1qViY_, lazy: true, middleware: false, method: "get" },
   { route: '/api/moments/:id', handler: _lazy_zWW14Y, lazy: true, middleware: false, method: "put" },
@@ -2890,74 +2888,6 @@ const index_post$4 = defineEventHandler(async (event) => {
 const index_post$5 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
   default: index_post$4
-}, Symbol.toStringTag, { value: 'Module' }));
-
-const migrate_post$2 = defineEventHandler(async (event) => {
-  var _a;
-  const authHeader = getHeader(event, "authorization");
-  const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
-  if (!adminPassword || authHeader !== `Bearer ${adminPassword}`) {
-    throw createError({
-      statusCode: 401,
-      message: "\u672A\u6388\u6743\u8BBF\u95EE"
-    });
-  }
-  const kv = useStorage("kv");
-  try {
-    const fs = await import('node:fs/promises');
-    const path = await import('node:path');
-    const fm = await import('file://G:/newblog/node_modules/front-matter/index.js');
-    const postsDir = path.join(process.cwd(), "posts");
-    const files = await fs.readdir(postsDir);
-    const mdFiles = files.filter((f) => f.endsWith(".md"));
-    const migratedPosts = [];
-    const postsList = [];
-    for (const file of mdFiles) {
-      const filePath = path.join(postsDir, file);
-      const content = await fs.readFile(filePath, "utf-8");
-      const parsed = fm.default(content);
-      const attr = parsed.attributes;
-      const fileId = file.replace(".md", "");
-      const postData = {
-        id: fileId,
-        title: attr.title || "\u65E0\u6807\u9898",
-        date: attr.date || (/* @__PURE__ */ new Date()).toISOString().split("T")[0],
-        cover: attr.cover || "",
-        ratio: attr.ratio || 0.75,
-        user: attr.user || "lcj",
-        avatar: attr.avatar || "",
-        likes: attr.likes || 0,
-        body: parsed.body
-      };
-      const postKey = `post:${fileId}`;
-      await kv.setItem(postKey, postData);
-      postsList.push(fileId);
-      migratedPosts.push(postData);
-    }
-    await kv.setItem("posts:list", postsList);
-    return {
-      success: true,
-      message: `\u6210\u529F\u8FC1\u79FB ${migratedPosts.length} \u7BC7\u6587\u7AE0`,
-      data: migratedPosts
-    };
-  } catch (error) {
-    if (error.code === "ENOENT" || ((_a = error.message) == null ? void 0 : _a.includes("fs"))) {
-      return {
-        success: false,
-        message: "\u8FC1\u79FB\u811A\u672C\u9700\u8981\u5728\u672C\u5730\u73AF\u5883\u8FD0\u884C\uFF0C\u6216\u8005\u624B\u52A8\u5728\u540E\u53F0\u521B\u5EFA\u6587\u7AE0",
-        hint: "\u8BF7\u5728\u672C\u5730\u8FD0\u884C\u6B64 API\uFF0C\u6216\u8005\u76F4\u63A5\u5728\u540E\u53F0\u7BA1\u7406\u754C\u9762\u521B\u5EFA\u6587\u7AE0"
-      };
-    }
-    throw createError({
-      statusCode: 500,
-      message: error.message || "\u8FC1\u79FB\u5931\u8D25"
-    });
-  }
-});
-
-const migrate_post$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
-  __proto__: null,
-  default: migrate_post$2
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const _id__delete$2 = defineEventHandler(async (event) => {

@@ -106,7 +106,7 @@ export const useNotesStore = defineStore("notes", {
             likes: item.likes || 0,
             date: item.date || "2025-01-01",
             isLiked: false,
-            filePath: `/posts/${item.id}.md`, // 兼容旧代码，使用 ID 作为路径
+            filePath: `/posts/${item.id}.md`, // 虚拟路径，用于兼容旧代码
           }));
 
           // 🔥 确保按日期降序排序（最新的在前）

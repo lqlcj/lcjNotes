@@ -20,7 +20,7 @@
       </div>
 
       <!-- 瀑布流内容 -->
-      <div v-else class="waterfall-box" ref="waterfallRef">
+      <div v-else-if="allData.length > 0" class="waterfall-box" ref="waterfallRef">
         <div 
           v-for="colIndex in columnCount" 
           :key="colIndex" 
@@ -140,19 +140,19 @@
   const imageErrorMap = ref({}) // 图片错误状态映射
 
   // 异步加载状态
-  const isLoading = ref(false)
+  const isLoading = ref(true) // 初始为true，确保显示加载状态
   const hasError = ref(false)
   const errorMessage = ref('')
   const isChangingPage = ref(false)
 
   // 响应式列数
   const columnCount = computed(() => {
-    if (typeof window === 'undefined') return 3
+    if (typeof window === 'undefined') return 3 // SSR 默认3列
     const width = window.innerWidth
-    // 超小屏：1列
-    if (width < 480) return 1
-    // 小屏手机：1列
-    if (width < 640) return 1
+    // 超小屏：2列
+    if (width < 480) return 2
+    // 小屏手机：2列
+    if (width < 640) return 2
     // 平板：2列
     if (width < 1024) return 2
     // 桌面：3列
@@ -160,8 +160,10 @@
   })
 
   onMounted(async () => {
+    console.log('[NotesSection] 组件已挂载，开始加载数据')
     // 异步加载数据
     await loadData()
+    console.log('[NotesSection] 数据加载完成，文章数量:', allData.value.length, 'isLoading:', isLoading.value, 'hasError:', hasError.value)
     // 监听窗口大小变化
     if (typeof window !== 'undefined') {
       window.addEventListener('resize', handleResize)
@@ -170,20 +172,36 @@
 
   // 异步加载数据
   const loadData = async () => {
+    console.log('[NotesSection] 开始加载数据...')
     isLoading.value = true
     hasError.value = false
     errorMessage.value = ''
     
     try {
       await notesStore.initPosts()
+      console.log('[NotesSection] Store 初始化完成，文章数量:', notesStore.allPosts.length)
       // 等待数据加载完成
       await new Promise(resolve => setTimeout(resolve, 100))
+      console.log('[NotesSection] 数据加载完成，allData.length:', allData.value.length)
+      
+      // 数据加载完成后，确保分配数据
+      if (allData.value.length > 0) {
+        console.log('[NotesSection] 开始分配数据到列...')
+        cardRefs.value.clear()
+        distributeItems()
+        await nextTick()
+        setTimeout(() => {
+          updateColumnHeights()
+          console.log('[NotesSection] 数据分配完成，columnItems:', columnItems.value.map(col => col.length))
+        }, 100)
+      }
     } catch (error) {
-      console.error('加载数据失败:', error)
+      console.error('[NotesSection] 加载数据失败:', error)
       hasError.value = true
       errorMessage.value = error.message || '加载失败，请稍后重试'
     } finally {
       isLoading.value = false
+      console.log('[NotesSection] 加载状态结束，isLoading:', isLoading.value)
     }
   }
 
@@ -333,17 +351,29 @@
 
   // 监听当前页数据变化和列数变化
   watch([currentPageData, columnCount], () => {
-    if (isLoading.value) return // 如果正在加载，不重新分配
+    // 如果正在加载，延迟执行
+    if (isLoading.value) {
+      console.log('[NotesSection] Watch: 正在加载中，跳过数据分配')
+      return
+    }
     
+    // 如果没有数据，不执行分配
+    if (currentPageData.value.length === 0) {
+      console.log('[NotesSection] Watch: 当前页数据为空，跳过数据分配')
+      return
+    }
+    
+    console.log('[NotesSection] Watch: 数据变化，重新分配数据，currentPageData.length:', currentPageData.value.length)
     cardRefs.value.clear() // 清空卡片引用
     distributeItems()
     nextTick(() => {
       // 等待图片加载和 DOM 更新
       setTimeout(() => {
         updateColumnHeights()
+        console.log('[NotesSection] Watch: 数据分配完成，columnItems:', columnItems.value.map(col => col.length))
       }, 300)
     })
-  }, { immediate: true })
+  }, { immediate: false }) // 改为 false，避免在数据加载前触发
 
   const changePage = async (page) => {
     if (page < 1 || page > totalPages.value || isChangingPage.value) return
@@ -397,6 +427,9 @@
     position: relative;
     margin-top: 20px;
     padding: 40px 0;
+    min-height: 200px; /* 确保组件有最小高度，始终可见 */
+    display: block; /* 确保显示 */
+    visibility: visible; /* 确保可见 */
   }
 
   .notes-bg-layer {
@@ -802,6 +835,10 @@
     .notes-section {
       margin-top: 10px;
       padding: 20px 0;
+    }
+
+    .notes-bg-layer {
+      display: none;
     }
 
     .xhs-container {

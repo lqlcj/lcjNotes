@@ -15,8 +15,6 @@
         </div>
       </div>
 
-      <HomeBanner class="home-banner-container" />
-
       <div class="right-section">
         <div class="social-row">
           <!-- <a href="#" target="_blank" class="social-btn facebook">FACEBOOK</a> -->
@@ -39,8 +37,6 @@
 </template>
 
 <script setup>
-  import HomeBanner from '~/pages/home/components/HomeBanner.vue'
-
 </script>
 
 <style scoped>
@@ -68,12 +64,6 @@
     gap: 40px;
     /* 左右两块之间的间距 */
   }
-
-  .home-banner-container {
-    width: 30%;
-  }
-
-
 
   /* --- 左侧区域 --- */
   .left-section {
@@ -116,10 +106,6 @@
   .links-row a:hover {
     color: #D94851;
     /* 增加一点交互反馈 */
-  }
-
-  .home-banner-container {
-    width: 25%;
   }
 
   /* --- 右侧区域 --- */
@@ -203,10 +189,6 @@
       /* 整体居中 */
       text-align: center;
       gap: 30px;
-    }
-
-    .home-banner-container {
-      width: 50%;
     }
 
     .left-section {

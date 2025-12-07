@@ -55,7 +55,7 @@
       description: '视频平台',
       link: 'https://www.bilibili.com',
       external: true,
-      backgroundImage: '/images/02.webp'
+      backgroundImage: 'https://file.nbfox.com/wp-content/uploads/2020/11/28/SbGo04.jpg@water750.jpg'
     },
     {
       type: 'github',
@@ -63,7 +63,7 @@
       description: '代码仓库',
       link: 'https://gitee.com',
       external: true,
-      backgroundImage: '/images/03.webp'
+      backgroundImage: 'https://file.nbfox.com/wp-content/uploads/2020/11/28/SbGo04.jpg@water750.jpg'
     }
   ]
 

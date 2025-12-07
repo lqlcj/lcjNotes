@@ -120,11 +120,6 @@ newblog/
 ├── plugins/            # 插件
 │   └── loading.client.js
 │
-├── posts/              # Markdown 文章
-│   ├── 01.md
-│   ├── 02.md
-│   └── ...
-│
 ├── public/            # 公共静态文件
 │   ├── favicon.ico
 │   ├── fonts/         # 字体文件
@@ -142,25 +137,10 @@ newblog/
 
 ### 添加博客文章
 
-1. 在 `posts/` 目录下创建新的 Markdown 文件（如 `13.md`）
-2. 在文件开头添加 Front Matter：
-
-```markdown
----
-title: 文章标题
-date: 2025-01-01
-description: 文章描述
-img: /images/13.webp
-avatar: /images/home/avatar.webp
-user: 作者名称
----
-
-# 文章内容
-
-这里是你的 Markdown 内容...
-```
-
-3. 文章会自动出现在笔记列表页（`/notes`）
+1. 访问 `/login` 页面并登录管理员账号
+2. 在"文章管理"标签页中点击"新建文章"
+3. 填写文章信息（标题、日期、封面、内容等）
+4. 文章会自动保存到云端并显示在笔记列表页（`/notes`）
 
 ### 配置 Giscus 留言系统
 
@@ -340,9 +320,10 @@ Markdown 文章阅读页面：
 
 ### 文章不显示
 
-1. 检查 `posts/` 目录下是否有 Markdown 文件
-2. 确认 Front Matter 格式正确
+1. 检查后台管理系统（`/login`）中是否有文章数据
+2. 确认 API 接口 `/api/posts` 是否正常工作
 3. 检查 `stores/notesStore.js` 是否正确加载
+4. 查看浏览器控制台是否有错误信息
 
 ### 留言系统不显示
 
