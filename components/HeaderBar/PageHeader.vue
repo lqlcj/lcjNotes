@@ -7,20 +7,20 @@
   
   使用示例：
     <!-- 带主标题和副标题 -->
-<PageHeader title="My Stories" subtitle="记录生活，探索代码" />
+<!-- <PageHeader title="My Stories" subtitle="记录生活，探索代码" />
 
-<!-- 仅主标题 -->
-<PageHeader title="页面标题" />
+  <!-- 仅主标题 -->
+<!-- <PageHeader title="页面标题" />
 
-Props:
-- title: 主标题文本（必填，String类型）
-- subtitle: 副标题文本（可选，String类型，不传则不显示）
+  Props:
+  - title: 主标题文本（必填，String类型）
+  - subtitle: 副标题文本（可选，String类型，不传则不显示）
 
-样式特性：
-- 手写风格字体（Caveat）
-- 淡入向上动画（fade-in-up）
-- 响应式设计（移动端自动适配）
--->
+  样式特性：
+  - 手写风格字体（Caveat）
+  - 淡入向上动画（fade-in-up）
+  - 响应式设计（移动端自动适配） -->
+
 <template>
   <div class="page-header fade-in-up">
     <div class="title-wrapper">

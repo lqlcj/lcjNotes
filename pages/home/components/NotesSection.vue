@@ -396,7 +396,7 @@
   .notes-section {
     position: relative;
     margin-top: 20px;
-    padding: 40px 0;
+    padding: 1px 0;
     min-height: 200px;
     width: 100%;
     max-width: 100%;

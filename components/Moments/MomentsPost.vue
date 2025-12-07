@@ -435,6 +435,8 @@
     left: 0;
     right: 0;
     bottom: 0;
+    width: 100vw;
+    height: 100vh;
     background-color: rgba(0, 0, 0, 0.9);
     z-index: 9999;
     display: flex;
@@ -442,14 +444,20 @@
     justify-content: center;
     cursor: pointer;
     animation: fadeIn 0.2s ease;
+    margin: 0;
+    padding: 0;
   }
 
   .viewer-image {
-    max-width: 90%;
-    max-height: 90%;
+    max-width: 90vw;
+    max-height: 90vh;
+    width: auto;
+    height: auto;
     object-fit: contain;
     cursor: default;
     animation: zoomIn 0.3s ease;
+    display: block;
+    margin: auto;
   }
 
   @keyframes fadeIn {
@@ -477,8 +485,8 @@
   /* 移动端适配 */
   @media (max-width: 768px) {
     .viewer-image {
-      max-width: 95%;
-      max-height: 95%;
+      max-width: 95vw;
+      max-height: 95vh;
     }
   }
 </style>

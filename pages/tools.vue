@@ -57,11 +57,6 @@
             </div>
 
             <!-- 知识库标签页 -->
-            <div v-if="activeTab === 'knowledge'" class="tab-panel">
-              <div class="knowledge-content">
-                <p class="placeholder-text">知识库功能开发中...</p>
-              </div>
-            </div>
 
             <!-- 管理后台标签�?-->
             <div v-if="activeTab === 'admin'" class="tab-panel">
@@ -83,7 +78,6 @@
   // Tab 配置
   const tabs = [
     { id: 'bookmarks', label: '书签' },
-    { id: 'knowledge', label: '知识库' },
     { id: 'admin', label: 'Me' }
   ]
 
@@ -191,14 +185,15 @@
   }
 
   .tab-button:hover {
-    color: #6c5ce7;
-    background: rgba(108, 92, 231, 0.05);
+    color: #68444d;
+    background: rgba(104, 68, 77, 0.08);
   }
 
   .tab-button.active {
-    color: #6c5ce7;
-    border-bottom-color: #6c5ce7;
+    color: #68444d;
+    border-bottom-color: #68444d;
     font-weight: 600;
+    background: rgba(104, 68, 77, 0.05);
   }
 
   .tabs-content {
@@ -224,11 +219,6 @@
   }
 
   /* 占位内容样式 */
-  .knowledge-content {
-    padding: 40px 20px;
-    text-align: center;
-  }
-
   .placeholder-text {
     color: #999;
     font-size: 16px;
@@ -269,12 +259,12 @@
   .bookmark-card:hover:not(.showing-confirm) {
     transform: translateY(-4px);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-    border-color: #6c5ce7;
+    border-color: #68444d;
   }
 
   .bookmark-card.showing-confirm {
-    border-color: #6c5ce7;
-    box-shadow: 0 4px 16px rgba(108, 92, 231, 0.2);
+    border-color: #68444d;
+    box-shadow: 0 4px 16px rgba(104, 68, 77, 0.2);
   }
 
   .bookmark-content {
@@ -353,7 +343,7 @@
   .confirm-name {
     font-size: 16px;
     font-weight: 500;
-    color: #6c5ce7;
+    color: #68444d;
     margin: 0 0 8px 0;
     word-break: break-word;
   }
@@ -399,14 +389,14 @@
   }
 
   .confirm-btn {
-    background: #6c5ce7;
+    background: #68444d;
     color: white;
   }
 
   .confirm-btn:hover {
-    background: #5a4fcf;
+    background: #5a3a42;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+    box-shadow: 0 4px 12px rgba(104, 68, 77, 0.3);
   }
 
   .cancel-btn {
@@ -457,8 +447,7 @@
       min-height: 300px;
     }
 
-    .bookmarks-content,
-    .knowledge-content {
+    .bookmarks-content {
       padding: 30px 15px;
     }
 

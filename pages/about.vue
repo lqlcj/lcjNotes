@@ -15,42 +15,39 @@
         <article class="content-body">
 
           <section>
-            <h3>👋 Hello, Traveler.</h3>
+            <h3> Hello, Traveler.</h3>
             <p>
-              欢迎走进这个小小的后花园。这是一个思维碎片的暂存区我把零散想法、读书笔记和偶尔写下的memos放在一起，让它们有个落脚处。
-            </p>
+              欢迎走进这个小小的后花园。</p>
+            <p>这是一个思维碎片的暂存区,我把零散想法、笔记和偶尔写下的memos放在一起,让它们有个落脚处。</p>
           </section>
 
           <section>
-            <h3>⚡ Powered By</h3>
-            <p>整个网站是我一点点搭出来的，算是把“喜欢折腾前端”这件事落地的方式。页面轻、内容杂、更新随缘——但都是我亲手写的。后续也有想用Next重做的打算。。。</p>
+            <h3>Powered By</h3>
+            <p>整个网站是我一点点搭出来的，算是把“喜欢折腾”这件事落地的方式。</p>
+            <p>更新随缘—后续也有想用Next重做的打算。。。</p>
             <p>如果你也有自己的小岛，欢迎来串门。我也很乐意把这儿当成你偶尔路过、顺手坐一会儿的地方。</p>
 
             <h4 style="margin-top: 30px; margin-bottom: 15px; font-size: 1.2rem; color: #2c3e50;">✨ 特性</h4>
             <ul class="feature-list">
-              <li><strong>💬 留言系统</strong>：集成 Cloudflare Turnstile 验证的自定义留言板，支持展开/收起动画和烟花效果</li>
-              <li><strong>🎯 响应式布局</strong>：完美适配桌面端和移动端</li>
-              <li><strong>🔗 友链管理</strong>：基于 Cloudflare KV 的友链申请和管理系统</li>
-              <li><strong>🚀 性能优化</strong>：代码分割、懒加载、异步组件加载</li>
-              <li><strong>🎭 动画效果</strong>：使用 GSAP 和 CSS 动画，流畅的交互体验</li>
-              <li><strong>⚡ 图片管理</strong>：支持 Cloudflare R2 图片上传和存储</li>
+              <li><strong>留言系统</strong>：集成 Cloudflare Turnstile 验证的自定义留言板，支持展开动画和烟花效果</li>
+              <li><strong>响应式布局</strong>：完美适配桌面端和移动端</li>
+              <li><strong>友链管理</strong>：基于 Cloudflare KV 的友链申请和管理系统</li>
+              <li><strong>性能优化</strong>：代码分割、懒加载、异步组件加载</li>
+              <li><strong>动画效果</strong>：使用 GSAP 和 CSS 动画，流畅的交互体验</li>
+              <li><strong>图片管理</strong>：支持 Cloudflare R2 图片上传和存储</li>
             </ul>
 
-            <h4 style="margin-top: 30px; margin-bottom: 15px; font-size: 1.2rem; color: #2c3e50;">核心框架</h4>
+            <h4 style="margin-top: 30px; margin-bottom: 15px; font-size: 1.2rem; color: #2c3e50;">🚀 核心框架</h4>
             <ul class="feature-list">
               <li><strong>框架</strong> - Nuxt 3</li>
               <li><strong>UI 框架</strong> - Vue 3</li>
               <li><strong>Markdown 解析</strong> - markdown-it</li>
               <li><strong>存储</strong> - Cloudflare KV（数据存储）+ Cloudflare R2（图片存储）</li>
-            </ul>
-
-            <h4 style="margin-top: 30px; margin-bottom: 15px; font-size: 1.2rem; color: #2c3e50;">构建工具</h4>
-            <ul class="feature-list">
               <li><strong>Vite 7.2+</strong> - 前端构建工具</li>
-              <li><strong>@vitejs/plugin-vue</strong> - Vue 单文件组件支持</li>
             </ul>
 
-            <h4 style="margin-top: 30px; margin-bottom: 15px; font-size: 1.2rem; color: #2c3e50;">功能库</h4>
+
+            <h4 style="margin-top: 30px; margin-bottom: 15px; font-size: 1.2rem; color: #2c3e50;">💬 功能库</h4>
             <ul class="feature-list">
               <li><strong>gsap</strong> - 动画库</li>
               <li><strong>canvas-confetti</strong> - 彩带动画效果</li>
@@ -441,13 +438,13 @@
   }
 
   .outline {
-    border: 2px solid #6c5ce7;
-    color: #6c5ce7;
+    border: 2px solid #68444d;
+    color: #68444d;
     background: transparent;
   }
 
   .outline:hover {
-    background: #6c5ce7;
+    background: #68444d;
     color: white;
     transform: translate3d(0, -2px, 0);
     /* 🚀 使用 translate3d */
@@ -458,7 +455,7 @@
   .btn-pill:focus-visible,
   .icon-btn:focus-visible,
   .btn-mini:focus-visible {
-    outline: 2px solid #6c5ce7;
+    outline: 2px solid #68444d;
     outline-offset: 2px;
   }
 
@@ -613,6 +610,22 @@
       width: 100%;
     }
 
+    .sign {
+      font-size: 1.2rem;
+    }
+
+  }
+
+  /* 小屏幕手机适配 */
+  @media (max-width: 480px) {
+    .sign {
+      font-size: 1rem;
+      white-space: nowrap;
+    }
+
+    .about-footer {
+      margin-top: 40px;
+    }
   }
 
   /* 🚀 可访问性优化：支持减少动画偏好 */

@@ -294,6 +294,11 @@
     width: 100%;
   }
 
+  .comments-container:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    border-color: rgba(104, 68, 77, 0.3);
+  }
+
   .comments-header {
     padding: 12px 20px 10px;
     display: flex;
@@ -410,6 +415,20 @@
     font-size: 14px;
     box-sizing: border-box;
     font-family: inherit;
+    transition: all 0.3s ease;
+  }
+
+  .form-group input:hover,
+  .form-group textarea:hover {
+    border-color: #68444d;
+    box-shadow: 0 0 0 3px rgba(104, 68, 77, 0.05);
+  }
+
+  .form-group input:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: #68444d;
+    box-shadow: 0 0 0 3px rgba(104, 68, 77, 0.1);
   }
 
   .form-group textarea {
@@ -474,6 +493,14 @@
   .message-item {
     padding: 15px;
     margin: 0;
+    transition: all 0.3s ease;
+    cursor: default;
+  }
+
+  .message-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(104, 68, 77, 0.15);
+    border-color: rgba(104, 68, 77, 0.3);
   }
 
   .message-header {
@@ -502,6 +529,13 @@
     font-weight: bold;
     font-size: 16px;
     flex-shrink: 0;
+    transition: all 0.3s ease;
+  }
+
+  .message-item:hover .message-avatar {
+    transform: scale(1.1);
+    background: linear-gradient(135deg, #68444d 0%, #8b5a6b 100%);
+    box-shadow: 0 2px 8px rgba(104, 68, 77, 0.3);
   }
 
   .message-info h4 {
@@ -527,11 +561,20 @@
     text-decoration: none;
     font-size: 18px;
     opacity: 0.7;
-    transition: opacity 0.3s;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(104, 68, 77, 0.05);
   }
 
   .message-website-link:hover {
     opacity: 1;
+    transform: scale(1.15) rotate(15deg);
+    background: rgba(104, 68, 77, 0.15);
   }
 
   .turnstile-container {

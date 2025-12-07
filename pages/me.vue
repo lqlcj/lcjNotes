@@ -3,24 +3,25 @@
     <div class="admin-container">
       <!-- 登录界面 -->
       <div v-if="!isAuthenticated" class="login-form glass-card">
-        <h2>Me</h2>
+        <h2 class="handwritten">Dev.Space</h2>
+        <p class="subtitle">🚧 Building in progress...正在构建中...</p>
         <form @submit.prevent="handleLogin">
           <div class="form-group">
-            <label>name</label>
+            <label>Userame</label>
             <input v-model="loginUsername" type="text" required />
           </div>
           <div class="form-group">
-            <label>pwd</label>
+            <label>Password</label>
             <input v-model="loginPassword" type="password" required />
           </div>
-          
+
           <!-- Turnstile 验证 -->
           <div class="form-group">
             <div ref="turnstileContainer" class="turnstile-container"></div>
           </div>
-          
+
           <button type="submit" class="btn-primary" :disabled="loggingIn || !turnstileToken">
-            {{ loggingIn ? '登录中...' : '登录' }}
+            {{ loggingIn ? '登录中...' : 'Connect' }}
           </button>
           <p v-if="loginError" class="error">{{ loginError }}</p>
         </form>
@@ -265,28 +266,17 @@
             <button @click="triggerAssetUpload" class="btn-primary" :disabled="uploadingAsset">
               {{ uploadingAsset ? '上传中...' : '+ 上传图片' }}
             </button>
-            <input 
-              ref="assetFileInput" 
-              type="file" 
-              accept="image/jpeg,image/jpg,image/png,image/webp,image/gif" 
-              multiple
-              @change="handleAssetFileSelect"
-              style="display: none"
-            />
+            <input ref="assetFileInput" type="file" accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+              multiple @change="handleAssetFileSelect" style="display: none" />
             <button @click="loadAssets" class="btn-secondary" :disabled="assetsLoading">
               {{ assetsLoading ? '加载中...' : '刷新' }}
             </button>
           </div>
 
           <!-- 拖拽上传区域 -->
-          <div 
-            class="asset-upload-zone"
-            :class="{ 'dragover': isDragging, 'uploading': uploadingAsset }"
-            @drop.prevent="handleDrop"
-            @dragover.prevent="isDragging = true"
-            @dragleave.prevent="isDragging = false"
-            @click="triggerAssetUpload"
-          >
+          <div class="asset-upload-zone" :class="{ 'dragover': isDragging, 'uploading': uploadingAsset }"
+            @drop.prevent="handleDrop" @dragover.prevent="isDragging = true" @dragleave.prevent="isDragging = false"
+            @click="triggerAssetUpload">
             <div v-if="!uploadingAsset" class="upload-zone-content">
               <p>📁 拖拽图片到这里或点击上传</p>
               <p class="upload-hint">支持 JPG、PNG、WebP、GIF，最大 10MB</p>
@@ -308,7 +298,8 @@
                   <img :src="asset.url" :alt="asset.name" @error="handleImageError" />
                   <div class="asset-overlay">
                     <button @click.stop="copyAssetUrl(asset.url)" class="btn-copy">复制链接</button>
-                    <button @click.stop="deleteAsset(asset.key)" class="btn-delete" :disabled="deletingAssets.includes(asset.key)">
+                    <button @click.stop="deleteAsset(asset.key)" class="btn-delete"
+                      :disabled="deletingAssets.includes(asset.key)">
                       {{ deletingAssets.includes(asset.key) ? '删除中...' : '删除' }}
                     </button>
                   </div>
@@ -316,95 +307,17 @@
                 <div class="asset-info">
                   <p class="asset-name" :title="asset.name">{{ asset.name }}</p>
                   <p class="asset-meta">
-                    {{ formatFileSize(asset.size) }} · 
+                    {{ formatFileSize(asset.size) }} ·
                     {{ formatDate(asset.uploaded) }}
                   </p>
                 </div>
               </div>
             </div>
-            
+
             <!-- 加载更多 -->
             <div v-if="hasMoreAssets && !assetsLoading" class="load-more">
               <button @click="loadMoreAssets" class="btn-secondary">加载更多</button>
             </div>
-          </div>
-        </div>
-
-        <!-- 创建/编辑文章表单 -->
-        <div v-if="showCreateForm || editingPost" class="form-modal">
-          <div class="form-content glass-card">
-            <div class="form-header">
-              <h2>{{ editingPost ? '编辑文章' : '新建文章' }}</h2>
-              <button @click="closeForm" class="close-btn">×</button>
-            </div>
-
-            <form @submit.prevent="handleSubmit">
-              <div class="form-group">
-                <label>标题 *</label>
-                <input v-model="formData.title" type="text" required />
-              </div>
-
-              <div class="form-row">
-                <div class="form-group">
-                  <label>日期</label>
-                  <input v-model="formData.date" type="date" />
-                </div>
-                <div class="form-group">
-                  <label>封面图片</label>
-                  <div class="cover-upload-section">
-                    <!-- 上传按钮 -->
-                    <div class="upload-area">
-                      <input ref="fileInput" type="file" accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
-                        @change="handleFileSelect" style="display: none;" />
-                      <button type="button" @click="triggerFileInput" class="btn-upload" :disabled="uploading">
-                        {{ uploading ? '上传中...' : '📤 上传图片' }}
-                      </button>
-                      <span class="upload-hint">或直接输入图片 URL</span>
-                    </div>
-
-                    <!-- 预览 -->
-                    <div v-if="coverPreview" class="cover-preview">
-                      <img :src="coverPreview" alt="封面预览" />
-                      <button type="button" @click="clearCoverPreview" class="btn-remove-preview">
-                        ✕
-                      </button>
-                    </div>
-
-                    <!-- URL 输入 -->
-                    <input v-model="formData.cover" type="text" placeholder="/r2/covers/xxx.jpg 或 图片URL"
-                      class="cover-url-input" />
-
-                    <!-- 上传进度 -->
-                    <div v-if="uploading" class="upload-progress">
-                      <div class="progress-bar" :style="{ width: uploadProgress + '%' }"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="form-row">
-                <div class="form-group">
-                  <label>宽高比</label>
-                  <input v-model.number="formData.ratio" type="number" step="0.01" min="0.5" max="2" />
-                </div>
-                <div class="form-group">
-                  <label>作者</label>
-                  <input v-model="formData.user" type="text" />
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label>文章内容 (Markdown) *</label>
-                <textarea v-model="formData.body" rows="20" required placeholder="在这里输入 Markdown 格式的文章内容..."></textarea>
-              </div>
-
-              <div class="form-actions">
-                <button type="button" @click="closeForm" class="btn-secondary">取消</button>
-                <button type="submit" class="btn-primary" :disabled="submitting">
-                  {{ submitting ? '保存中...' : '保存' }}
-                </button>
-              </div>
-            </form>
           </div>
         </div>
 
@@ -555,6 +468,85 @@
           </div>
         </div>
 
+        <!-- 创建/编辑文章表单 -->
+        <div v-if="showCreateForm || editingPost" class="form-modal">
+          <div class="form-content glass-card">
+            <div class="form-header">
+              <h2>{{ editingPost ? '编辑文章' : '新建文章' }}</h2>
+              <button @click="closeForm" class="close-btn">×</button>
+            </div>
+
+            <form @submit.prevent="handleSubmit">
+              <div class="form-group">
+                <label>标题 *</label>
+                <input v-model="formData.title" type="text" required />
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>日期</label>
+                  <input v-model="formData.date" type="date" />
+                </div>
+                <div class="form-group">
+                  <label>封面图片</label>
+                  <div class="cover-upload-section">
+                    <!-- 上传按钮 -->
+                    <div class="upload-area">
+                      <input ref="fileInput" type="file" accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                        @change="handleFileSelect" style="display: none;" />
+                      <button type="button" @click="triggerFileInput" class="btn-upload" :disabled="uploading">
+                        {{ uploading ? '上传中...' : '📤 上传图片' }}
+                      </button>
+                      <span class="upload-hint">或直接输入图片 URL</span>
+                    </div>
+
+                    <!-- 预览 -->
+                    <div v-if="coverPreview" class="cover-preview">
+                      <img :src="coverPreview" alt="封面预览" />
+                      <button type="button" @click="clearCoverPreview" class="btn-remove-preview">
+                        ✕
+                      </button>
+                    </div>
+
+                    <!-- URL 输入 -->
+                    <input v-model="formData.cover" type="text" placeholder="/r2/covers/xxx.jpg 或 图片URL"
+                      class="cover-url-input" />
+
+                    <!-- 上传进度 -->
+                    <div v-if="uploading" class="upload-progress">
+                      <div class="progress-bar" :style="{ width: uploadProgress + '%' }"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>宽高比</label>
+                  <input v-model.number="formData.ratio" type="number" step="0.01" min="0.5" max="2" />
+                </div>
+                <div class="form-group">
+                  <label>作者</label>
+                  <input v-model="formData.user" type="text" />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>文章内容 (Markdown) *</label>
+                <textarea v-model="formData.body" rows="20" required placeholder="在这里输入 Markdown 格式的文章内容..."></textarea>
+              </div>
+
+              <div class="form-actions">
+                <button type="button" @click="closeForm" class="btn-secondary">取消</button>
+                <button type="submit" class="btn-primary" :disabled="submitting">
+                  {{ submitting ? '保存中...' : '保存' }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+
         <!-- 创建留言表单 -->
         <div v-if="showMessageForm" class="form-modal">
           <div class="form-content glass-card">
@@ -626,7 +618,7 @@
   const loginPassword = ref('');
   const loggingIn = ref(false);
   const loginError = ref('');
-  
+
   // Turnstile 验证相关
   const config = useRuntimeConfig();
   const turnstileSiteKey = config.public.turnstileSiteKey;
@@ -797,7 +789,7 @@
 
     // 确保容器已渲染
     await nextTick();
-    
+
     if (!turnstileContainer.value) {
       console.warn('Turnstile 容器未找到，延迟重试');
       setTimeout(() => {
@@ -821,7 +813,7 @@
           renderTurnstile();
         }
       }, 100);
-      
+
       // 10秒后停止检查
       setTimeout(() => {
         clearInterval(checkInterval);
@@ -1848,7 +1840,7 @@
   };
 
   // ========== 图床管理相关方法 ==========
-  
+
   // 触发文件选择
   const triggerAssetUpload = () => {
     assetFileInput.value?.click();
@@ -2076,7 +2068,24 @@
   .login-form h2 {
     margin-bottom: 20px;
     text-align: center;
-    color: #333;
+  }
+
+  /* 主标题样式 - 手写风格 */
+  .login-form .handwritten {
+    font-family: 'Caveat', cursive;
+    font-size: 2.2rem;
+    color: #5d4037;
+    margin: 0 0 10px 0;
+  }
+
+  /* 副标题样式 */
+  .login-form .subtitle {
+    font-size: 0.9rem;
+    color: #888;
+    text-align: center;
+    margin-top: 5px;
+    margin-bottom: 20px;
+    letter-spacing: 1.5px;
   }
 
   .turnstile-container {
@@ -2127,7 +2136,7 @@
   .btn-primary {
     width: 100%;
     padding: 12px;
-    background: #6c5ce7;
+    background: #68444d;
     color: white;
     border: none;
     border-radius: 6px;
@@ -2137,7 +2146,7 @@
   }
 
   .btn-primary:hover:not(:disabled) {
-    background: #5a4fcf;
+    background: #5a3a42;
   }
 
   .btn-primary:disabled {
@@ -2199,13 +2208,15 @@
   }
 
   .tab-btn:hover {
-    color: #6c5ce7;
+    color: #68444d;
+    background: rgba(104, 68, 77, 0.05);
   }
 
   .tab-btn.active {
-    color: #6c5ce7;
-    border-bottom-color: #6c5ce7;
+    color: #68444d;
+    border-bottom-color: #68444d;
     font-weight: 600;
+    background: rgba(104, 68, 77, 0.05);
   }
 
   .tab-content {
@@ -2362,6 +2373,26 @@
       flex-direction: column;
       align-items: flex-start;
       gap: 15px;
+    }
+
+    .login-form .handwritten {
+      font-size: 2rem;
+    }
+
+    .login-form .subtitle {
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .login-form .handwritten {
+      font-size: 1.6rem;
+    }
+
+    .login-form .subtitle {
+      font-size: 0.8rem;
+      letter-spacing: 0.5px;
     }
   }
 
@@ -2558,7 +2589,7 @@
   }
 
   .message-website a {
-    color: #6c5ce7;
+    color: #68444d;
     text-decoration: none;
     font-size: 14px;
   }
@@ -2583,7 +2614,7 @@
 
   .btn-upload {
     padding: 8px 16px;
-    background: #6c5ce7;
+    background: #68444d;
     color: white;
     border: none;
     border-radius: 4px;
@@ -2593,7 +2624,7 @@
   }
 
   .btn-upload:hover:not(:disabled) {
-    background: #5a4fcf;
+    background: #5a3a42;
   }
 
   .btn-upload:disabled {
@@ -2720,7 +2751,7 @@
 
   .progress-bar {
     height: 100%;
-    background: #6c5ce7;
+    background: #68444d;
     transition: width 0.3s;
   }
 
@@ -2885,7 +2916,7 @@
 
   .request-info a,
   .friend-info a {
-    color: #6c5ce7;
+    color: #68444d;
     text-decoration: none;
   }
 
@@ -2952,13 +2983,13 @@
 
   .asset-upload-zone:hover,
   .asset-upload-zone.dragover {
-    border-color: #6c5ce7;
-    background: rgba(108, 92, 231, 0.1);
+    border-color: #68444d;
+    background: rgba(104, 68, 77, 0.1);
   }
 
   .asset-upload-zone.uploading {
-    border-color: #6c5ce7;
-    background: rgba(108, 92, 231, 0.2);
+    border-color: #68444d;
+    background: rgba(104, 68, 77, 0.2);
     cursor: not-allowed;
   }
 
@@ -2996,7 +3027,8 @@
   .asset-image-wrapper {
     position: relative;
     width: 100%;
-    padding-top: 100%; /* 1:1 比例 */
+    padding-top: 100%;
+    /* 1:1 比例 */
     background: #f5f5f5;
     overflow: hidden;
   }
@@ -3036,7 +3068,7 @@
 
   .btn-copy {
     padding: 8px 16px;
-    background: #6c5ce7;
+    background: #68444d;
     color: white;
     border: none;
     border-radius: 4px;
@@ -3046,7 +3078,7 @@
   }
 
   .btn-copy:hover {
-    background: #5a4fcf;
+    background: #5a3a42;
   }
 
   .asset-info {
@@ -3085,4 +3117,3 @@
     }
   }
 </style>
-
