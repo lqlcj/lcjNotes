@@ -415,6 +415,11 @@
     margin-top: 20px;
     padding: 40px 0;
     min-height: 200px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    /* 防止内容溢出导致横向滚动 */
     /* 确保组件有最小高度，始终可见 */
     display: block;
     /* 确保显示 */
@@ -441,6 +446,8 @@
     padding: 20px 10px 80px;
     box-sizing: border-box;
     position: relative;
+    overflow-x: hidden;
+    /* 防止内容溢出导致横向滚动 */
   }
 
   /* 瀑布流布局 - 小红书风格 */
@@ -449,9 +456,13 @@
     gap: 15px;
     align-items: flex-start;
     width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
     /* 移动端滚动优化 */
     -webkit-overflow-scrolling: touch;
     will-change: contents;
+    overflow-x: hidden;
+    /* 防止横向滚动 */
   }
 
   .waterfall-column {
@@ -460,11 +471,14 @@
     flex-direction: column;
     gap: 15px;
     min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
     /* 防止 flex 子元素溢出 */
   }
 
   .card {
     width: 100%;
+    max-width: 100%;
     margin-bottom: 0;
     /* 使用 gap 替代 margin */
     background: #fff;
@@ -482,6 +496,8 @@
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
     user-select: none;
+    box-sizing: border-box;
+    /* 确保盒子模型正确 */
   }
 
   .glass-card:hover {
@@ -549,6 +565,13 @@
 
   .card-content {
     padding: 10px 12px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    /* 防止内容溢出 */
+    word-wrap: break-word;
+    word-break: break-word;
+    /* 处理长文本 */
   }
 
   .title {
@@ -562,6 +585,10 @@
     line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    word-wrap: break-word;
+    word-break: break-word;
+    max-width: 100%;
+    /* 防止文本溢出 */
   }
 
   .footer {
@@ -784,6 +811,8 @@
     .notes-section {
       margin-top: 10px;
       padding: 20px 0;
+      overflow-x: hidden;
+      max-width: 100%;
     }
 
     .notes-bg-layer {
@@ -793,19 +822,28 @@
     .xhs-container {
       padding: 15px 10px 50px;
       max-width: 100%;
+      overflow-x: hidden;
     }
 
     .waterfall-box {
       gap: 10px;
+      overflow-x: hidden;
     }
 
     .card {
       border-radius: 8px;
       box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+      max-width: 100%;
+      box-sizing: border-box;
     }
 
     .card-content {
       padding: 8px 10px;
+      word-wrap: break-word;
+      word-break: break-word;
+      overflow: hidden;
+      max-width: 100%;
+      box-sizing: border-box;
     }
 
     .title {
@@ -887,22 +925,33 @@
   @media (max-width: 640px) {
     .notes-section {
       padding: 15px 0;
+      overflow-x: hidden;
+      max-width: 100%;
     }
 
     .xhs-container {
       padding: 10px 8px 40px;
+      overflow-x: hidden;
     }
 
     .waterfall-box {
       gap: 8px;
+      overflow-x: hidden;
     }
 
     .card {
       border-radius: 6px;
+      max-width: 100%;
+      box-sizing: border-box;
     }
 
     .card-content {
       padding: 6px 8px;
+      word-wrap: break-word;
+      word-break: break-word;
+      overflow: hidden;
+      max-width: 100%;
+      box-sizing: border-box;
     }
 
     .title {
@@ -953,16 +1002,33 @@
 
   /* 超小屏适配 */
   @media (max-width: 480px) {
+    .notes-section {
+      overflow-x: hidden;
+      max-width: 100%;
+    }
+
     .xhs-container {
       padding: 8px 5px 35px;
+      overflow-x: hidden;
     }
 
     .waterfall-box {
       gap: 6px;
+      overflow-x: hidden;
+    }
+
+    .card {
+      max-width: 100%;
+      box-sizing: border-box;
     }
 
     .card-content {
       padding: 5px 6px;
+      word-wrap: break-word;
+      word-break: break-word;
+      overflow: hidden;
+      max-width: 100%;
+      box-sizing: border-box;
     }
 
     .title {

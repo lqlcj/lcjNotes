@@ -541,7 +541,7 @@
 </template>
 
 <script setup>
-  import { ref, computed, onMounted } from 'vue';
+  import { ref, computed, onMounted, nextTick, watch } from 'vue';
 
   definePageMeta({
     layout: false
@@ -703,16 +703,44 @@
   };
 
   // 加载 Turnstile
-  const loadTurnstile = () => {
+  const loadTurnstile = async () => {
     if (!turnstileSiteKey) {
       console.warn('Turnstile Site Key 未配置，跳过验证');
       turnstileToken.value = 'skip'; // 允许跳过验证（开发环境）
       return;
     }
 
+    // 确保容器已渲染
+    await nextTick();
+    
+    if (!turnstileContainer.value) {
+      console.warn('Turnstile 容器未找到，延迟重试');
+      setTimeout(() => {
+        loadTurnstile();
+      }, 100);
+      return;
+    }
+
     // 动态加载 Turnstile script
     if (window.turnstile) {
       renderTurnstile();
+      return;
+    }
+
+    // 检查是否已经在加载
+    if (document.querySelector('script[src*="turnstile"]')) {
+      // 如果脚本已存在但 window.turnstile 还未加载，等待一下
+      const checkInterval = setInterval(() => {
+        if (window.turnstile) {
+          clearInterval(checkInterval);
+          renderTurnstile();
+        }
+      }, 100);
+      
+      // 10秒后停止检查
+      setTimeout(() => {
+        clearInterval(checkInterval);
+      }, 10000);
       return;
     }
 
@@ -723,30 +751,57 @@
     script.onload = () => {
       renderTurnstile();
     };
+    script.onerror = () => {
+      console.error('Turnstile 脚本加载失败');
+      loginError.value = '验证服务加载失败，请刷新页面重试';
+    };
     document.head.appendChild(script);
   };
 
   // 渲染 Turnstile widget
   const renderTurnstile = () => {
     if (!window.turnstile || !turnstileContainer.value || !turnstileSiteKey) {
+      console.warn('Turnstile 渲染条件不满足:', {
+        hasTurnstile: !!window.turnstile,
+        hasContainer: !!turnstileContainer.value,
+        hasSiteKey: !!turnstileSiteKey
+      });
       return;
     }
 
-    turnstileWidgetId = window.turnstile.render(turnstileContainer.value, {
-      sitekey: turnstileSiteKey,
-      callback: (token) => {
-        turnstileToken.value = token;
-      },
-      'error-callback': () => {
-        turnstileToken.value = '';
-        loginError.value = '验证失败，请重试';
-      },
-      'expired-callback': () => {
-        turnstileToken.value = '';
-      },
-      theme: 'light',
-      size: 'normal'
-    });
+    // 如果已经渲染过，先重置
+    if (turnstileWidgetId) {
+      try {
+        window.turnstile.remove(turnstileWidgetId);
+      } catch (e) {
+        console.warn('移除 Turnstile widget 失败:', e);
+      }
+      turnstileWidgetId = null;
+    }
+
+    try {
+      turnstileWidgetId = window.turnstile.render(turnstileContainer.value, {
+        sitekey: turnstileSiteKey,
+        callback: (token) => {
+          turnstileToken.value = token;
+          console.log('Turnstile 验证成功');
+        },
+        'error-callback': () => {
+          turnstileToken.value = '';
+          loginError.value = '验证失败，请重试';
+          console.error('Turnstile 验证失败');
+        },
+        'expired-callback': () => {
+          turnstileToken.value = '';
+          console.warn('Turnstile token 已过期');
+        },
+        theme: 'light',
+        size: 'normal'
+      });
+      console.log('Turnstile widget 已渲染');
+    } catch (error) {
+      console.error('渲染 Turnstile widget 失败:', error);
+    }
   };
 
   // 重置 Turnstile
@@ -758,7 +813,7 @@
   };
 
   // 检查是否已登录
-  onMounted(() => {
+  onMounted(async () => {
     const token = localStorage.getItem('admin_token');
     if (token) {
       isAuthenticated.value = true;
@@ -769,10 +824,26 @@
       loadMoments();
       loadBookmarks();
     } else {
-      // 如果未登录，加载 Turnstile
+      // 如果未登录，等待 DOM 渲染后加载 Turnstile
+      // 使用 watch 监听 isAuthenticated，确保登录表单显示后再加载
+      await nextTick();
+      // 延迟加载，确保登录表单已完全渲染
       setTimeout(() => {
         loadTurnstile();
-      }, 100);
+      }, 300);
+    }
+  });
+
+  // 监听登录状态变化，如果退出登录，重新加载 Turnstile
+  watch(isAuthenticated, (newVal) => {
+    if (!newVal) {
+      // 退出登录后，重置并重新加载 Turnstile
+      resetTurnstile();
+      nextTick(() => {
+        setTimeout(() => {
+          loadTurnstile();
+        }, 200);
+      });
     }
   });
 
