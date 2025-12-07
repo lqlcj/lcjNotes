@@ -3,7 +3,7 @@ import { Server } from 'node:http';
 import { resolve, dirname, join } from 'node:path';
 import nodeCrypto from 'node:crypto';
 import { parentPort, threadId } from 'node:worker_threads';
-import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, createError, getQuery as getQuery$1, readBody, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus, getRouterParam, getHeader, setHeader, readFormData, getResponseStatusText } from 'file://G:/lcjNotes/lcjNotes/node_modules/h3/dist/index.mjs';
+import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, createError, getQuery as getQuery$1, readBody, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus, getRouterParam, setCookie, deleteCookie, getCookie, getHeader, setHeader, readFormData, getResponseStatusText } from 'file://G:/lcjNotes/lcjNotes/node_modules/h3/dist/index.mjs';
 import { escapeHtml } from 'file://G:/lcjNotes/lcjNotes/node_modules/@vue/shared/dist/shared.cjs.js';
 import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLinks } from 'file://G:/lcjNotes/lcjNotes/node_modules/vue-bundle-renderer/dist/runtime.mjs';
 import { parseURL, withoutBase, joinURL, getQuery, withQuery, withTrailingSlash, decodePath, withLeadingSlash, withoutTrailingSlash, joinRelativeURL } from 'file://G:/lcjNotes/lcjNotes/node_modules/ufo/dist/index.mjs';
@@ -654,6 +654,7 @@ const _inlineRuntimeConfig = {
     "turnstileSiteKey": ""
   },
   "adminPassword": "admin123",
+  "sessionSecret": "",
   "r2PublicUrl": "https://photo.lcjlq.com",
   "turnstileSecretKey": ""
 };
@@ -1457,22 +1458,7 @@ const plugins = [
 _KALrG6HWC5DsF1iB5xLtcxqD_gXRBB5_KIe3mv6Ln4
 ];
 
-const assets = {
-  "/index.mjs": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"235c0-ZAUvWhuiPS0EMTfMdfqA18wTFr0\"",
-    "mtime": "2025-12-07T16:13:58.175Z",
-    "size": 144832,
-    "path": "index.mjs"
-  },
-  "/index.mjs.map": {
-    "type": "application/json",
-    "etag": "\"821b9-/4jQYnYFUXwdTLA6ceOXxzuWSjI\"",
-    "mtime": "2025-12-07T16:13:58.175Z",
-    "size": 532921,
-    "path": "index.mjs.map"
-  }
-};
+const assets = {};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));
@@ -1882,7 +1868,9 @@ async function getIslandContext(event) {
   return ctx;
 }
 
+const _lazy_uOvIXJ = () => Promise.resolve().then(function () { return check_get$1; });
 const _lazy_8rD6vD = () => Promise.resolve().then(function () { return login_post$1; });
+const _lazy_ixVewG = () => Promise.resolve().then(function () { return logout_post$1; });
 const _lazy_gB5Uww = () => Promise.resolve().then(function () { return _id__delete$b; });
 const _lazy_hs2uJU = () => Promise.resolve().then(function () { return _id__put$7; });
 const _lazy_M_b7Ju = () => Promise.resolve().then(function () { return index_get$9; });
@@ -1913,7 +1901,9 @@ const _lazy_DuBKWK = () => Promise.resolve().then(function () { return renderer$
 
 const handlers = [
   { route: '', handler: _FLioW9, lazy: false, middleware: true, method: undefined },
+  { route: '/api/auth/check', handler: _lazy_uOvIXJ, lazy: true, middleware: false, method: "get" },
   { route: '/api/auth/login', handler: _lazy_8rD6vD, lazy: true, middleware: false, method: "post" },
+  { route: '/api/auth/logout', handler: _lazy_ixVewG, lazy: true, middleware: false, method: "post" },
   { route: '/api/bookmarks/:id', handler: _lazy_gB5Uww, lazy: true, middleware: false, method: "delete" },
   { route: '/api/bookmarks/:id', handler: _lazy_hs2uJU, lazy: true, middleware: false, method: "put" },
   { route: '/api/bookmarks', handler: _lazy_M_b7Ju, lazy: true, middleware: false, method: "get" },
@@ -2273,6 +2263,141 @@ const styles$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   default: styles
 }, Symbol.toStringTag, { value: 'Module' }));
 
+const SESSION_COOKIE_NAME = "admin_session";
+const SESSION_MAX_AGE = 60 * 60 * 24 * 7;
+const SESSION_SECRET_MIN_LENGTH = 32;
+function getSessionSecret() {
+  const config = useRuntimeConfig();
+  const secret = config.sessionSecret || process.env.SESSION_SECRET;
+  if (secret && secret.length >= SESSION_SECRET_MIN_LENGTH) {
+    return secret;
+  }
+  if (process.env.NITRO_PRESET === "cloudflare-pages") {
+    throw new Error("SESSION_SECRET must be configured in production environment");
+  }
+  console.warn("\u26A0\uFE0F  Warning: Using default session secret in development. Set SESSION_SECRET in production!");
+  return "dev-session-secret-key-change-in-production-" + Date.now();
+}
+async function encryptSession(data, secret) {
+  try {
+    const encoder = new TextEncoder();
+    const dataBytes = encoder.encode(data);
+    const secretBytes = encoder.encode(secret);
+    const key = await crypto.subtle.importKey(
+      "raw",
+      secretBytes,
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["sign"]
+    );
+    const signature = await crypto.subtle.sign("HMAC", key, dataBytes);
+    const signatureArray = new Uint8Array(signature);
+    const signatureBase64 = btoa(String.fromCharCode(...signatureArray));
+    const dataBase64 = btoa(String.fromCharCode(...dataBytes));
+    const timestamp = Date.now();
+    return `${dataBase64}.${signatureBase64}.${timestamp}`;
+  } catch (error) {
+    console.error("Session encryption error:", error);
+    throw error;
+  }
+}
+async function decryptSession(encrypted, secret) {
+  try {
+    const parts = encrypted.split(".");
+    if (parts.length !== 3) {
+      return null;
+    }
+    const [dataBase64, signatureBase64, timestamp] = parts;
+    const sessionTime = parseInt(timestamp, 10);
+    if (Date.now() - sessionTime > SESSION_MAX_AGE * 1e3) {
+      return null;
+    }
+    const encoder = new TextEncoder();
+    const dataBytes = Uint8Array.from(atob(dataBase64), (c) => c.charCodeAt(0));
+    const secretBytes = encoder.encode(secret);
+    const key = await crypto.subtle.importKey(
+      "raw",
+      secretBytes,
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["verify"]
+    );
+    const signature = Uint8Array.from(atob(signatureBase64), (c) => c.charCodeAt(0));
+    const isValid = await crypto.subtle.verify("HMAC", key, signature, dataBytes);
+    if (!isValid) {
+      return null;
+    }
+    return atob(dataBase64);
+  } catch (error) {
+    console.error("Session decryption error:", error);
+    return null;
+  }
+}
+async function createSession(event, sessionData) {
+  const secret = getSessionSecret();
+  const sessionJson = JSON.stringify(sessionData);
+  const encrypted = await encryptSession(sessionJson, secret);
+  setCookie(event, SESSION_COOKIE_NAME, encrypted, {
+    httpOnly: true,
+    secure: process.env.NITRO_PRESET === "cloudflare-pages",
+    // 生产环境使用 HTTPS
+    sameSite: "strict",
+    maxAge: SESSION_MAX_AGE,
+    path: "/"
+  });
+}
+async function getSession(event) {
+  const encrypted = getCookie(event, SESSION_COOKIE_NAME);
+  if (!encrypted) {
+    return null;
+  }
+  const secret = getSessionSecret();
+  const decrypted = await decryptSession(encrypted, secret);
+  if (!decrypted) {
+    return null;
+  }
+  try {
+    return JSON.parse(decrypted);
+  } catch (error) {
+    console.error("Session parse error:", error);
+    return null;
+  }
+}
+function destroySession(event) {
+  deleteCookie(event, SESSION_COOKIE_NAME, {
+    httpOnly: true,
+    secure: process.env.NITRO_PRESET === "cloudflare-pages",
+    sameSite: "strict",
+    path: "/"
+  });
+}
+async function isAuthenticated(event) {
+  const session = await getSession(event);
+  return session !== null;
+}
+async function requireAuth(event) {
+  const session = await getSession(event);
+  if (!session) {
+    throw createError({
+      statusCode: 401,
+      message: "\u672A\u6388\u6743\u8BBF\u95EE\uFF0C\u8BF7\u5148\u767B\u5F55"
+    });
+  }
+}
+
+const check_get = defineEventHandler(async (event) => {
+  const authenticated = await isAuthenticated(event);
+  return {
+    success: true,
+    authenticated
+  };
+});
+
+const check_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: check_get
+}, Symbol.toStringTag, { value: 'Module' }));
+
 async function verifyTurnstile(token, secretKey, remoteip) {
   if (!token || !secretKey) {
     return false;
@@ -2338,16 +2463,32 @@ const login_post = defineEventHandler(async (event) => {
       message: "\u5BC6\u7801\u9519\u8BEF"
     });
   }
+  await createSession(event, {
+    username: adminUsername,
+    loginTime: Date.now()
+  });
   return {
     success: true,
-    token: adminPassword
-    // 简单实现，实际应该使用 JWT
+    message: "\u767B\u5F55\u6210\u529F"
   };
 });
 
 const login_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
   default: login_post
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const logout_post = defineEventHandler(async (event) => {
+  destroySession(event);
+  return {
+    success: true,
+    message: "\u5DF2\u6210\u529F\u767B\u51FA"
+  };
+});
+
+const logout_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: logout_post
 }, Symbol.toStringTag, { value: 'Module' }));
 
 function getKVStorage(event) {
@@ -2468,15 +2609,26 @@ function handleApiError(error, defaultMessage, statusCode = 500) {
   throw createSafeError(statusCode, defaultMessage, error);
 }
 
-const _id__delete$a = defineEventHandler(async (event) => {
-  const authHeader = getHeader(event, "authorization");
-  const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
-  if (!adminPassword || authHeader !== `Bearer ${adminPassword}`) {
-    throw createError({
-      statusCode: 401,
-      message: "\u672A\u6388\u6743\u8BBF\u95EE"
-    });
+async function verifyAuth(event) {
+  await requireAuth(event);
+}
+async function isAdmin(event) {
+  try {
+    await requireAuth(event);
+    return true;
+  } catch {
+    return false;
   }
+}
+
+const auth = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  isAdmin: isAdmin,
+  verifyAuth: verifyAuth
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const _id__delete$a = defineEventHandler(async (event) => {
+  await verifyAuth(event);
   const id = getRouterParam(event, "id");
   if (!id) {
     throw createError({
@@ -2584,14 +2736,7 @@ function validateAndTrim(value, maxLength, fieldName) {
 }
 
 const _id__put$6 = defineEventHandler(async (event) => {
-  const authHeader = getHeader(event, "authorization");
-  const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
-  if (!adminPassword || authHeader !== `Bearer ${adminPassword}`) {
-    throw createError({
-      statusCode: 401,
-      message: "\u672A\u6388\u6743\u8BBF\u95EE"
-    });
-  }
+  await verifyAuth(event);
   const id = getRouterParam(event, "id");
   const body = await readBody(event);
   if (!id) {
@@ -2683,14 +2828,7 @@ const index_get$9 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePropert
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const index_post$8 = defineEventHandler(async (event) => {
-  const authHeader = getHeader(event, "authorization");
-  const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
-  if (!adminPassword || authHeader !== `Bearer ${adminPassword}`) {
-    throw createError({
-      statusCode: 401,
-      message: "\u672A\u6388\u6743\u8BBF\u95EE"
-    });
-  }
+  await verifyAuth(event);
   const body = await readBody(event);
   const name = validateAndTrim(body.name, FIELD_LIMITS.BOOKMARK_NAME, "\u4E66\u7B7E\u540D\u79F0");
   const url = validateAndTrim(body.url, FIELD_LIMITS.BOOKMARK_URL, "\u4E66\u7B7E\u94FE\u63A5");
@@ -2742,14 +2880,7 @@ const index_post$9 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProper
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const _id__delete$8 = defineEventHandler(async (event) => {
-  const authHeader = getHeader(event, "authorization");
-  const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
-  if (!adminPassword || authHeader !== `Bearer ${adminPassword}`) {
-    throw createError({
-      statusCode: 401,
-      message: "\u672A\u6388\u6743\u8BBF\u95EE"
-    });
-  }
+  await verifyAuth(event);
   const id = getRouterParam(event, "id");
   if (!id) {
     throw createError({
@@ -2810,14 +2941,7 @@ const index_get$7 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePropert
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const index_post$6 = defineEventHandler(async (event) => {
-  const authHeader = getHeader(event, "authorization");
-  const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
-  if (!adminPassword || authHeader !== `Bearer ${adminPassword}`) {
-    throw createError({
-      statusCode: 401,
-      message: "\u672A\u6388\u6743\u8BBF\u95EE"
-    });
-  }
+  await verifyAuth(event);
   const body = await readBody(event);
   const name = validateAndTrim(body.name, FIELD_LIMITS.FRIEND_NAME, "\u7F51\u7AD9\u540D\u79F0");
   const url = validateAndTrim(body.url, FIELD_LIMITS.FRIEND_URL, "\u7F51\u7AD9\u94FE\u63A5");
@@ -2870,14 +2994,7 @@ const index_post$7 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProper
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const requests_get = defineEventHandler(async (event) => {
-  const authHeader = getHeader(event, "authorization");
-  const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
-  if (!adminPassword || authHeader !== `Bearer ${adminPassword}`) {
-    throw createError({
-      statusCode: 401,
-      message: "\u672A\u6388\u6743\u8BBF\u95EE"
-    });
-  }
+  await verifyAuth(event);
   try {
     const kv = getKVStorage(event);
     const requestsListKey = "friend-requests:list";
@@ -2984,14 +3101,7 @@ const requests_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePro
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const _id__delete$6 = defineEventHandler(async (event) => {
-  const authHeader = getHeader(event, "authorization");
-  const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
-  if (!adminPassword || authHeader !== `Bearer ${adminPassword}`) {
-    throw createError({
-      statusCode: 401,
-      message: "\u672A\u6388\u6743\u8BBF\u95EE"
-    });
-  }
+  await verifyAuth(event);
   const id = getRouterParam(event, "id");
   if (!id) {
     throw createError({
@@ -3022,14 +3132,7 @@ const _id__delete$7 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePrope
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const _id__put$4 = defineEventHandler(async (event) => {
-  const authHeader = getHeader(event, "authorization");
-  const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
-  if (!adminPassword || authHeader !== `Bearer ${adminPassword}`) {
-    throw createError({
-      statusCode: 401,
-      message: "\u672A\u6388\u6743\u8BBF\u95EE"
-    });
-  }
+  await verifyAuth(event);
   const id = getRouterParam(event, "id");
   const body = await readBody(event);
   if (!id) {
@@ -3093,14 +3196,7 @@ const _id__put$5 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const _id__delete$4 = defineEventHandler(async (event) => {
-  const authHeader = getHeader(event, "authorization");
-  const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
-  if (!adminPassword || authHeader !== `Bearer ${adminPassword}`) {
-    throw createError({
-      statusCode: 401,
-      message: "\u672A\u6388\u6743\u8BBF\u95EE"
-    });
-  }
+  await verifyAuth(event);
   const kv = getKVStorage(event);
   const id = getRouterParam(event, "id");
   if (!id) {
@@ -3206,9 +3302,13 @@ const index_post$4 = defineEventHandler(async (event) => {
       message: "\u90AE\u7BB1\u683C\u5F0F\u4E0D\u6B63\u786E"
     });
   }
-  const authHeader = getHeader(event, "authorization");
-  const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
-  const isAdmin = adminPassword && authHeader === `Bearer ${adminPassword}`;
+  const { isAdmin: checkIsAdmin } = await Promise.resolve().then(function () { return auth; });
+  let isAdmin = await checkIsAdmin(event);
+  if (!isAdmin) {
+    const authHeader = getHeader(event, "authorization");
+    const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
+    isAdmin = adminPassword && authHeader === `Bearer ${adminPassword}`;
+  }
   if (!isAdmin) {
     const turnstileSecretKey = useRuntimeConfig().turnstileSecretKey || process.env.TURNSTILE_SECRET_KEY;
     const turnstileToken = body.turnstileToken;
@@ -3276,14 +3376,7 @@ const index_post$5 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProper
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const _id__delete$2 = defineEventHandler(async (event) => {
-  const authHeader = getHeader(event, "authorization");
-  const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
-  if (!adminPassword || authHeader !== `Bearer ${adminPassword}`) {
-    throw createError({
-      statusCode: 401,
-      message: "\u672A\u6388\u6743\u8BBF\u95EE"
-    });
-  }
+  await verifyAuth(event);
   const id = getRouterParam(event, "id");
   if (!id) {
     throw createError({
@@ -3350,14 +3443,7 @@ const _id__get$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty
 
 const _id__put$2 = defineEventHandler(async (event) => {
   var _a, _b, _c, _d;
-  const authHeader = getHeader(event, "authorization");
-  const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
-  if (!adminPassword || authHeader !== `Bearer ${adminPassword}`) {
-    throw createError({
-      statusCode: 401,
-      message: "\u672A\u6388\u6743\u8BBF\u95EE"
-    });
-  }
+  await verifyAuth(event);
   const id = getRouterParam(event, "id");
   const body = await readBody(event);
   if (!id) {
@@ -3476,14 +3562,7 @@ const index_get$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePropert
 
 const index_post$2 = defineEventHandler(async (event) => {
   var _a, _b;
-  const authHeader = getHeader(event, "authorization");
-  const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
-  if (!adminPassword || authHeader !== `Bearer ${adminPassword}`) {
-    throw createError({
-      statusCode: 401,
-      message: "\u672A\u6388\u6743\u8BBF\u95EE"
-    });
-  }
+  await verifyAuth(event);
   const body = await readBody(event);
   const content = validateAndTrim(body.content, FIELD_LIMITS.MOMENT_CONTENT, "\u52A8\u6001\u5185\u5BB9");
   const nickname = ((_a = body.author) == null ? void 0 : _a.nickname) ? validateAndTrim(body.author.nickname, FIELD_LIMITS.MOMENT_NICKNAME, "\u6635\u79F0") : "Leyili";
@@ -3537,14 +3616,7 @@ const index_post$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProper
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const _id__delete = defineEventHandler(async (event) => {
-  const authHeader = getHeader(event, "authorization");
-  const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
-  if (!adminPassword || authHeader !== `Bearer ${adminPassword}`) {
-    throw createError({
-      statusCode: 401,
-      message: "\u672A\u6388\u6743\u8BBF\u95EE"
-    });
-  }
+  await verifyAuth(event);
   const id = getRouterParam(event, "id");
   const kv = getKVStorage(event);
   if (!id) {
@@ -3584,6 +3656,43 @@ const _id__delete$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePrope
   default: _id__delete
 }, Symbol.toStringTag, { value: 'Module' }));
 
+function setCacheHeaders(event, maxAge = 300, staleWhileRevalidate = 0, mustRevalidate = false) {
+  let cacheControl = `public, max-age=${maxAge}`;
+  if (staleWhileRevalidate > 0) {
+    cacheControl += `, stale-while-revalidate=${staleWhileRevalidate}`;
+  }
+  if (mustRevalidate) {
+    cacheControl += ", must-revalidate";
+  }
+  setHeader(event, "Cache-Control", cacheControl);
+  const etag = `"${Date.now()}"`;
+  setHeader(event, "ETag", etag);
+}
+function setPostsListCacheHeaders(event) {
+  setCacheHeaders(event, 120, 300, false);
+}
+function setPostDetailCacheHeaders(event) {
+  setCacheHeaders(event, 3600, 86400, false);
+}
+function checkETag(event, etag) {
+  const ifNoneMatch = getHeader(event, "if-none-match");
+  if (ifNoneMatch && ifNoneMatch === etag) {
+    setResponseStatus(event, 304);
+    return true;
+  }
+  return false;
+}
+function generateETag(content) {
+  const contentStr = typeof content === "string" ? content : JSON.stringify(content);
+  let hash = 0;
+  for (let i = 0; i < contentStr.length; i++) {
+    const char = contentStr.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash;
+  }
+  return `"${Math.abs(hash).toString(16)}"`;
+}
+
 const _id__get = defineEventHandler(async (event) => {
   const id = getRouterParam(event, "id");
   if (!id) {
@@ -3602,10 +3711,17 @@ const _id__get = defineEventHandler(async (event) => {
         message: "\u6587\u7AE0\u4E0D\u5B58\u5728"
       });
     }
-    return {
+    const responseData = {
       success: true,
       data: postData
     };
+    const etag = generateETag(responseData);
+    if (checkETag(event, etag)) {
+      return;
+    }
+    setPostDetailCacheHeaders(event);
+    setHeader(event, "ETag", etag);
+    return responseData;
   } catch (error) {
     if (error.statusCode) {
       throw error;
@@ -3620,14 +3736,7 @@ const _id__get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const _id__put = defineEventHandler(async (event) => {
-  const authHeader = getHeader(event, "authorization");
-  const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
-  if (!adminPassword || authHeader !== `Bearer ${adminPassword}`) {
-    throw createError({
-      statusCode: 401,
-      message: "\u672A\u6388\u6743\u8BBF\u95EE"
-    });
-  }
+  await verifyAuth(event);
   const id = getRouterParam(event, "id");
   const body = await readBody(event);
   const kv = getKVStorage(event);
@@ -3721,10 +3830,17 @@ const index_get = defineEventHandler(async (event) => {
       const dateB = b.date ? new Date(b.date).getTime() : 0;
       return dateB - dateA;
     });
-    return {
+    const responseData = {
       success: true,
       data: posts
     };
+    const etag = generateETag(responseData);
+    if (checkETag(event, etag)) {
+      return;
+    }
+    setPostsListCacheHeaders(event);
+    setHeader(event, "ETag", etag);
+    return responseData;
   } catch (error) {
     const isProd = process.env.NITRO_PRESET === "cloudflare-pages";
     return {
@@ -3740,14 +3856,7 @@ const index_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePropert
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const index_post = defineEventHandler(async (event) => {
-  const authHeader = getHeader(event, "authorization");
-  const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
-  if (!adminPassword || authHeader !== `Bearer ${adminPassword}`) {
-    throw createError({
-      statusCode: 401,
-      message: "\u672A\u6388\u6743\u8BBF\u95EE"
-    });
-  }
+  await verifyAuth(event);
   const body = await readBody(event);
   const kv = getKVStorage(event);
   const title = validateAndTrim(body.title, FIELD_LIMITS.POST_TITLE, "\u6807\u9898");
@@ -3851,14 +3960,7 @@ const ____path__get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePro
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const image_post = defineEventHandler(async (event) => {
-  const authHeader = getHeader(event, "authorization");
-  const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
-  if (!adminPassword || authHeader !== `Bearer ${adminPassword}`) {
-    throw createError({
-      statusCode: 401,
-      message: "\u672A\u6388\u6743\u8BBF\u95EE"
-    });
-  }
+  await verifyAuth(event);
   try {
     const formData = await readFormData(event);
     const file = formData.get("file");

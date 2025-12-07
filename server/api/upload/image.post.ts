@@ -1,18 +1,11 @@
 import { getR2Storage, generateFileName, isValidImageType } from '~/server/utils/r2';
 import { handleApiError } from '~/server/utils/errorHandler';
+import { verifyAuth } from '~/server/utils/auth';
 
 // 上传图片到 R2
 export default defineEventHandler(async (event) => {
-  // 验证身份
-  const authHeader = getHeader(event, 'authorization');
-  const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
-  
-  if (!adminPassword || authHeader !== `Bearer ${adminPassword}`) {
-    throw createError({
-      statusCode: 401,
-      message: '未授权访问'
-    });
-  }
+  // 验证身份（使用加密的 session cookie）
+  await verifyAuth(event);
 
   try {
     // 获取上传的文件

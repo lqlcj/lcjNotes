@@ -812,22 +812,28 @@
     }
   };
 
-  // 检查是否已登录
+  // 检查是否已登录（通过 API 检查 session cookie）
   onMounted(async () => {
-    const token = localStorage.getItem('admin_token');
-    if (token) {
-      isAuthenticated.value = true;
-      loadPosts();
-      loadMessages();
-      loadFriendsRequests();
-      loadApprovedFriends();
-      loadMoments();
-      loadBookmarks();
-    } else {
-      // 如果未登录，等待 DOM 渲染后加载 Turnstile
-      // 使用 watch 监听 isAuthenticated，确保登录表单显示后再加载
+    try {
+      const response = await $fetch('/api/auth/check');
+      if (response.authenticated) {
+        isAuthenticated.value = true;
+        loadPosts();
+        loadMessages();
+        loadFriendsRequests();
+        loadApprovedFriends();
+        loadMoments();
+        loadBookmarks();
+      } else {
+        // 如果未登录，等待 DOM 渲染后加载 Turnstile
+        await nextTick();
+        setTimeout(() => {
+          loadTurnstile();
+        }, 300);
+      }
+    } catch (error) {
+      // 检查失败，显示登录表单
       await nextTick();
-      // 延迟加载，确保登录表单已完全渲染
       setTimeout(() => {
         loadTurnstile();
       }, 300);
@@ -869,13 +875,17 @@
       });
 
       if (response.success) {
-        localStorage.setItem('admin_token', response.token);
+        // Session cookie 已自动设置，无需手动存储
         isAuthenticated.value = true;
         loginUsername.value = '';
         loginPassword.value = '';
         resetTurnstile();
         loadPosts();
         loadMessages();
+        loadFriendsRequests();
+        loadApprovedFriends();
+        loadMoments();
+        loadBookmarks();
       }
     } catch (error) {
       loginError.value = error?.data?.message || '登录失败';
@@ -889,8 +899,12 @@
   };
 
   // 退出登录
-  const handleLogout = () => {
-    localStorage.removeItem('admin_token');
+  const handleLogout = async () => {
+    try {
+      await $fetch('/api/auth/logout', { method: 'POST' });
+    } catch (error) {
+      console.error('登出失败:', error);
+    }
     isAuthenticated.value = false;
     posts.value = [];
   };
@@ -944,13 +958,11 @@
       return;
     }
 
-    const token = localStorage.getItem('admin_token');
+    // 使用 session cookie，无需手动设置 token
     try {
       const response = await $fetch(`/api/posts/${id}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        // Cookie 会自动发送，无需手动设置 headers
       });
 
       if (response.success) {
@@ -965,7 +977,7 @@
   // 提交表单
   const handleSubmit = async () => {
     submitting.value = true;
-    const token = localStorage.getItem('admin_token');
+    // 使用 session cookie，无需手动设置 token
 
     try {
       if (editingPost.value) {
@@ -973,7 +985,7 @@
         const response = await $fetch(`/api/posts/${editingPost.value.id}`, {
           method: 'PUT',
           headers: {
-            'Authorization': `Bearer ${token}`
+            // Cookie 会自动发送，无需手动设置 Authorization header
           },
           body: formData.value
         });
@@ -988,7 +1000,7 @@
         const response = await $fetch('/api/posts', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${token}`
+            // Cookie 会自动发送，无需手动设置 Authorization header
           },
           body: formData.value
         });
@@ -1062,7 +1074,7 @@
   const uploadImage = async (file) => {
     uploading.value = true;
     uploadProgress.value = 0;
-    const token = localStorage.getItem('admin_token');
+    // 使用 session cookie，无需手动设置 token
 
     try {
       const formDataToSend = new FormData();
@@ -1077,9 +1089,7 @@
 
       const response = await $fetch('/api/upload/image', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
+        // Cookie 会自动发送，无需手动设置 headers,
         body: formDataToSend
       });
 
@@ -1166,7 +1176,7 @@
   const uploadMomentImage = async (file) => {
     uploadingMomentImages.value = true;
     momentUploadProgress.value = 0;
-    const token = localStorage.getItem('admin_token');
+    // 使用 session cookie，无需手动设置 token
 
     try {
       const formDataToSend = new FormData();
@@ -1181,9 +1191,7 @@
 
       const response = await $fetch('/api/upload/image', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
+        // Cookie 会自动发送，无需手动设置 headers,
         body: formDataToSend
       });
 
@@ -1236,13 +1244,11 @@
       return;
     }
 
-    const token = localStorage.getItem('admin_token');
+    // 使用 session cookie，无需手动设置 token
     try {
       const response = await $fetch(`/api/messages/${id}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        // Cookie 会自动发送，无需手动设置 headers
       });
 
       if (response.success) {
@@ -1270,14 +1276,12 @@
   // 提交留言表单
   const handleMessageSubmit = async () => {
     submittingMessage.value = true;
-    const token = localStorage.getItem('admin_token');
+    // 使用 session cookie，无需手动设置 token
 
     try {
       const response = await $fetch('/api/messages', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
+        // Cookie 会自动发送，无需手动设置 headers,
         body: {
           name: messageForm.value.name,
           email: messageForm.value.email,
@@ -1314,12 +1318,10 @@
   // 加载友链申请列表
   const loadFriendsRequests = async () => {
     friendsRequestsLoading.value = true;
-    const token = localStorage.getItem('admin_token');
+    // 使用 session cookie，无需手动设置 token
     try {
       const response = await $fetch('/api/friends/requests', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        // Cookie 会自动发送，无需手动设置 headers
       });
       if (response.success) {
         friendsRequests.value = response.data;
@@ -1352,13 +1354,11 @@
       return;
     }
 
-    const token = localStorage.getItem('admin_token');
+    // 使用 session cookie，无需手动设置 token
     try {
       const response = await $fetch(`/api/friends/requests/${id}`, {
         method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
+        // Cookie 会自动发送，无需手动设置 headers,
         body: {
           status: 'approved'
         }
@@ -1380,13 +1380,11 @@
       return;
     }
 
-    const token = localStorage.getItem('admin_token');
+    // 使用 session cookie，无需手动设置 token
     try {
       const response = await $fetch(`/api/friends/requests/${id}`, {
         method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
+        // Cookie 会自动发送，无需手动设置 headers,
         body: {
           status: 'rejected'
         }
@@ -1407,13 +1405,11 @@
       return;
     }
 
-    const token = localStorage.getItem('admin_token');
+    // 使用 session cookie，无需手动设置 token
     try {
       const response = await $fetch(`/api/friends/requests/${id}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        // Cookie 会自动发送，无需手动设置 headers
       });
 
       if (response.success) {
@@ -1431,13 +1427,11 @@
       return;
     }
 
-    const token = localStorage.getItem('admin_token');
+    // 使用 session cookie，无需手动设置 token
     try {
       const response = await $fetch(`/api/friends/${id}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        // Cookie 会自动发送，无需手动设置 headers
       });
 
       if (response.success) {
@@ -1481,14 +1475,12 @@
     }
 
     submittingFriend.value = true;
-    const token = localStorage.getItem('admin_token');
+    // 使用 session cookie，无需手动设置 token
 
     try {
       const response = await $fetch('/api/friends', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
+        // Cookie 会自动发送，无需手动设置 headers,
         body: {
           name: friendForm.value.name,
           url: friendForm.value.url,
@@ -1556,13 +1548,11 @@
       return;
     }
 
-    const token = localStorage.getItem('admin_token');
+    // 使用 session cookie，无需手动设置 token
     try {
       const response = await $fetch(`/api/moments/${id}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        // Cookie 会自动发送，无需手动设置 headers
       });
 
       if (response.success) {
@@ -1582,7 +1572,7 @@
     }
 
     submittingMoment.value = true;
-    const token = localStorage.getItem('admin_token');
+    // 使用 session cookie，无需手动设置 token
 
     try {
       // 准备提交的数据
@@ -1602,7 +1592,7 @@
         const response = await $fetch(`/api/moments/${editingMoment.value.id}`, {
           method: 'PUT',
           headers: {
-            'Authorization': `Bearer ${token}`
+            // Cookie 会自动发送，无需手动设置 Authorization header
           },
           body: submitData
         });
@@ -1619,7 +1609,7 @@
         const response = await $fetch('/api/moments', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${token}`
+            // Cookie 会自动发送，无需手动设置 Authorization header
           },
           body: submitData
         });
@@ -1690,13 +1680,11 @@
   const deleteBookmark = async (id) => {
     if (!confirm('确定要删除这个书签吗？')) return;
 
-    const token = localStorage.getItem('admin_token');
+    // 使用 session cookie，无需手动设置 token
     try {
       const response = await $fetch(`/api/bookmarks/${id}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        // Cookie 会自动发送，无需手动设置 headers
       });
 
       if (response.success) {
@@ -1718,7 +1706,7 @@
     }
 
     submittingBookmark.value = true;
-    const token = localStorage.getItem('admin_token');
+    // 使用 session cookie，无需手动设置 token
 
     try {
       if (editingBookmark.value) {
@@ -1726,7 +1714,7 @@
         const response = await $fetch(`/api/bookmarks/${editingBookmark.value.id}`, {
           method: 'PUT',
           headers: {
-            'Authorization': `Bearer ${token}`
+            // Cookie 会自动发送，无需手动设置 Authorization header
           },
           body: bookmarkFormData.value
         });
@@ -1743,7 +1731,7 @@
         const response = await $fetch('/api/bookmarks', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${token}`
+            // Cookie 会自动发送，无需手动设置 Authorization header
           },
           body: bookmarkFormData.value
         });

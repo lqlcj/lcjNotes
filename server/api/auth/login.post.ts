@@ -1,4 +1,5 @@
 import { verifyTurnstile } from '~/server/utils/turnstile';
+import { createSession } from '~/server/utils/session';
 
 // 登录验证
 export default defineEventHandler(async (event) => {
@@ -56,10 +57,16 @@ export default defineEventHandler(async (event) => {
     });
   }
   
-  // 用户名和密码都正确
+  // 用户名和密码都正确，创建加密的 session cookie
+  await createSession(event, {
+    username: adminUsername,
+    loginTime: Date.now()
+  });
+  
+  // 不返回 token，session 已通过 HttpOnly Cookie 设置
   return {
     success: true,
-    token: adminPassword // 简单实现，实际应该使用 JWT
+    message: '登录成功'
   };
 });
 

@@ -31,10 +31,16 @@ export default defineEventHandler(async (event) => {
     });
   }
   
-  // 检查是否是管理员创建（带认证token）
-  const authHeader = getHeader(event, 'authorization');
-  const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
-  const isAdmin = adminPassword && authHeader === `Bearer ${adminPassword}`;
+  // 检查是否是管理员创建（使用 session cookie 或兼容旧的 Bearer token）
+  const { isAdmin: checkIsAdmin } = await import('~/server/utils/auth');
+  let isAdmin = await checkIsAdmin(event);
+  
+  // 兼容旧的 Bearer token 方式（向后兼容）
+  if (!isAdmin) {
+    const authHeader = getHeader(event, 'authorization');
+    const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
+    isAdmin = adminPassword && authHeader === `Bearer ${adminPassword}`;
+  }
   
   // 如果不是管理员，验证 Turnstile token
   if (!isAdmin) {

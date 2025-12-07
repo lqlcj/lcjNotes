@@ -1,2 +1,0 @@
-import"G:/lcjNotes/lcjNotes/node_modules/vue/index.mjs";import"G:/lcjNotes/lcjNotes/node_modules/hookable/dist/index.mjs";import"../../server.mjs";const o="[nuxt] `setInterval` should not be used on the server. Consider wrapping it with an `onNuxtReady`, `onBeforeMount` or `onMounted` lifecycle hook, or ensure you only call it in the browser by checking `false`.",t=()=>{console.error(o)};export{t as s};
-//# sourceMappingURL=interval-xIO1VTFX.js.map

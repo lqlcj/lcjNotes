@@ -89,6 +89,8 @@ declare module 'nuxt/schema' {
 
    adminPassword: string,
 
+   sessionSecret: string,
+
    r2PublicUrl: string,
 
    turnstileSecretKey: string,
