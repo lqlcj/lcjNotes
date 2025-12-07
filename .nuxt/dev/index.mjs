@@ -1458,7 +1458,22 @@ const plugins = [
 _KALrG6HWC5DsF1iB5xLtcxqD_gXRBB5_KIe3mv6Ln4
 ];
 
-const assets = {};
+const assets = {
+  "/index.mjs": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"25b85-ddVYG3OY1EH7DclwM8y9+F567YY\"",
+    "mtime": "2025-12-07T22:17:18.930Z",
+    "size": 154501,
+    "path": "index.mjs"
+  },
+  "/index.mjs.map": {
+    "type": "application/json",
+    "etag": "\"8920d-W8Iul99xin55PySDmFoRg+wBXQo\"",
+    "mtime": "2025-12-07T22:17:18.931Z",
+    "size": 561677,
+    "path": "index.mjs.map"
+  }
+};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));
@@ -3443,19 +3458,45 @@ const index_get$4 = defineEventHandler(async (event) => {
           content: messageData.content || "",
           date: messageData.date || "",
           avatar: messageData.avatar || "",
-          website: messageData.website || ""
-          // 不返回敏感信息给前端
+          website: messageData.website || "",
+          parentId: messageData.parentId || null,
+          replies: []
+          // 用于存储子回复
         });
       }
     }
-    messages.sort((a, b) => {
-      const dateA = a.date ? new Date(a.date).getTime() : 0;
-      const dateB = b.date ? new Date(b.date).getTime() : 0;
-      return dateB - dateA;
+    const messageMap = /* @__PURE__ */ new Map();
+    const rootMessages = [];
+    messages.forEach((msg) => {
+      messageMap.set(msg.id, msg);
     });
+    messages.forEach((msg) => {
+      if (msg.parentId && messageMap.has(msg.parentId)) {
+        const parent = messageMap.get(msg.parentId);
+        if (!parent.replies) {
+          parent.replies = [];
+        }
+        parent.replies.push(msg);
+      } else {
+        rootMessages.push(msg);
+      }
+    });
+    const sortMessages = (msgs) => {
+      msgs.sort((a, b) => {
+        const dateA = a.date ? new Date(a.date).getTime() : 0;
+        const dateB = b.date ? new Date(b.date).getTime() : 0;
+        return dateB - dateA;
+      });
+      msgs.forEach((msg) => {
+        if (msg.replies && msg.replies.length > 0) {
+          sortMessages(msg.replies);
+        }
+      });
+    };
+    sortMessages(rootMessages);
     return {
       success: true,
-      data: messages
+      data: rootMessages
     };
   } catch (error) {
     const isProd = process.env.NITRO_PRESET === "cloudflare-pages";
@@ -3480,11 +3521,22 @@ const index_post$4 = defineEventHandler(async (event) => {
   const email = body.email ? validateAndTrim(body.email, FIELD_LIMITS.MESSAGE_EMAIL, "\u90AE\u7BB1") : "";
   const website = body.website ? validateAndTrim(body.website, FIELD_LIMITS.MESSAGE_WEBSITE, "\u7F51\u7AD9") : "";
   const avatar = body.avatar ? validateAndTrim(body.avatar, FIELD_LIMITS.FRIEND_AVATAR, "\u5934\u50CF") : "";
+  const parentId = body.parentId ? String(body.parentId).trim() : null;
   if (!name || !content) {
     throw createError({
       statusCode: 400,
       message: "\u59D3\u540D\u548C\u7559\u8A00\u5185\u5BB9\u4E0D\u80FD\u4E3A\u7A7A"
     });
+  }
+  if (parentId) {
+    const parentKey = `message:${parentId}`;
+    const parentMessage = await kv.getItem(parentKey);
+    if (!parentMessage) {
+      throw createError({
+        statusCode: 400,
+        message: "\u7236\u7559\u8A00\u4E0D\u5B58\u5728"
+      });
+    }
   }
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     throw createError({
@@ -3538,6 +3590,7 @@ const index_post$4 = defineEventHandler(async (event) => {
       date: messageDate,
       avatar,
       website,
+      parentId: parentId || null,
       ip: isAdmin ? "admin" : event.headers.get("cf-connecting-ip") || event.headers.get("x-forwarded-for") || "unknown"
     };
     const messageKey = `message:${newId}`;
@@ -3552,7 +3605,8 @@ const index_post$4 = defineEventHandler(async (event) => {
         content: messageData.content,
         date: messageData.date,
         avatar: messageData.avatar,
-        website: messageData.website
+        website: messageData.website,
+        parentId: messageData.parentId
       }
     };
   } catch (error) {

@@ -25,21 +25,56 @@ export default defineEventHandler(async (event) => {
           date: messageData.date || '',
           avatar: messageData.avatar || '',
           website: messageData.website || '',
-          // 不返回敏感信息给前端
+          parentId: messageData.parentId || null,
+          replies: [] // 用于存储子回复
         });
       }
     }
     
-    // 按日期降序排序（最新的在前）
-    messages.sort((a, b) => {
-      const dateA = a.date ? new Date(a.date).getTime() : 0;
-      const dateB = b.date ? new Date(b.date).getTime() : 0;
-      return dateB - dateA;
+    // 构建树形结构
+    const messageMap = new Map();
+    const rootMessages = [];
+    
+    // 先创建所有消息的映射
+    messages.forEach(msg => {
+      messageMap.set(msg.id, msg);
     });
+    
+    // 构建树形结构
+    messages.forEach(msg => {
+      if (msg.parentId && messageMap.has(msg.parentId)) {
+        // 这是回复，添加到父消息的 replies 数组
+        const parent = messageMap.get(msg.parentId);
+        if (!parent.replies) {
+          parent.replies = [];
+        }
+        parent.replies.push(msg);
+      } else {
+        // 这是顶级留言
+        rootMessages.push(msg);
+      }
+    });
+    
+    // 对顶级留言和回复都按日期降序排序
+    const sortMessages = (msgs) => {
+      msgs.sort((a, b) => {
+        const dateA = a.date ? new Date(a.date).getTime() : 0;
+        const dateB = b.date ? new Date(b.date).getTime() : 0;
+        return dateB - dateA;
+      });
+      // 递归排序回复
+      msgs.forEach(msg => {
+        if (msg.replies && msg.replies.length > 0) {
+          sortMessages(msg.replies);
+        }
+      });
+    };
+    
+    sortMessages(rootMessages);
     
     return {
       success: true,
-      data: messages
+      data: rootMessages
     };
   } catch (error: any) {
     // 使用安全的错误处理，但 GET 请求返回错误对象而不是抛出

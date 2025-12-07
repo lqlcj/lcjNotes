@@ -15,6 +15,7 @@ export default defineEventHandler(async (event) => {
   const email = body.email ? validateAndTrim(body.email, FIELD_LIMITS.MESSAGE_EMAIL, '邮箱') : '';
   const website = body.website ? validateAndTrim(body.website, FIELD_LIMITS.MESSAGE_WEBSITE, '网站') : '';
   const avatar = body.avatar ? validateAndTrim(body.avatar, FIELD_LIMITS.FRIEND_AVATAR, '头像') : '';
+  const parentId = body.parentId ? String(body.parentId).trim() : null;
   
   // 验证必填字段
   if (!name || !content) {
@@ -22,6 +23,18 @@ export default defineEventHandler(async (event) => {
       statusCode: 400,
       message: '姓名和留言内容不能为空'
     });
+  }
+  
+  // 如果提供了 parentId，验证父留言是否存在
+  if (parentId) {
+    const parentKey = `message:${parentId}`;
+    const parentMessage = await kv.getItem(parentKey);
+    if (!parentMessage) {
+      throw createError({
+        statusCode: 400,
+        message: '父留言不存在'
+      });
+    }
   }
   
   // 验证邮箱格式（如果提供了邮箱）
@@ -101,6 +114,7 @@ export default defineEventHandler(async (event) => {
       date: messageDate,
       avatar: avatar,
       website: website,
+      parentId: parentId || null,
       ip: isAdmin ? 'admin' : (event.headers.get('cf-connecting-ip') || event.headers.get('x-forwarded-for') || 'unknown')
     };
     
@@ -120,7 +134,8 @@ export default defineEventHandler(async (event) => {
         content: messageData.content,
         date: messageData.date,
         avatar: messageData.avatar,
-        website: messageData.website
+        website: messageData.website,
+        parentId: messageData.parentId
       }
     };
   } catch (error: any) {

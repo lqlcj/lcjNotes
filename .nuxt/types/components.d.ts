@@ -17,6 +17,7 @@ interface _GlobalComponents {
   'BackToTop': typeof import("../../components/BackToTop/BackToTop.vue")['default']
   'CommentsGiscus': typeof import("../../components/Comments/Giscus.vue")['default']
   'CommentsGuestbook': typeof import("../../components/Comments/Guestbook.vue")['default']
+  'CommentsMessageItem': typeof import("../../components/Comments/MessageItem.vue")['default']
   'CommonLoadingMessage': typeof import("../../components/Common/LoadingMessage.vue")['default']
   'CommonOutlineButton': typeof import("../../components/Common/OutlineButton.vue")['default']
   'CommonPageLoading': typeof import("../../components/Common/PageLoading.vue")['default']
@@ -53,6 +54,7 @@ interface _GlobalComponents {
   'LazyBackToTop': LazyComponent<typeof import("../../components/BackToTop/BackToTop.vue")['default']>
   'LazyCommentsGiscus': LazyComponent<typeof import("../../components/Comments/Giscus.vue")['default']>
   'LazyCommentsGuestbook': LazyComponent<typeof import("../../components/Comments/Guestbook.vue")['default']>
+  'LazyCommentsMessageItem': LazyComponent<typeof import("../../components/Comments/MessageItem.vue")['default']>
   'LazyCommonLoadingMessage': LazyComponent<typeof import("../../components/Common/LoadingMessage.vue")['default']>
   'LazyCommonOutlineButton': LazyComponent<typeof import("../../components/Common/OutlineButton.vue")['default']>
   'LazyCommonPageLoading': LazyComponent<typeof import("../../components/Common/PageLoading.vue")['default']>

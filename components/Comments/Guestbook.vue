@@ -71,25 +71,13 @@
           <p>还没有留言，快来成为第一个留言的人吧！</p>
         </div>
         <div v-else class="messages">
-          <div v-for="message in messages" :key="message.id" class="message-item glass-card">
-            <div class="message-header">
-              <div class="message-author">
-                <div class="message-avatar">
-                  {{ message.name.charAt(0).toUpperCase() }}
-                </div>
-                <div class="message-info">
-                  <h4>{{ message.name }}</h4>
-                  <span class="message-date">{{ formatDate(message.date) }}</span>
-                </div>
-              </div>
-              <a v-if="message.website" :href="message.website" target="_blank" class="message-website-link">
-                🔗
-              </a>
-            </div>
-            <div class="message-content">
-              {{ message.content }}
-            </div>
-          </div>
+          <MessageItem
+            v-for="message in messages"
+            :key="message.id"
+            :message="message"
+            :turnstile-site-key="turnstileSiteKey"
+            @reload="loadMessages"
+          />
         </div>
       </div>
     </div>
@@ -100,6 +88,7 @@
   import { ref, onMounted, onUnmounted, watch } from 'vue';
   import { useConfetti } from '~/composables/useConfetti';
   import LoadingMessage from '~/components/Common/LoadingMessage.vue';
+  import MessageItem from '~/components/Comments/MessageItem.vue';
 
   // 展开/收起状态
   const isExpanded = ref(false);
@@ -519,98 +508,6 @@
     display: flex;
     flex-direction: column;
     gap: 15px;
-  }
-
-  .message-item {
-    padding: 15px;
-    margin: 0;
-    transition: all 0.3s ease-in-out;
-    cursor: default;
-  }
-
-  .message-item:hover {
-    transform: translateY(-2px);
-    box-shadow:
-      0 6px 16px rgba(104, 68, 77, 0.15),
-      0 3px 8px rgba(255, 165, 0, 0.08);
-    border-color: rgba(104, 68, 77, 0.3);
-  }
-
-  .message-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: start;
-    margin-bottom: 12px;
-  }
-
-  .message-author {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex: 1;
-  }
-
-  .message-avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: #68444d;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    font-size: 16px;
-    flex-shrink: 0;
-    transition: all 0.3s ease;
-  }
-
-  .message-item:hover .message-avatar {
-    transform: scale(1.1);
-    background: linear-gradient(135deg, #68444d 0%, #8b5a6b 100%);
-    box-shadow:
-      0 2px 8px rgba(104, 68, 77, 0.3),
-      0 1px 4px rgba(255, 165, 0, 0.1);
-  }
-
-  .message-info h4 {
-    margin: 0 0 4px 0;
-    color: #333;
-    font-size: 15px;
-  }
-
-  .message-date {
-    font-size: 12px;
-    color: #999;
-  }
-
-  .message-content {
-    color: #555;
-    line-height: 1.6;
-    word-break: break-word;
-    white-space: pre-wrap;
-  }
-
-  .message-website-link {
-    color: #68444d;
-    text-decoration: none;
-    font-size: 18px;
-    opacity: 0.7;
-    transition: all 0.3s ease-in-out;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: rgba(104, 68, 77, 0.08);
-  }
-
-  .message-website-link:hover {
-    opacity: 1;
-    transform: scale(1.15) rotate(15deg);
-    background: rgba(104, 68, 77, 0.2);
-    box-shadow: 0 2px 6px rgba(104, 68, 77, 0.2);
   }
 
   .turnstile-container {

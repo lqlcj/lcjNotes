@@ -17,6 +17,7 @@ type LazyComponent<T> = DefineComponent<HydrationStrategies, {}, {}, {}, {}, {},
 export const BackToTop: typeof import("../components/BackToTop/BackToTop.vue")['default']
 export const CommentsGiscus: typeof import("../components/Comments/Giscus.vue")['default']
 export const CommentsGuestbook: typeof import("../components/Comments/Guestbook.vue")['default']
+export const CommentsMessageItem: typeof import("../components/Comments/MessageItem.vue")['default']
 export const CommonLoadingMessage: typeof import("../components/Common/LoadingMessage.vue")['default']
 export const CommonOutlineButton: typeof import("../components/Common/OutlineButton.vue")['default']
 export const CommonPageLoading: typeof import("../components/Common/PageLoading.vue")['default']
@@ -53,6 +54,7 @@ export const NuxtIsland: typeof import("../node_modules/nuxt/dist/app/components
 export const LazyBackToTop: LazyComponent<typeof import("../components/BackToTop/BackToTop.vue")['default']>
 export const LazyCommentsGiscus: LazyComponent<typeof import("../components/Comments/Giscus.vue")['default']>
 export const LazyCommentsGuestbook: LazyComponent<typeof import("../components/Comments/Guestbook.vue")['default']>
+export const LazyCommentsMessageItem: LazyComponent<typeof import("../components/Comments/MessageItem.vue")['default']>
 export const LazyCommonLoadingMessage: LazyComponent<typeof import("../components/Common/LoadingMessage.vue")['default']>
 export const LazyCommonOutlineButton: LazyComponent<typeof import("../components/Common/OutlineButton.vue")['default']>
 export const LazyCommonPageLoading: LazyComponent<typeof import("../components/Common/PageLoading.vue")['default']>
