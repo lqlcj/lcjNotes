@@ -6,6 +6,15 @@
         <h2>后台管理登录</h2>
         <form @submit.prevent="handleLogin">
           <div class="form-group">
+            <label>用户名</label>
+            <input 
+              v-model="loginUsername" 
+              type="text" 
+              placeholder="请输入用户名"
+              required
+            />
+          </div>
+          <div class="form-group">
             <label>密码</label>
             <input 
               v-model="loginPassword" 
@@ -406,6 +415,7 @@ definePageMeta({
 });
 
 const isAuthenticated = ref(false);
+const loginUsername = ref('');
 const loginPassword = ref('');
 const loggingIn = ref(false);
 const loginError = ref('');
@@ -489,6 +499,7 @@ const handleLogin = async () => {
     const response = await $fetch('/api/auth/login', {
       method: 'POST',
       body: {
+        username: loginUsername.value,
         password: loginPassword.value
       }
     });
@@ -496,6 +507,7 @@ const handleLogin = async () => {
     if (response.success) {
       localStorage.setItem('admin_token', response.token);
       isAuthenticated.value = true;
+      loginUsername.value = '';
       loginPassword.value = '';
       loadPosts();
       loadMessages();

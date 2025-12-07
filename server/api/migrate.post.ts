@@ -5,7 +5,7 @@
  * 
  * 使用场景：
  * - 将现有的 posts/*.md 文件迁移到 Cloudflare KV
- * - 迁移完成后，后续文章管理通过 /admin 后台进行
+ * - 迁移完成后，后续文章管理通过 /login 后台进行
  * 
  * 使用方法：
  * 1. 在本地环境运行：curl -X POST http://localhost:3000/api/migrate -H "Authorization: Bearer YOUR_PASSWORD"

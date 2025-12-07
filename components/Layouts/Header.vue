@@ -10,9 +10,6 @@
       <NuxtLink to="/home" class="nav-link" active-class="select">
         Home
       </NuxtLink>
-      <NuxtLink to="/notes" class="nav-link" active-class="select">
-        Notes
-      </NuxtLink>
 
       <NuxtLink to="/friends" class="nav-link" :class="{ select: isFriendsGroupActive }">
         Friends

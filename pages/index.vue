@@ -187,7 +187,7 @@
   .scroll-indicator {
     font-size: 1rem;
     color: var(--text-soft);
-    animation: bounce 2s infinite;
+    animation: bounce 2s infinite ease-in-out;
     animation-delay: 0.2s;
     animation-fill-mode: both;
     transition: opacity 0.6s ease;
@@ -316,4 +316,3 @@
     }
   }
 </style>
-

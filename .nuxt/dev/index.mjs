@@ -2257,24 +2257,30 @@ const styles$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
 const login_post = defineEventHandler(async (event) => {
   const body = await readBody(event);
   const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
+  const adminUsername = "lcj";
   if (!adminPassword) {
     throw createError({
       statusCode: 500,
       message: "\u670D\u52A1\u5668\u672A\u914D\u7F6E\u7BA1\u7406\u5458\u5BC6\u7801"
     });
   }
-  if (body.password === adminPassword) {
-    return {
-      success: true,
-      token: adminPassword
-      // 简单实现，实际应该使用 JWT
-    };
-  } else {
+  if (body.username !== adminUsername) {
+    throw createError({
+      statusCode: 401,
+      message: "\u7528\u6237\u540D\u9519\u8BEF"
+    });
+  }
+  if (body.password !== adminPassword) {
     throw createError({
       statusCode: 401,
       message: "\u5BC6\u7801\u9519\u8BEF"
     });
   }
+  return {
+    success: true,
+    token: adminPassword
+    // 简单实现，实际应该使用 JWT
+  };
 });
 
 const login_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({

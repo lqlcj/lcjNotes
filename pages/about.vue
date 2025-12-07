@@ -23,7 +23,7 @@
 
           <section>
             <h3>⚡ Powered By</h3>
-            <p>这是一个基于 Vue 3 构建的纯静态个人博客系统，采用 Composition API、Pinia 状态管理和 Vite 构建工具，支持 Markdown 文章、友链管理和 Giscus 留言系统。</p>
+            <p>这是一个基于 Vue 3 构建的纯静态个人博客系统，采用 Composition API、Pinia 状态管理和 Vite 构建工具，支持 Markdown 文章、友链管理和留言系统。</p>
             <p>现已在github开源。</p>
 
             <h4 style="margin-top: 30px; margin-bottom: 15px; font-size: 1.2rem; color: #2c3e50;">✨ 特性</h4>
@@ -31,7 +31,7 @@
               <li><strong>📝 Markdown 支持</strong>：支持 Markdown 格式文章，自动解析 front-matter</li>
               <li><strong>🎯 响应式布局</strong>：完美适配桌面端和移动端</li>
               <li><strong>🚀 性能优化</strong>：代码分割、懒加载、异步组件加载</li>
-              <li><strong>💬 留言系统</strong>：集成 Giscus 评论系统</li>
+              <li><strong>💬 留言系统</strong>：集成 Cloudflare Turnstile 验证的留言板</li>
               <li><strong>🔗 友链管理</strong>：支持友链申请和管理</li>
               <li><strong>🎭 动画效果</strong>：使用 GSAP 和 CSS 动画，流畅的交互体验</li>
               <li><strong>⚡ 快速构建</strong>：基于 Vite 的快速开发体验</li>
@@ -166,26 +166,8 @@
           </section>
 
           <section>
-            <div class="comments-header-wrapper">
-              <div class="comments-title-group">
-                <h3>💬 留言板</h3>
-                <p>分享你的想法，让我们一起交流</p>
-              </div>
-              <div class="comments-button-group">
-                <OutlineButton v-if="!commentsExpanded" @click="commentsExpanded = true" icon="💬">
-                  展开留言板
-                </OutlineButton>
-                <OutlineButton v-else @click="commentsExpanded = false" icon="←" size="small">
-                  收起
-                </OutlineButton>
-              </div>
-            </div>
-
-            <transition name="comments-fade">
-              <div v-if="commentsExpanded" class="comments-container">
-                <Giscus v-bind="giscusConfig" />
-              </div>
-            </transition>
+            <!-- 留言板组件 -->
+            <Guestbook />
           </section>
 
         </article>
@@ -200,17 +182,10 @@
 </template>
 
 <script setup>
-  import { reactive, ref, onBeforeUnmount, defineAsyncComponent } from 'vue'
-  import OutlineButton from '~/components/Common/OutlineButton.vue'
-  import { giscusConfig } from '~/config/giscus'
-
-  // 留言板异步加载
-  const Giscus = defineAsyncComponent(() => import('~/components/Comments/Giscus.vue'))
+  import { reactive, onBeforeUnmount } from 'vue'
+  import Guestbook from '~/components/Comments/Guestbook.vue'
 
   const emailAddress = "cli20220909@gmail.com"
-
-  // 留言板展开状态
-  const commentsExpanded = ref(false)
 
   // 🚀 优化：邮箱状态管理
   const emailState = reactive({
@@ -647,18 +622,6 @@
       width: 100%;
     }
 
-    .comments-header-wrapper {
-      gap: 15px;
-    }
-
-    .comments-button-group {
-      width: 100%;
-    }
-
-    .comments-button-group .outline-btn {
-      width: 100%;
-      justify-content: center;
-    }
   }
 
   /* 🚀 可访问性优化：支持减少动画偏好 */
@@ -692,70 +655,6 @@
       transform: none;
     }
 
-    .comments-fade-enter-active,
-    .comments-fade-leave-active {
-      transition: none;
-    }
-
-    .comments-fade-enter-from,
-    .comments-fade-leave-to {
-      opacity: 1;
-      transform: none;
-    }
   }
 
-  /* 留言板相关样式 */
-  .comments-header-wrapper {
-    display: flex;
-    justify-content: flex-start;
-    align-items: flex-start;
-    gap: 8px;
-    margin-bottom: 20px;
-  }
-
-  .comments-title-group {
-    flex: 0 1 auto;
-  }
-
-  .comments-title-group h3 {
-    margin-bottom: 8px;
-  }
-
-  .comments-title-group p {
-    margin-bottom: 0;
-    font-size: 0.95rem;
-    color: #666;
-  }
-
-  .comments-button-group {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    margin-top: 0;
-  }
-
-  .comments-container {
-    margin-top: 20px;
-    position: relative;
-  }
-
-
-  /* 留言板展开动画 */
-  .comments-fade-enter-active {
-    transition: all 0.3s ease;
-  }
-
-  .comments-fade-leave-active {
-    transition: all 0.3s ease;
-  }
-
-  .comments-fade-enter-from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-
-  .comments-fade-leave-to {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
 </style>

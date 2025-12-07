@@ -7,7 +7,7 @@ import { getKVStorage } from '~/server/utils/kv';
  * 
  * 使用方法：
  * 1. 在本地环境运行：curl -X POST http://localhost:3000/api/moments/migrate -H "Authorization: Bearer YOUR_PASSWORD"
- * 2. 迁移完成后，后续朋友圈管理通过 /admin 后台进行
+ * 2. 迁移完成后，后续朋友圈管理通过 /login 后台进行
  * 
  * 注意：此脚本在 Cloudflare Workers 环境中无法运行（需要文件系统访问）
  */

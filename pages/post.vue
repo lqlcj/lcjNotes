@@ -133,24 +133,32 @@
       errorMessage.value = '文章加载失败，请检查文章是否存在';
       console.error('文章加载失败，postId:', postId, 'filePath:', filePath);
       
-      // 3秒后自动跳回列表
+      // 3秒后自动跳回主页
       setTimeout(() => {
-        navigateTo('/notes');
+        navigateTo('/home');
       }, 3000);
     } catch (e) {
       console.error("Post loading error:", e);
       errorMessage.value = '加载文章时发生错误: ' + (e.message || '未知错误');
       
-      // 3秒后自动跳回列表
+      // 3秒后自动跳回主页
       setTimeout(() => {
-        navigateTo('/notes');
+        navigateTo('/home');
       }, 3000);
     }
   });
 
   const goBack = () => {
-    // Nuxt 的 navigateTo 不支持数字参数，直接导航到 notes 页面
-    navigateTo('/notes');
+    // 返回主页，并传递文章ID用于定位
+    const postId = route.query.id
+    if (postId) {
+      navigateTo({
+        path: '/home',
+        query: { scrollTo: postId }
+      })
+    } else {
+      navigateTo('/home')
+    }
   };
 </script>
 

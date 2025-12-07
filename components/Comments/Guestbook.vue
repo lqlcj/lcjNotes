@@ -1,11 +1,19 @@
 <template>
   <div class="comments-container">
-    <div class="comments-header">
-      <h3 class="comments-title">💬 留言板</h3>
-      <p class="comments-subtitle">分享你的想法，让我们一起交流</p>
+    <!-- 标题栏（可点击展开/收起） -->
+    <div class="comments-header" @click="toggleExpanded">
+      <div class="header-left">
+        <h3 class="comments-title">💬 留言板</h3>
+        <p class="comments-subtitle">分享你的想法，让我们一起交流</p>
+      </div>
+      <button class="toggle-btn" @click.stop="toggleExpanded">
+        <span class="toggle-icon" :class="{ expanded: isExpanded }">▼</span>
+      </button>
     </div>
 
-    <!-- 留言表单 -->
+    <!-- 可折叠的内容区域 -->
+    <div class="comments-content" :class="{ expanded: isExpanded }">
+      <!-- 留言表单 -->
     <div class="comment-form glass-card">
       <form @submit.prevent="submitMessage">
         <div class="form-row">
@@ -80,11 +88,26 @@
         </div>
       </div>
     </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
+
+// 展开/收起状态
+const isExpanded = ref(false);
+
+// 切换展开/收起
+const toggleExpanded = () => {
+  isExpanded.value = !isExpanded.value;
+  // 如果展开，延迟加载 Turnstile（确保 DOM 已渲染）
+  if (isExpanded.value) {
+    setTimeout(() => {
+      loadTurnstile();
+    }, 100);
+  }
+};
 
 const config = useRuntimeConfig();
 const turnstileSiteKey = config.public.turnstileSiteKey;
@@ -243,10 +266,7 @@ const formatDate = (dateString) => {
 
 onMounted(() => {
   loadMessages();
-  // 延迟加载 Turnstile，确保 DOM 已渲染
-  setTimeout(() => {
-    loadTurnstile();
-  }, 100);
+  // 不在挂载时自动加载 Turnstile，等用户展开时再加载
 });
 
 onUnmounted(() => {
@@ -273,23 +293,72 @@ onUnmounted(() => {
 
 .comments-header {
   padding: 12px 20px 10px;
-  text-align: center;
-  border-bottom: 1px solid rgba(224, 195, 252, 0.2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(212, 197, 176, 0.3);
   background: linear-gradient(135deg,
       rgba(255, 221, 225, 0.05) 0%,
-      rgba(224, 195, 252, 0.05) 100%);
+      rgba(212, 197, 176, 0.05) 100%);
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.comments-header:hover {
+  background: linear-gradient(135deg,
+      rgba(255, 221, 225, 0.1) 0%,
+      rgba(212, 197, 176, 0.1) 100%);
+}
+
+.header-left {
+  flex: 1;
+  text-align: center;
+}
+
+.toggle-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+  color: #68444d;
+  font-size: 18px;
+}
+
+.toggle-btn:hover {
+  opacity: 0.8;
+}
+
+.toggle-icon {
+  display: inline-block;
+  transition: transform 0.3s ease;
+  font-size: 14px;
+}
+
+.toggle-icon.expanded {
+  transform: rotate(180deg);
+}
+
+.comments-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease-out;
+}
+
+.comments-content.expanded {
+  max-height: 3000px;
+  transition: max-height 0.5s ease-in;
 }
 
 .comments-title {
   font-family: 'Caveat', cursive;
   font-size: 1.5rem;
   margin: 0 0 3px 0;
-  color: #6c5ce7;
+  color: #68444d;
   font-weight: 500;
-  background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 .comments-subtitle {
@@ -348,7 +417,7 @@ onUnmounted(() => {
 .submit-btn {
   width: 100%;
   padding: 12px;
-  background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
+  background: #68444d;
   color: white;
   border: none;
   border-radius: 6px;
@@ -360,7 +429,8 @@ onUnmounted(() => {
 
 .submit-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+  box-shadow: 0 4px 12px rgba(104, 68, 77, 0.3);
+  background: #5a3a42;
 }
 
 .submit-btn:disabled {
@@ -397,8 +467,8 @@ onUnmounted(() => {
   width: 40px;
   height: 40px;
   margin: 0 auto 15px;
-  border: 4px solid rgba(162, 155, 254, 0.2);
-  border-top-color: #6c5ce7;
+  border: 4px solid rgba(104, 68, 77, 0.2);
+  border-top-color: #68444d;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -436,7 +506,7 @@ onUnmounted(() => {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
+  background: #68444d;
   color: white;
   display: flex;
   align-items: center;
@@ -465,7 +535,7 @@ onUnmounted(() => {
 }
 
 .message-website-link {
-  color: #6c5ce7;
+  color: #68444d;
   text-decoration: none;
   font-size: 18px;
   opacity: 0.7;

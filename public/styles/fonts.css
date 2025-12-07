@@ -36,6 +36,15 @@
   font-display: swap;
 }
 
+/* --- 霞鹜文楷字体 --- */
+@font-face {
+  font-family: "LXGW WenKai";
+  src: url("/fonts/LXGWWenKai-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* --- 2. 定义全站默认字体 (因为没下载 Noto Serif，我们用系统宋体代替) --- */
 body {
   /* 优先用 Noto (如果系统有)，没有就用宋体/明体，保证 Welcome 页的气质 */
