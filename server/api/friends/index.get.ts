@@ -19,10 +19,8 @@ export default defineEventHandler(async (event) => {
       }
     }
     
-    // 按日期倒序排序
-    friends.sort((a: any, b: any) => {
-      return new Date(b.date).getTime() - new Date(a.date).getTime();
-    });
+    // 随机排序
+    friends.sort(() => Math.random() - 0.5);
     
     return {
       success: true,

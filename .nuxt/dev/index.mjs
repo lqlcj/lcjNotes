@@ -3115,9 +3115,7 @@ const index_get$6 = defineEventHandler(async (event) => {
         friends.push(friendData);
       }
     }
-    friends.sort((a, b) => {
-      return new Date(b.date).getTime() - new Date(a.date).getTime();
-    });
+    friends.sort(() => Math.random() - 0.5);
     return {
       success: true,
       data: friends

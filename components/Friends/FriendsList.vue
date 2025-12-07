@@ -157,29 +157,43 @@
     align-items: center;
     gap: 12px;
     padding: 12px;
-    background: #faf9f6;
-    border: 1px solid #d4c5b0;
+    /* 米白色/奶油色背景 */
+    background: #fcfbf9;
+    /* 边框样式 */
+    border: 1px solid rgba(104, 68, 77, 0.15);
     border-radius: 8px;
     text-decoration: none;
     color: inherit;
-    transition: all 0.3s ease;
+    transition: all 0.3s ease-in-out;
     position: relative;
     overflow: hidden;
     cursor: pointer;
     /* 性能优化：使用 GPU 加速 */
     transform: translateZ(0);
     will-change: transform;
+    /* 柔和且带有暖色调的阴影 */
+    box-shadow:
+      0 8px 32px rgba(255, 165, 0, 0.08),
+      0 4px 16px rgba(255, 200, 150, 0.12),
+      0 2px 8px rgba(0, 0, 0, 0.04);
   }
 
   .friend-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-    border-color: #c4b5a0;
+    background: rgba(252, 251, 249, 0.98);
+    border-color: rgba(104, 68, 77, 0.25);
+    box-shadow:
+      0 12px 40px rgba(255, 165, 0, 0.12),
+      0 6px 20px rgba(255, 200, 150, 0.18),
+      0 3px 12px rgba(0, 0, 0, 0.06);
   }
 
   .friend-card.show-confirm {
-    border-color: #8ec5fc;
-    box-shadow: 0 4px 16px rgba(142, 197, 252, 0.3);
+    border-color: rgba(104, 68, 77, 0.3);
+    box-shadow:
+      0 8px 32px rgba(255, 165, 0, 0.12),
+      0 4px 16px rgba(255, 200, 150, 0.18),
+      0 2px 8px rgba(0, 0, 0, 0.06);
   }
 
   .friend-card:hover .friend-arrow {
@@ -258,7 +272,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(250, 249, 246, 0.98);
+    background: rgba(252, 251, 249, 0.98);
     backdrop-filter: blur(4px);
     display: flex;
     align-items: center;
@@ -359,6 +373,36 @@
     .confirm-btn {
       padding: 5px 12px;
       font-size: 0.75rem;
+    }
+  }
+
+  /* ========== 深色模式支持 ========== */
+  @media (prefers-color-scheme: dark) {
+    .friend-card {
+      background: rgba(40, 35, 35, 0.95);
+      border-color: rgba(212, 165, 181, 0.2);
+      box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        0 4px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .friend-card:hover {
+      background: rgba(50, 45, 45, 0.98);
+      border-color: rgba(212, 165, 181, 0.3);
+      box-shadow:
+        0 12px 40px rgba(0, 0, 0, 0.4),
+        0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .friend-card.show-confirm {
+      border-color: rgba(212, 165, 181, 0.3);
+      box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        0 4px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .confirm-overlay {
+      background: rgba(50, 45, 45, 0.98);
     }
   }
 </style>

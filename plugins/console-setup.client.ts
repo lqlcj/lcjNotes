@@ -35,3 +35,4 @@ export default defineNuxtPlugin(() => {
     `background: #e8eaf6; color: ${deepBlue}; border-radius: 0 3px 3px 0; padding: 2px 6px;` // e8eaf6 是一种很浅的蓝灰色背景
   );
 });
+

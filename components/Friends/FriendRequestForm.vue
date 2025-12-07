@@ -18,7 +18,33 @@
     <div v-if="isExpanded" class="request-form glass-panel">
       <div class="form-content">
         <div class="form-header">
-          <h3 class="form-title">🔗 申请友链</h3>
+          <!-- 本站信息 -->
+          <div class="site-info">
+            <div class="site-info-title">本站信息</div>
+            <div class="site-info-content">
+              <div class="site-info-item">
+                <span class="site-info-label">名称:</span>
+                <span class="site-info-value" @click="copyToClipboard('Leyili 花园')">Leyili 花园</span>
+              </div>
+              <div class="site-info-item">
+                <span class="site-info-label">图标:</span>
+                <span class="site-info-value" @click="copyToClipboard('https://photo.lcjlq.com/lcj.svg')">https://photo.lcjlq.com/lcj.svg</span>
+              </div>
+              <div class="site-info-item">
+                <span class="site-info-label">链接:</span>
+                <span class="site-info-value" @click="copyToClipboard('https://lcjlq.com/')">https://lcjlq.com/</span>
+              </div>
+              <div class="site-info-item">
+                <span class="site-info-label">描述:</span>
+                <span class="site-info-value" @click="copyToClipboard('小小后花园～')">小小后花园～</span>
+              </div>
+            </div>
+            <div class="site-info-note">长时间无法正常访问的站点会被移除～</div>
+          </div>
+          <!-- 复制提示 -->
+          <transition name="fade">
+            <div v-if="showCopyTip" class="copy-tip">已复制到剪贴板</div>
+          </transition>
           <p class="form-subtitle">填写以下信息，我会尽快审核并添加你的网站</p>
           <button @click="handleClose" class="close-btn" aria-label="收起表单">×</button>
         </div>
@@ -100,6 +126,7 @@
   const submitError = ref('')
   const turnstileContainer = ref(null)
   const turnstileToken = ref('')
+  const showCopyTip = ref(false)
   let turnstileWidgetId = null
 
   // 关闭表单
@@ -256,6 +283,19 @@
     // 注意：不自动收起表单，让用户可以选择继续申请
   }
 
+  // 复制到剪贴板
+  const copyToClipboard = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      showCopyTip.value = true
+      setTimeout(() => {
+        showCopyTip.value = false
+      }, 2000)
+    } catch (err) {
+      console.error('复制失败:', err)
+    }
+  }
+
   // 监听表单展开状态，展开时加载 Turnstile
   watch(() => props.isExpanded, (newVal) => {
     if (newVal) {
@@ -299,7 +339,7 @@
   .form-header {
     position: relative;
     text-align: center;
-    margin-bottom: 16px;
+    margin-bottom: 0;
   }
 
   .close-btn {
@@ -364,6 +404,94 @@
     color: #2c3e50;
     margin: 0 0 4px 0;
     text-align: center;
+  }
+
+  .site-info {
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid #e0d5c4;
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin: 8px 0 12px 0;
+    font-size: 0.8rem;
+    width: 100%;
+    text-align: left;
+  }
+
+  .site-info-title {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 6px;
+    font-size: 1rem;
+    text-align: center;
+  }
+
+  .site-info-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    text-align: left;
+  }
+
+  .site-info-item {
+    display: flex;
+    align-items: flex-start;
+    line-height: 1.4;
+    text-align: left;
+  }
+
+  .site-info-label {
+    color: #666;
+    min-width: 40px;
+    flex-shrink: 0;
+    text-align: left;
+  }
+
+  .site-info-value {
+    color: #2c3e50;
+    word-break: break-all;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    flex: 1;
+    text-align: left;
+  }
+
+  .site-info-value:hover {
+    color: #6c5ce7;
+    text-decoration: underline;
+  }
+
+  .site-info-note {
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid #e0d5c4;
+    color: #999;
+    font-size: 0.75rem;
+    text-align: left;
+  }
+
+  .copy-tip {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(44, 62, 80, 0.9);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    z-index: 10000;
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  .fade-enter-active,
+  .fade-leave-active {
+    transition: opacity 0.3s ease;
+  }
+
+  .fade-enter-from,
+  .fade-leave-to {
+    opacity: 0;
   }
 
   .form-subtitle {
