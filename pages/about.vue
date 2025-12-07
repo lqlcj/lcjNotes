@@ -17,31 +17,31 @@
           <section>
             <h3>👋 Hello, Traveler.</h3>
             <p>
-              欢迎来到我的后花园。这是一个思维碎片的暂存区。这里的每一行代码都由 <strong>Vue 3 + Vite</strong> 驱动，每一篇文章都由 <strong>Obsidian</strong> 撰写。
+              欢迎走进这个小小的后花园。这是一个思维碎片的暂存区我把零散想法、读书笔记和偶尔写下的memos放在一起，让它们有个落脚处。
             </p>
           </section>
 
           <section>
             <h3>⚡ Powered By</h3>
-            <p>这是一个基于 Vue 3 构建的纯静态个人博客系统，采用 Composition API、Pinia 状态管理和 Vite 构建工具，支持 Markdown 文章、友链管理和留言系统。</p>
-            <p>现已在github开源。</p>
+            <p>整个网站是我一点点搭出来的，算是把“喜欢折腾前端”这件事落地的方式。页面轻、内容杂、更新随缘——但都是我亲手写的。后续也有想用Next重做的打算。。。</p>
+            <p>如果你也有自己的小岛，欢迎来串门。我也很乐意把这儿当成你偶尔路过、顺手坐一会儿的地方。</p>
 
             <h4 style="margin-top: 30px; margin-bottom: 15px; font-size: 1.2rem; color: #2c3e50;">✨ 特性</h4>
             <ul class="feature-list">
-              <li><strong>📝 Markdown 支持</strong>：支持 Markdown 格式文章，自动解析 front-matter</li>
+              <li><strong>💬 留言系统</strong>：集成 Cloudflare Turnstile 验证的自定义留言板，支持展开/收起动画和烟花效果</li>
               <li><strong>🎯 响应式布局</strong>：完美适配桌面端和移动端</li>
+              <li><strong>🔗 友链管理</strong>：基于 Cloudflare KV 的友链申请和管理系统</li>
               <li><strong>🚀 性能优化</strong>：代码分割、懒加载、异步组件加载</li>
-              <li><strong>💬 留言系统</strong>：集成 Cloudflare Turnstile 验证的留言板</li>
-              <li><strong>🔗 友链管理</strong>：支持友链申请和管理</li>
               <li><strong>🎭 动画效果</strong>：使用 GSAP 和 CSS 动画，流畅的交互体验</li>
-              <li><strong>⚡ 快速构建</strong>：基于 Vite 的快速开发体验</li>
+              <li><strong>⚡ 图片管理</strong>：支持 Cloudflare R2 图片上传和存储</li>
             </ul>
 
             <h4 style="margin-top: 30px; margin-bottom: 15px; font-size: 1.2rem; color: #2c3e50;">核心框架</h4>
             <ul class="feature-list">
-              <li><strong>Vue 3.4+</strong> - 渐进式 JavaScript 框架</li>
-              <li><strong>Vue Router 4</strong> - 官方路由管理器</li>
-              <li><strong>Pinia</strong> - Vue 官方状态管理库</li>
+              <li><strong>框架</strong> - Nuxt 3</li>
+              <li><strong>UI 框架</strong> - Vue 3</li>
+              <li><strong>Markdown 解析</strong> - markdown-it</li>
+              <li><strong>存储</strong> - Cloudflare KV（数据存储）+ Cloudflare R2（图片存储）</li>
             </ul>
 
             <h4 style="margin-top: 30px; margin-bottom: 15px; font-size: 1.2rem; color: #2c3e50;">构建工具</h4>
@@ -52,19 +52,10 @@
 
             <h4 style="margin-top: 30px; margin-bottom: 15px; font-size: 1.2rem; color: #2c3e50;">功能库</h4>
             <ul class="feature-list">
-              <li><strong>markdown-it</strong> - Markdown 解析器</li>
-              <li><strong>front-matter</strong> - Front matter 解析</li>
-              <li><strong>github-markdown-css</strong> - GitHub 风格 Markdown 样式</li>
               <li><strong>gsap</strong> - 动画库</li>
               <li><strong>canvas-confetti</strong> - 彩带动画效果</li>
             </ul>
 
-            <h4 style="margin-top: 30px; margin-bottom: 15px; font-size: 1.2rem; color: #2c3e50;">开发工具</h4>
-            <ul class="feature-list">
-              <li><strong>unplugin-auto-import</strong> - 自动导入 API</li>
-              <li><strong>unplugin-vue-components</strong> - 自动导入组件</li>
-              <li><strong>rollup-plugin-visualizer</strong> - 打包分析工具</li>
-            </ul>
           </section>
 
           <section>
@@ -104,18 +95,18 @@
             <p>&nbsp;&nbsp;元宵 (LCJ)</p>
           </section>
 
-          <section>
+          <!-- <section>
             <h3>🙏 致谢</h3>
             <ul class="feature-list">
               <li>Vue.js 团队</li>
               <li>Vite 团队</li>
               <li>所有开源贡献者</li>
             </ul>
-          </section>
+          </section> -->
 
           <section>
             <h3>📮 Contact</h3>
-            <p>如果你发现了 Bug，或者只是想聊聊技术与设计，欢迎通过以下方式找到我。</p>
+            <p>不论是发现 Bug、想交流，或只是路过想说句嗨，都可以来找我。</p>
 
             <div class="contact-box">
 

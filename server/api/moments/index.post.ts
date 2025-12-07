@@ -26,12 +26,74 @@ export default defineEventHandler(async (event) => {
   try {
     const kv = getKVStorage(event);
     
-    // 生成新的动态 ID
     const momentsListKey = 'moments:list';
-    const momentsList = await kv.getItem(momentsListKey) as string[] || [];
-    const newId = momentsList.length > 0 
-      ? String(Math.max(...momentsList.map(id => parseInt(id))) + 1)
-      : '1';
+    let momentsList = await kv.getItem(momentsListKey) as string[] || [];
+    
+    // 🔥 如果列表为空，尝试恢复旧数据（防止数据丢失）
+    if (momentsList.length === 0) {
+      // 尝试从常见的 ID 范围恢复（1-1000）
+      const recoveredIds: string[] = [];
+      for (let id = 1; id <= 1000; id++) {
+        const momentKey = `moment:${id}`;
+        const momentData = await kv.getItem(momentKey);
+        if (momentData) {
+          recoveredIds.push(String(id));
+        }
+      }
+      
+      if (recoveredIds.length > 0) {
+        // 恢复列表
+        momentsList = recoveredIds;
+        await kv.setItem(momentsListKey, momentsList);
+        console.log(`恢复了 ${recoveredIds.length} 条旧朋友圈数据`);
+      }
+    }
+    
+    // 生成新的动态 ID（确保不覆盖已有数据）
+    let newId: string;
+    if (momentsList.length > 0) {
+      // 基于现有最大 ID + 1
+      const maxId = Math.max(...momentsList.map(id => parseInt(id) || 0));
+      newId = String(maxId + 1);
+    } else {
+      // 如果列表仍为空，从 1 开始，但先检查是否存在
+      let candidateId = 1;
+      while (true) {
+        const momentKey = `moment:${candidateId}`;
+        const existing = await kv.getItem(momentKey);
+        if (!existing) {
+          newId = String(candidateId);
+          break;
+        }
+        candidateId++;
+        // 防止无限循环
+        if (candidateId > 10000) {
+          newId = String(Date.now());
+          break;
+        }
+      }
+    }
+    
+    // 再次检查新 ID 是否已存在（双重保险）
+    const momentKey = `moment:${newId}`;
+    const existingMoment = await kv.getItem(momentKey);
+    if (existingMoment) {
+      // 如果已存在，递增 ID
+      let candidateId = parseInt(newId) + 1;
+      while (true) {
+        const checkKey = `moment:${candidateId}`;
+        const check = await kv.getItem(checkKey);
+        if (!check) {
+          newId = String(candidateId);
+          break;
+        }
+        candidateId++;
+        if (candidateId > 10000) {
+          newId = String(Date.now());
+          break;
+        }
+      }
+    }
     
     // 构建动态数据
     const now = new Date();
@@ -49,12 +111,13 @@ export default defineEventHandler(async (event) => {
     };
     
     // 保存动态详情
-    const momentKey = `moment:${newId}`;
-    await kv.setItem(momentKey, momentData);
+    await kv.setItem(`moment:${newId}`, momentData);
     
-    // 添加到动态列表
-    momentsList.push(newId);
-    await kv.setItem(momentsListKey, momentsList);
+    // 添加到动态列表（避免重复添加）
+    if (!momentsList.includes(newId)) {
+      momentsList.push(newId);
+      await kv.setItem(momentsListKey, momentsList);
+    }
     
     return {
       success: true,

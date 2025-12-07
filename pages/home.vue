@@ -23,8 +23,8 @@
             <div class="text-block text-block-right">
               <span class="homepage title">欢迎来到我的小窝.</span><br /><br />
               <span class="homepage description wenkai-font">
-                在这个只有算法推荐的时代，靠兴趣发电的个人小站就像汪洋中的一座座渺小岛屿，不过，仍旧有那么一群人愿意登上这些不起眼的小岛，
-                如果你也是千万岛屿中的一个，非常欢迎你在友情链接页面成为我的邻居.
+                在这个只有算法推荐的时代，靠兴趣发电的个人小站就像汪洋中的一座座渺小岛屿，不过，仍旧有那么一群人愿意访问这个宁静的地方，
+                如果你也是千万岛屿中的一个，非常欢迎你在友情链接页面成为我的邻居！
               </span>
             </div>
           </div>

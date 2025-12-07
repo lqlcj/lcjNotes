@@ -16,7 +16,13 @@
           @click="handleCardClick(friend.url, index)"
         >
           <div class="friend-avatar">
-            <img :src="friend.avatar" :alt="friend.name" @error="handleImageError" />
+            <img 
+              :src="friend.avatar" 
+              :alt="friend.name" 
+              loading="lazy"
+              decoding="async"
+              @error="handleImageError" 
+            />
           </div>
           <div class="friend-info">
             <h3 class="friend-name">{{ friend.name }}</h3>
@@ -146,6 +152,9 @@
     position: relative;
     overflow: hidden;
     cursor: pointer;
+    /* 性能优化：使用 GPU 加速 */
+    transform: translateZ(0);
+    will-change: transform;
   }
 
   .friend-card:hover {
@@ -179,6 +188,10 @@
     height: 100%;
     object-fit: cover;
     display: block;
+    /* 性能优化 */
+    will-change: opacity;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
   }
 
   .friend-info {

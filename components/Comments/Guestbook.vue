@@ -93,14 +93,28 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { useConfetti } from '~/composables/useConfetti';
 
 // 展开/收起状态
 const isExpanded = ref(false);
 
+// 烟花效果
+const { birthday } = useConfetti();
+
 // 切换展开/收起
 const toggleExpanded = () => {
+  const wasExpanded = isExpanded.value;
   isExpanded.value = !isExpanded.value;
+  
+  // 如果是从关闭状态变为打开状态，触发烟花效果
+  if (!wasExpanded && isExpanded.value) {
+    // 延迟一点触发，让展开动画先开始
+    setTimeout(() => {
+      birthday();
+    }, 200);
+  }
+  
   // 如果展开，延迟加载 Turnstile（确保 DOM 已渲染）
   if (isExpanded.value) {
     setTimeout(() => {

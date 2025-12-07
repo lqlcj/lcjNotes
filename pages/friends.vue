@@ -112,6 +112,8 @@
     gap: 30px;
     margin-top: 40px;
     align-items: start;
+    /* 性能优化：使用 contain 属性 */
+    contain: layout style paint;
   }
 
   /* 左侧：朋友圈 */

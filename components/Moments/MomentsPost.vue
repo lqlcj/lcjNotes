@@ -5,19 +5,39 @@
     </div>
     <div v-for="post in posts" :key="post.id" class="post-item">
       <div class="avatar-container">
-        <img :src="post.author.avatar || avatarImage" alt="avatar" class="avatar-img" @error="handleAvatarError" />
+        <img 
+          :src="post.author.avatar || avatarImage" 
+          alt="avatar" 
+          class="avatar-img" 
+          loading="lazy"
+          decoding="async"
+          @error="handleAvatarError" 
+        />
       </div>
       <div class="post-content">
         <div class="nickname">{{ post.author.nickname }}</div>
         <p class="content-text" v-html="post.content.replace(/\n/g, '<br/>')"></p>
         <div v-if="post.images && post.images.length > 0" class="image-gallery">
           <div v-if="post.images.length === 1" class="image-wrapper single-image">
-            <img :src="post.images[0]" alt="post image" class="gallery-image"
-              @click="openImageViewer(post.images[0])" />
+            <img 
+              :src="post.images[0]" 
+              alt="post image" 
+              class="gallery-image"
+              loading="lazy"
+              decoding="async"
+              @click="openImageViewer(post.images[0])" 
+            />
           </div>
           <div v-else class="image-grid" :class="{ 'four-grid': post.images.length === 4 }">
             <div v-for="(image, index) in post.images" :key="index" class="image-wrapper grid-image">
-              <img :src="image" alt="post image" class="gallery-image" @click="openImageViewer(image)" />
+              <img 
+                :src="image" 
+                alt="post image" 
+                class="gallery-image" 
+                loading="lazy"
+                decoding="async"
+                @click="openImageViewer(image)" 
+              />
             </div>
           </div>
         </div>
@@ -40,7 +60,7 @@
 </template>
 
 <script setup>
-  import { ref, onBeforeUnmount, computed, onMounted } from 'vue'
+  import { ref, onBeforeUnmount, computed, onMounted, nextTick } from 'vue'
   // 使用 public 目录下的图片
   const avatarImage = '/images/home/avatar.webp'
 
@@ -155,9 +175,11 @@
   const currentPage = ref(1)
   const isLoading = ref(false)
 
-  // 当前显示的文章列表
+  // 当前显示的文章列表（使用 computed 缓存，避免重复计算）
   const posts = computed(() => {
-    return allPosts.value.slice(0, currentPage.value * pageSize)
+    const start = 0
+    const end = currentPage.value * pageSize
+    return allPosts.value.slice(start, end)
   })
 
   // 是否还有更多
@@ -165,16 +187,25 @@
     return allPosts.value.length > currentPage.value * pageSize
   })
 
-  // 加载更多
+  // 加载更多（使用 requestAnimationFrame 优化性能）
   const loadMore = () => {
     if (isLoading.value || !hasMore.value) return
 
     isLoading.value = true
-    // 模拟加载延迟
-    setTimeout(() => {
-      currentPage.value++
-      isLoading.value = false
-    }, 500)
+    // 使用 requestAnimationFrame 优化性能
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        currentPage.value++
+        isLoading.value = false
+        // 滚动到新加载的内容附近
+        nextTick(() => {
+          const loadMoreBtn = document.querySelector('.load-more-container')
+          if (loadMoreBtn) {
+            loadMoreBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+          }
+        })
+      }, 300)
+    })
   }
 
   // 图片预览相关
@@ -237,6 +268,9 @@
     padding: 12px 10px;
     background-color: transparent;
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    /* 性能优化：使用 GPU 加速 */
+    transform: translateZ(0);
+    will-change: transform;
   }
 
   /* 1. 头像 */
@@ -298,6 +332,10 @@
     /* 保证图片被裁剪填充，不变形 */
     cursor: pointer;
     transition: opacity 0.2s ease;
+    /* 性能优化 */
+    will-change: opacity;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
   }
 
   .gallery-image:hover {

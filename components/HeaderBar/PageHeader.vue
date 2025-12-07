@@ -126,16 +126,50 @@ Props:
 
   /* 响应式设计：移动端适配 */
   @media (max-width: 768px) {
+    .page-header {
+      margin-bottom: 20px;
+    }
+
     .title-wrapper {
-      gap: 16px;
+      gap: 12px;
     }
 
     .handwritten {
-      font-size: 2.2rem;
+      font-size: 2rem;
+      white-space: normal;
+    }
+
+    .subtitle {
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+      margin-top: 3px;
     }
 
     .divider-line {
-      max-width: 100px;
+      max-width: 80px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .page-header {
+      margin-bottom: 15px;
+    }
+
+    .title-wrapper {
+      gap: 8px;
+    }
+
+    .handwritten {
+      font-size: 1.6rem;
+    }
+
+    .subtitle {
+      font-size: 0.8rem;
+      letter-spacing: 0.5px;
+    }
+
+    .divider-line {
+      max-width: 50px;
     }
   }
 </style>

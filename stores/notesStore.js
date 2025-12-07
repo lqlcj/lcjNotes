@@ -96,7 +96,7 @@ export const useNotesStore = defineStore("notes", {
         
         if (response.success && response.data && Array.isArray(response.data) && response.data.length > 0) {
           // 转换 API 返回的数据格式为组件需要的格式
-          this.allPosts = response.data.map((item, index) => ({
+          let posts = response.data.map((item, index) => ({
             id: item.id,
             title: item.title || "无标题",
             img: item.cover || defaultCover,
@@ -108,6 +108,15 @@ export const useNotesStore = defineStore("notes", {
             isLiked: false,
             filePath: `/posts/${item.id}.md`, // 兼容旧代码，使用 ID 作为路径
           }));
+
+          // 🔥 确保按日期降序排序（最新的在前）
+          posts.sort((a, b) => {
+            const dateA = a.date ? new Date(a.date).getTime() : 0;
+            const dateB = b.date ? new Date(b.date).getTime() : 0;
+            return dateB - dateA; // 降序：最新的在前
+          });
+
+          this.allPosts = posts;
 
           // 读取本地缓存的点赞状态
           this.loadLikesFromStorage();

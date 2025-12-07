@@ -1457,7 +1457,22 @@ const plugins = [
 _iS2Hx_aRY6b5luI5ZFAVScoHeBMFBXD6z47xxZowt8
 ];
 
-const assets = {};
+const assets = {
+  "/index.mjs": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"210ea-jM4fMaVCL2hb6xaEg+Yqp6tfnfs\"",
+    "mtime": "2025-12-07T10:03:30.575Z",
+    "size": 135402,
+    "path": "index.mjs"
+  },
+  "/index.mjs.map": {
+    "type": "application/json",
+    "etag": "\"7a4c5-7Pi21A3lyvX1i7aOgsH+5nON6NM\"",
+    "mtime": "2025-12-07T10:03:30.575Z",
+    "size": 500933,
+    "path": "index.mjs.map"
+  }
+};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));
@@ -3088,7 +3103,22 @@ const index_get$2 = defineEventHandler(async (event) => {
   try {
     const kv = getKVStorage(event);
     const momentsListKey = "moments:list";
-    const momentsList = await kv.getItem(momentsListKey) || [];
+    let momentsList = await kv.getItem(momentsListKey) || [];
+    if (momentsList.length === 0) {
+      const recoveredIds = [];
+      for (let id = 1; id <= 1e3; id++) {
+        const momentKey = `moment:${id}`;
+        const momentData = await kv.getItem(momentKey);
+        if (momentData) {
+          recoveredIds.push(String(id));
+        }
+      }
+      if (recoveredIds.length > 0) {
+        momentsList = recoveredIds;
+        await kv.setItem(momentsListKey, momentsList);
+        console.log(`\u6062\u590D\u4E86 ${recoveredIds.length} \u6761\u65E7\u670B\u53CB\u5708\u6570\u636E`);
+      }
+    }
     const moments = [];
     for (const id of momentsList) {
       const momentKey = `moment:${id}`;
@@ -3139,8 +3169,60 @@ const index_post$2 = defineEventHandler(async (event) => {
   try {
     const kv = getKVStorage(event);
     const momentsListKey = "moments:list";
-    const momentsList = await kv.getItem(momentsListKey) || [];
-    const newId = momentsList.length > 0 ? String(Math.max(...momentsList.map((id) => parseInt(id))) + 1) : "1";
+    let momentsList = await kv.getItem(momentsListKey) || [];
+    if (momentsList.length === 0) {
+      const recoveredIds = [];
+      for (let id = 1; id <= 1e3; id++) {
+        const momentKey2 = `moment:${id}`;
+        const momentData2 = await kv.getItem(momentKey2);
+        if (momentData2) {
+          recoveredIds.push(String(id));
+        }
+      }
+      if (recoveredIds.length > 0) {
+        momentsList = recoveredIds;
+        await kv.setItem(momentsListKey, momentsList);
+        console.log(`\u6062\u590D\u4E86 ${recoveredIds.length} \u6761\u65E7\u670B\u53CB\u5708\u6570\u636E`);
+      }
+    }
+    let newId;
+    if (momentsList.length > 0) {
+      const maxId = Math.max(...momentsList.map((id) => parseInt(id) || 0));
+      newId = String(maxId + 1);
+    } else {
+      let candidateId = 1;
+      while (true) {
+        const momentKey2 = `moment:${candidateId}`;
+        const existing = await kv.getItem(momentKey2);
+        if (!existing) {
+          newId = String(candidateId);
+          break;
+        }
+        candidateId++;
+        if (candidateId > 1e4) {
+          newId = String(Date.now());
+          break;
+        }
+      }
+    }
+    const momentKey = `moment:${newId}`;
+    const existingMoment = await kv.getItem(momentKey);
+    if (existingMoment) {
+      let candidateId = parseInt(newId) + 1;
+      while (true) {
+        const checkKey = `moment:${candidateId}`;
+        const check = await kv.getItem(checkKey);
+        if (!check) {
+          newId = String(candidateId);
+          break;
+        }
+        candidateId++;
+        if (candidateId > 1e4) {
+          newId = String(Date.now());
+          break;
+        }
+      }
+    }
     const now = /* @__PURE__ */ new Date();
     const timestamp = `\u521B\u5EFA\u65F6\u95F4: ${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
     const momentData = {
@@ -3153,10 +3235,11 @@ const index_post$2 = defineEventHandler(async (event) => {
       timestamp: body.timestamp || timestamp,
       images: body.images || []
     };
-    const momentKey = `moment:${newId}`;
-    await kv.setItem(momentKey, momentData);
-    momentsList.push(newId);
-    await kv.setItem(momentsListKey, momentsList);
+    await kv.setItem(`moment:${newId}`, momentData);
+    if (!momentsList.includes(newId)) {
+      momentsList.push(newId);
+      await kv.setItem(momentsListKey, momentsList);
+    }
     return {
       success: true,
       data: momentData,
