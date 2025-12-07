@@ -1,4 +1,5 @@
 import { getR2Storage } from '~/server/utils/r2';
+import { handleApiError } from '~/server/utils/errorHandler';
 
 // 代理 R2 图片请求（用于公共访问）
 export default defineEventHandler(async (event) => {
@@ -39,10 +40,7 @@ export default defineEventHandler(async (event) => {
     if (error.statusCode) {
       throw error;
     }
-    throw createError({
-      statusCode: 500,
-      message: error.message || '获取文件失败'
-    });
+    handleApiError(error, '获取文件失败', 500);
   }
 });
 

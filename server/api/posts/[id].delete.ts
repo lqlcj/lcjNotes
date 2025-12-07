@@ -1,4 +1,5 @@
 import { getKVStorage } from '~/server/utils/kv';
+import { handleApiError } from '~/server/utils/errorHandler';
 
 // 删除文章
 export default defineEventHandler(async (event) => {
@@ -51,10 +52,7 @@ export default defineEventHandler(async (event) => {
     if (error.statusCode) {
       throw error;
     }
-    throw createError({
-      statusCode: 500,
-      message: error.message || '删除文章失败'
-    });
+    handleApiError(error, '删除文章失败', 500);
   }
 });
 

@@ -1,2 +1,0 @@
-import{d as s,h as t,f as a}from"../../../_/nitro.mjs";import{g as e}from"../../../_/kv.mjs";const o=s(async s=>{const o=t(s,"id");if(!o)throw a({statusCode:400,message:"缺少文章 ID"});try{const t=e(s),r=`post:${o}`,m=await t.getItem(r);if(!m)throw a({statusCode:404,message:"文章不存在"});return{success:!0,data:m}}catch(s){if(s.statusCode)throw s;throw a({statusCode:500,message:s.message||"获取文章失败"})}});export{o as default};
-//# sourceMappingURL=_id_.get.mjs.map

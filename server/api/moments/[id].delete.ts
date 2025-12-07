@@ -1,4 +1,5 @@
 import { getKVStorage } from '~/server/utils/kv';
+import { handleApiError } from '~/server/utils/errorHandler';
 
 // 删除朋友圈动态（需要管理员认证）
 export default defineEventHandler(async (event) => {
@@ -40,10 +41,7 @@ export default defineEventHandler(async (event) => {
       message: '删除成功'
     };
   } catch (error: any) {
-    throw createError({
-      statusCode: 500,
-      message: error.message || '删除朋友圈动态失败'
-    });
+    handleApiError(error, '删除朋友圈动态失败', 500);
   }
 });
 

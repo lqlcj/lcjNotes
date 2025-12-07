@@ -1,4 +1,5 @@
 import { getKVStorage } from '~/server/utils/kv';
+import { handleApiError } from '~/server/utils/errorHandler';
 
 // 更新友链申请状态（批准或拒绝）
 export default defineEventHandler(async (event) => {
@@ -80,10 +81,7 @@ export default defineEventHandler(async (event) => {
     if (error.statusCode) {
       throw error;
     }
-    throw createError({
-      statusCode: 500,
-      message: error.message || '更新申请状态失败'
-    });
+    handleApiError(error, '更新申请状态失败', 500);
   }
 });
 

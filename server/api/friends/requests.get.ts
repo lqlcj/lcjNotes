@@ -1,4 +1,5 @@
 import { getKVStorage } from '~/server/utils/kv';
+import { handleApiError } from '~/server/utils/errorHandler';
 
 // 获取友链申请列表（需要管理员认证）
 export default defineEventHandler(async (event) => {
@@ -38,10 +39,7 @@ export default defineEventHandler(async (event) => {
       data: requests
     };
   } catch (error: any) {
-    throw createError({
-      statusCode: 500,
-      message: error.message || '获取申请列表失败'
-    });
+    handleApiError(error, '获取申请列表失败', 500);
   }
 });
 

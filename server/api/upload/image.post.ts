@@ -1,4 +1,5 @@
 import { getR2Storage, generateFileName, isValidImageType } from '~/server/utils/r2';
+import { handleApiError } from '~/server/utils/errorHandler';
 
 // 上传图片到 R2
 export default defineEventHandler(async (event) => {
@@ -80,10 +81,7 @@ export default defineEventHandler(async (event) => {
     if (error.statusCode) {
       throw error;
     }
-    throw createError({
-      statusCode: 500,
-      message: error.message || '上传失败'
-    });
+    handleApiError(error, '上传失败', 500);
   }
 });
 

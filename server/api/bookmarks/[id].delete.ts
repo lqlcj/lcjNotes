@@ -1,4 +1,5 @@
 import { getKVStorage } from '~/server/utils/kv';
+import { handleApiError } from '~/server/utils/errorHandler';
 
 // 删除书签（需要管理员权限）
 export default defineEventHandler(async (event) => {
@@ -48,10 +49,7 @@ export default defineEventHandler(async (event) => {
       message: '书签删除成功'
     };
   } catch (error: any) {
-    throw createError({
-      statusCode: 500,
-      message: error.message || '删除书签失败'
-    });
+    handleApiError(error, '删除书签失败', 500);
   }
 });
 

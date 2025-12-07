@@ -1,4 +1,6 @@
 import { getKVStorage } from '~/server/utils/kv';
+import { validateAndTrim, validateLength, FIELD_LIMITS } from '~/server/utils/validation';
+import { handleApiError } from '~/server/utils/errorHandler';
 
 // 更新文章
 export default defineEventHandler(async (event) => {
@@ -35,17 +37,37 @@ export default defineEventHandler(async (event) => {
       });
     }
     
+    // 验证并清理输入（只验证提供的字段）
+    const updates: any = {}
+    if (body.title !== undefined) {
+      updates.title = validateAndTrim(body.title, FIELD_LIMITS.POST_TITLE, '标题')
+    }
+    if (body.body !== undefined) {
+      updates.body = validateAndTrim(body.body, FIELD_LIMITS.POST_BODY, '文章内容')
+    }
+    if (body.user !== undefined) {
+      updates.user = validateAndTrim(body.user, FIELD_LIMITS.POST_USER, '作者')
+    }
+    if (body.cover !== undefined) {
+      updates.cover = validateAndTrim(body.cover, FIELD_LIMITS.POST_COVER, '封面')
+    }
+    if (body.avatar !== undefined) {
+      updates.avatar = validateAndTrim(body.avatar, FIELD_LIMITS.FRIEND_AVATAR, '头像')
+    }
+    if (body.date !== undefined) {
+      updates.date = body.date
+    }
+    if (body.ratio !== undefined) {
+      updates.ratio = body.ratio
+    }
+    if (body.likes !== undefined) {
+      updates.likes = body.likes
+    }
+    
     // 更新文章数据（保留原有数据，只更新提供的字段）
     const updatedPost = {
       ...existingPost,
-      ...(body.title !== undefined && { title: body.title }),
-      ...(body.date !== undefined && { date: body.date }),
-      ...(body.cover !== undefined && { cover: body.cover }),
-      ...(body.ratio !== undefined && { ratio: body.ratio }),
-      ...(body.user !== undefined && { user: body.user }),
-      ...(body.avatar !== undefined && { avatar: body.avatar }),
-      ...(body.likes !== undefined && { likes: body.likes }),
-      ...(body.body !== undefined && { body: body.body })
+      ...updates
     };
     
     await kv.setItem(postKey, updatedPost);
@@ -58,10 +80,7 @@ export default defineEventHandler(async (event) => {
     if (error.statusCode) {
       throw error;
     }
-    throw createError({
-      statusCode: 500,
-      message: error.message || '更新文章失败'
-    });
+    handleApiError(error, '更新文章失败', 500);
   }
 });
 

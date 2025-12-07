@@ -1457,7 +1457,22 @@ const plugins = [
 _KALrG6HWC5DsF1iB5xLtcxqD_gXRBB5_KIe3mv6Ln4
 ];
 
-const assets = {};
+const assets = {
+  "/index.mjs": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"235c0-ZAUvWhuiPS0EMTfMdfqA18wTFr0\"",
+    "mtime": "2025-12-07T16:13:58.175Z",
+    "size": 144832,
+    "path": "index.mjs"
+  },
+  "/index.mjs.map": {
+    "type": "application/json",
+    "etag": "\"821b9-/4jQYnYFUXwdTLA6ceOXxzuWSjI\"",
+    "mtime": "2025-12-07T16:13:58.175Z",
+    "size": 532921,
+    "path": "index.mjs.map"
+  }
+};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));
@@ -2430,6 +2445,29 @@ function getKVStorage(event) {
   }
 }
 
+function isProduction() {
+  return process.env.NITRO_PRESET === "cloudflare-pages";
+}
+function createSafeError(statusCode, defaultMessage, error) {
+  if (isProduction()) {
+    return createError({
+      statusCode,
+      message: defaultMessage
+    });
+  }
+  const message = (error == null ? void 0 : error.message) ? `${defaultMessage}: ${error.message}` : defaultMessage;
+  return createError({
+    statusCode,
+    message
+  });
+}
+function handleApiError(error, defaultMessage, statusCode = 500) {
+  if (error.statusCode) {
+    throw error;
+  }
+  throw createSafeError(statusCode, defaultMessage, error);
+}
+
 const _id__delete$a = defineEventHandler(async (event) => {
   const authHeader = getHeader(event, "authorization");
   const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
@@ -2466,10 +2504,7 @@ const _id__delete$a = defineEventHandler(async (event) => {
       message: "\u4E66\u7B7E\u5220\u9664\u6210\u529F"
     };
   } catch (error) {
-    throw createError({
-      statusCode: 500,
-      message: error.message || "\u5220\u9664\u4E66\u7B7E\u5931\u8D25"
-    });
+    handleApiError(error, "\u5220\u9664\u4E66\u7B7E\u5931\u8D25", 500);
   }
 });
 
@@ -2477,6 +2512,76 @@ const _id__delete$b = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePrope
   __proto__: null,
   default: _id__delete$a
 }, Symbol.toStringTag, { value: 'Module' }));
+
+const FIELD_LIMITS = {
+  // 留言相关
+  MESSAGE_NAME: 50,
+  // 留言姓名
+  MESSAGE_EMAIL: 100,
+  // 邮箱
+  MESSAGE_CONTENT: 2e3,
+  // 留言内容
+  MESSAGE_WEBSITE: 500,
+  // 网站链接
+  // 文章相关
+  POST_TITLE: 200,
+  // 文章标题
+  POST_BODY: 5e4,
+  // 文章内容（Markdown）
+  POST_USER: 50,
+  // 作者名
+  POST_COVER: 500,
+  // 封面链接
+  // 友链相关
+  FRIEND_NAME: 100,
+  // 友链名称
+  FRIEND_URL: 500,
+  // 友链链接
+  FRIEND_DESCRIPTION: 500,
+  // 友链描述
+  FRIEND_AVATAR: 500,
+  // 友链头像
+  // 朋友圈动态相关
+  MOMENT_CONTENT: 2e3,
+  // 动态内容
+  MOMENT_NICKNAME: 50,
+  // 昵称
+  MOMENT_AVATAR: 500,
+  // 头像链接
+  // 书签相关
+  BOOKMARK_NAME: 200,
+  // 书签名称
+  BOOKMARK_URL: 500,
+  // 书签链接
+  BOOKMARK_DESCRIPTION: 1e3
+  // 书签描述
+};
+function validateLength(value, maxLength, fieldName) {
+  if (value === void 0 || value === null) {
+    return;
+  }
+  if (typeof value !== "string") {
+    throw createError({
+      statusCode: 400,
+      message: `${fieldName}\u5FC5\u987B\u662F\u5B57\u7B26\u4E32\u7C7B\u578B`
+    });
+  }
+  const length = Array.from(value).length;
+  if (length > maxLength) {
+    throw createError({
+      statusCode: 400,
+      message: `${fieldName}\u957F\u5EA6\u4E0D\u80FD\u8D85\u8FC7 ${maxLength} \u4E2A\u5B57\u7B26\uFF08\u5F53\u524D\uFF1A${length} \u4E2A\u5B57\u7B26\uFF09`
+    });
+  }
+}
+function validateAndTrim(value, maxLength, fieldName) {
+  if (value === void 0 || value === null) {
+    return "";
+  }
+  const trimmed = String(value).trim();
+  validateLength(trimmed, maxLength, fieldName);
+  return trimmed;
+}
 
 const _id__put$6 = defineEventHandler(async (event) => {
   const authHeader = getHeader(event, "authorization");
@@ -2495,14 +2600,17 @@ const _id__put$6 = defineEventHandler(async (event) => {
       message: "\u4E66\u7B7E ID \u4E0D\u80FD\u4E3A\u7A7A"
     });
   }
-  if (!body.name || !body.url) {
+  const name = validateAndTrim(body.name, FIELD_LIMITS.BOOKMARK_NAME, "\u4E66\u7B7E\u540D\u79F0");
+  const url = validateAndTrim(body.url, FIELD_LIMITS.BOOKMARK_URL, "\u4E66\u7B7E\u94FE\u63A5");
+  const description = body.description ? validateAndTrim(body.description, FIELD_LIMITS.BOOKMARK_DESCRIPTION, "\u4E66\u7B7E\u63CF\u8FF0") : "";
+  if (!name || !url) {
     throw createError({
       statusCode: 400,
       message: "\u7F51\u7AD9\u540D\u79F0\u548C\u94FE\u63A5\u4E0D\u80FD\u4E3A\u7A7A"
     });
   }
   try {
-    new URL(body.url);
+    new URL(url);
   } catch {
     throw createError({
       statusCode: 400,
@@ -2521,9 +2629,9 @@ const _id__put$6 = defineEventHandler(async (event) => {
     }
     const bookmarkData = {
       ...existingBookmark,
-      name: body.name,
-      url: body.url,
-      description: body.description || "",
+      name,
+      url,
+      description,
       updatedAt: (/* @__PURE__ */ new Date()).toISOString()
     };
     await kv.setItem(bookmarkKey, bookmarkData);
@@ -2533,10 +2641,7 @@ const _id__put$6 = defineEventHandler(async (event) => {
       message: "\u4E66\u7B7E\u66F4\u65B0\u6210\u529F"
     };
   } catch (error) {
-    throw createError({
-      statusCode: 500,
-      message: error.message || "\u66F4\u65B0\u4E66\u7B7E\u5931\u8D25"
-    });
+    handleApiError(error, "\u66F4\u65B0\u4E66\u7B7E\u5931\u8D25", 500);
   }
 });
 
@@ -2568,10 +2673,7 @@ const index_get$8 = defineEventHandler(async (event) => {
       data: bookmarks
     };
   } catch (error) {
-    throw createError({
-      statusCode: 500,
-      message: error.message || "\u83B7\u53D6\u4E66\u7B7E\u5217\u8868\u5931\u8D25"
-    });
+    handleApiError(error, "\u83B7\u53D6\u4E66\u7B7E\u5217\u8868\u5931\u8D25", 500);
   }
 });
 
@@ -2590,14 +2692,17 @@ const index_post$8 = defineEventHandler(async (event) => {
     });
   }
   const body = await readBody(event);
-  if (!body.name || !body.url) {
+  const name = validateAndTrim(body.name, FIELD_LIMITS.BOOKMARK_NAME, "\u4E66\u7B7E\u540D\u79F0");
+  const url = validateAndTrim(body.url, FIELD_LIMITS.BOOKMARK_URL, "\u4E66\u7B7E\u94FE\u63A5");
+  const description = body.description ? validateAndTrim(body.description, FIELD_LIMITS.BOOKMARK_DESCRIPTION, "\u4E66\u7B7E\u63CF\u8FF0") : "";
+  if (!name || !url) {
     throw createError({
       statusCode: 400,
       message: "\u7F51\u7AD9\u540D\u79F0\u548C\u94FE\u63A5\u4E0D\u80FD\u4E3A\u7A7A"
     });
   }
   try {
-    new URL(body.url);
+    new URL(url);
   } catch {
     throw createError({
       statusCode: 400,
@@ -2611,9 +2716,9 @@ const index_post$8 = defineEventHandler(async (event) => {
     const newId = bookmarksList.length > 0 ? String(Math.max(...bookmarksList.map((id) => parseInt(id))) + 1) : "1";
     const bookmarkData = {
       id: newId,
-      name: body.name,
-      url: body.url,
-      description: body.description || "",
+      name,
+      url,
+      description,
       createdAt: (/* @__PURE__ */ new Date()).toISOString(),
       updatedAt: (/* @__PURE__ */ new Date()).toISOString()
     };
@@ -2627,10 +2732,7 @@ const index_post$8 = defineEventHandler(async (event) => {
       message: "\u4E66\u7B7E\u6DFB\u52A0\u6210\u529F"
     };
   } catch (error) {
-    throw createError({
-      statusCode: 500,
-      message: error.message || "\u6DFB\u52A0\u4E66\u7B7E\u5931\u8D25"
-    });
+    handleApiError(error, "\u6DFB\u52A0\u4E66\u7B7E\u5931\u8D25", 500);
   }
 });
 
@@ -2668,10 +2770,7 @@ const _id__delete$8 = defineEventHandler(async (event) => {
       message: "\u5220\u9664\u6210\u529F"
     };
   } catch (error) {
-    throw createError({
-      statusCode: 500,
-      message: error.message || "\u5220\u9664\u53CB\u94FE\u5931\u8D25"
-    });
+    handleApiError(error, "\u5220\u9664\u53CB\u94FE\u5931\u8D25", 500);
   }
 });
 
@@ -2701,10 +2800,7 @@ const index_get$6 = defineEventHandler(async (event) => {
       data: friends
     };
   } catch (error) {
-    throw createError({
-      statusCode: 500,
-      message: error.message || "\u83B7\u53D6\u53CB\u94FE\u5217\u8868\u5931\u8D25"
-    });
+    handleApiError(error, "\u83B7\u53D6\u53CB\u94FE\u5217\u8868\u5931\u8D25", 500);
   }
 });
 
@@ -2723,14 +2819,18 @@ const index_post$6 = defineEventHandler(async (event) => {
     });
   }
   const body = await readBody(event);
-  if (!body.name || !body.url) {
+  const name = validateAndTrim(body.name, FIELD_LIMITS.FRIEND_NAME, "\u7F51\u7AD9\u540D\u79F0");
+  const url = validateAndTrim(body.url, FIELD_LIMITS.FRIEND_URL, "\u7F51\u7AD9\u94FE\u63A5");
+  const description = body.description ? validateAndTrim(body.description, FIELD_LIMITS.FRIEND_DESCRIPTION, "\u7F51\u7AD9\u63CF\u8FF0") : "";
+  const avatar = body.avatar ? validateAndTrim(body.avatar, FIELD_LIMITS.FRIEND_AVATAR, "\u5934\u50CF") : "/images/home/avatar.webp";
+  if (!name || !url) {
     throw createError({
       statusCode: 400,
       message: "\u7F51\u7AD9\u540D\u79F0\u548C\u94FE\u63A5\u4E0D\u80FD\u4E3A\u7A7A"
     });
   }
   try {
-    new URL(body.url);
+    new URL(url);
   } catch {
     throw createError({
       statusCode: 400,
@@ -2744,10 +2844,10 @@ const index_post$6 = defineEventHandler(async (event) => {
     const newId = friendsList.length > 0 ? String(Math.max(...friendsList.map((id) => parseInt(id))) + 1) : "1";
     const friendData = {
       id: newId,
-      name: body.name,
-      url: body.url,
-      description: body.description || "",
-      avatar: body.avatar || "/images/home/avatar.webp",
+      name,
+      url,
+      description,
+      avatar,
       date: (/* @__PURE__ */ new Date()).toISOString().split("T")[0]
     };
     const friendKey = `friend:${newId}`;
@@ -2760,10 +2860,7 @@ const index_post$6 = defineEventHandler(async (event) => {
       message: "\u53CB\u94FE\u6DFB\u52A0\u6210\u529F"
     };
   } catch (error) {
-    throw createError({
-      statusCode: 500,
-      message: error.message || "\u6DFB\u52A0\u53CB\u94FE\u5931\u8D25"
-    });
+    handleApiError(error, "\u6DFB\u52A0\u53CB\u94FE\u5931\u8D25", 500);
   }
 });
 
@@ -2801,10 +2898,7 @@ const requests_get = defineEventHandler(async (event) => {
       data: requests
     };
   } catch (error) {
-    throw createError({
-      statusCode: 500,
-      message: error.message || "\u83B7\u53D6\u7533\u8BF7\u5217\u8868\u5931\u8D25"
-    });
+    handleApiError(error, "\u83B7\u53D6\u7533\u8BF7\u5217\u8868\u5931\u8D25", 500);
   }
 });
 
@@ -2817,14 +2911,18 @@ const requests_post = defineEventHandler(async (event) => {
   var _a, _b, _c, _d;
   const kv = getKVStorage(event);
   const body = await readBody(event);
-  if (!body.name || !body.url) {
+  const name = validateAndTrim(body.name, FIELD_LIMITS.FRIEND_NAME, "\u7F51\u7AD9\u540D\u79F0");
+  const url = validateAndTrim(body.url, FIELD_LIMITS.FRIEND_URL, "\u7F51\u7AD9\u94FE\u63A5");
+  const description = body.description ? validateAndTrim(body.description, FIELD_LIMITS.FRIEND_DESCRIPTION, "\u7F51\u7AD9\u63CF\u8FF0") : "";
+  const avatar = body.avatar ? validateAndTrim(body.avatar, FIELD_LIMITS.FRIEND_AVATAR, "\u5934\u50CF") : "";
+  if (!name || !url) {
     throw createError({
       statusCode: 400,
       message: "\u7F51\u7AD9\u540D\u79F0\u548C\u94FE\u63A5\u4E0D\u80FD\u4E3A\u7A7A"
     });
   }
   try {
-    new URL(body.url);
+    new URL(url);
   } catch {
     throw createError({
       statusCode: 400,
@@ -2855,10 +2953,10 @@ const requests_post = defineEventHandler(async (event) => {
     const newId = requestsList.length > 0 ? String(Math.max(...requestsList.map((id) => parseInt(id))) + 1) : "1";
     const requestData = {
       id: newId,
-      name: body.name,
-      url: body.url,
-      description: body.description || "",
-      avatar: body.avatar || "",
+      name,
+      url,
+      description,
+      avatar,
       status: "pending",
       // pending, approved, rejected
       createdAt: (/* @__PURE__ */ new Date()).toISOString(),
@@ -2876,10 +2974,7 @@ const requests_post = defineEventHandler(async (event) => {
       }
     };
   } catch (error) {
-    throw createError({
-      statusCode: 500,
-      message: error.message || "\u63D0\u4EA4\u7533\u8BF7\u5931\u8D25"
-    });
+    handleApiError(error, "\u63D0\u4EA4\u7533\u8BF7\u5931\u8D25", 500);
   }
 });
 
@@ -2917,10 +3012,7 @@ const _id__delete$6 = defineEventHandler(async (event) => {
       message: "\u5220\u9664\u6210\u529F"
     };
   } catch (error) {
-    throw createError({
-      statusCode: 500,
-      message: error.message || "\u5220\u9664\u7533\u8BF7\u5931\u8D25"
-    });
+    handleApiError(error, "\u5220\u9664\u7533\u8BF7\u5931\u8D25", 500);
   }
 });
 
@@ -2991,10 +3083,7 @@ const _id__put$4 = defineEventHandler(async (event) => {
     if (error.statusCode) {
       throw error;
     }
-    throw createError({
-      statusCode: 500,
-      message: error.message || "\u66F4\u65B0\u7533\u8BF7\u72B6\u6001\u5931\u8D25"
-    });
+    handleApiError(error, "\u66F4\u65B0\u7533\u8BF7\u72B6\u6001\u5931\u8D25", 500);
   }
 });
 
@@ -3042,10 +3131,7 @@ const _id__delete$4 = defineEventHandler(async (event) => {
     if (error.statusCode) {
       throw error;
     }
-    throw createError({
-      statusCode: 500,
-      message: error.message || "\u5220\u9664\u7559\u8A00\u5931\u8D25"
-    });
+    handleApiError(error, "\u5220\u9664\u7559\u8A00\u5931\u8D25", 500);
   }
 });
 
@@ -3086,9 +3172,10 @@ const index_get$4 = defineEventHandler(async (event) => {
       data: messages
     };
   } catch (error) {
+    const isProd = process.env.NITRO_PRESET === "cloudflare-pages";
     return {
       success: false,
-      error: error.message || "\u83B7\u53D6\u7559\u8A00\u5217\u8868\u5931\u8D25"
+      error: isProd ? "\u83B7\u53D6\u7559\u8A00\u5217\u8868\u5931\u8D25" : error.message || "\u83B7\u53D6\u7559\u8A00\u5217\u8868\u5931\u8D25"
     };
   }
 });
@@ -3102,10 +3189,21 @@ const index_post$4 = defineEventHandler(async (event) => {
   var _a, _b;
   const kv = getKVStorage(event);
   const body = await readBody(event);
-  if (!body.name || !body.content) {
+  const name = validateAndTrim(body.name, FIELD_LIMITS.MESSAGE_NAME, "\u59D3\u540D");
+  const content = validateAndTrim(body.content, FIELD_LIMITS.MESSAGE_CONTENT, "\u7559\u8A00\u5185\u5BB9");
+  const email = body.email ? validateAndTrim(body.email, FIELD_LIMITS.MESSAGE_EMAIL, "\u90AE\u7BB1") : "";
+  const website = body.website ? validateAndTrim(body.website, FIELD_LIMITS.MESSAGE_WEBSITE, "\u7F51\u7AD9") : "";
+  const avatar = body.avatar ? validateAndTrim(body.avatar, FIELD_LIMITS.FRIEND_AVATAR, "\u5934\u50CF") : "";
+  if (!name || !content) {
     throw createError({
       statusCode: 400,
       message: "\u59D3\u540D\u548C\u7559\u8A00\u5185\u5BB9\u4E0D\u80FD\u4E3A\u7A7A"
+    });
+  }
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw createError({
+      statusCode: 400,
+      message: "\u90AE\u7BB1\u683C\u5F0F\u4E0D\u6B63\u786E"
     });
   }
   const authHeader = getHeader(event, "authorization");
@@ -3144,12 +3242,12 @@ const index_post$4 = defineEventHandler(async (event) => {
     }
     const messageData = {
       id: newId,
-      name: body.name,
-      email: body.email || "",
-      content: body.content,
+      name,
+      email,
+      content,
       date: messageDate,
-      avatar: body.avatar || "",
-      website: body.website || "",
+      avatar,
+      website,
       ip: isAdmin ? "admin" : event.headers.get("cf-connecting-ip") || event.headers.get("x-forwarded-for") || "unknown"
     };
     const messageKey = `message:${newId}`;
@@ -3168,10 +3266,7 @@ const index_post$4 = defineEventHandler(async (event) => {
       }
     };
   } catch (error) {
-    throw createError({
-      statusCode: 500,
-      message: error.message || "\u521B\u5EFA\u7559\u8A00\u5931\u8D25"
-    });
+    handleApiError(error, "\u521B\u5EFA\u7559\u8A00\u5931\u8D25", 500);
   }
 });
 
@@ -3209,10 +3304,7 @@ const _id__delete$2 = defineEventHandler(async (event) => {
       message: "\u5220\u9664\u6210\u529F"
     };
   } catch (error) {
-    throw createError({
-      statusCode: 500,
-      message: error.message || "\u5220\u9664\u670B\u53CB\u5708\u52A8\u6001\u5931\u8D25"
-    });
+    handleApiError(error, "\u5220\u9664\u670B\u53CB\u5708\u52A8\u6001\u5931\u8D25", 500);
   }
 });
 
@@ -3247,10 +3339,7 @@ const _id__get$2 = defineEventHandler(async (event) => {
     if (error.statusCode) {
       throw error;
     }
-    throw createError({
-      statusCode: 500,
-      message: error.message || "\u83B7\u53D6\u670B\u53CB\u5708\u52A8\u6001\u5931\u8D25"
-    });
+    handleApiError(error, "\u83B7\u53D6\u670B\u53CB\u5708\u52A8\u6001\u5931\u8D25", 500);
   }
 });
 
@@ -3287,15 +3376,37 @@ const _id__put$2 = defineEventHandler(async (event) => {
         message: "\u52A8\u6001\u4E0D\u5B58\u5728"
       });
     }
+    let nickname = ((_a = momentData.author) == null ? void 0 : _a.nickname) || "Leyili";
+    let avatar = ((_b = momentData.author) == null ? void 0 : _b.avatar) || "/images/lcj.svg";
+    let content = momentData.content;
+    let images = momentData.images || [];
+    if (((_c = body.author) == null ? void 0 : _c.nickname) !== void 0) {
+      nickname = validateAndTrim(body.author.nickname, FIELD_LIMITS.MOMENT_NICKNAME, "\u6635\u79F0");
+    }
+    if (((_d = body.author) == null ? void 0 : _d.avatar) !== void 0) {
+      avatar = validateAndTrim(body.author.avatar, FIELD_LIMITS.MOMENT_AVATAR, "\u5934\u50CF");
+    }
+    if (body.content !== void 0) {
+      content = validateAndTrim(body.content, FIELD_LIMITS.MOMENT_CONTENT, "\u52A8\u6001\u5185\u5BB9");
+    }
+    if (body.images !== void 0) {
+      if (Array.isArray(body.images) && body.images.length > 9) {
+        throw createError({
+          statusCode: 400,
+          message: "\u6700\u591A\u53EA\u80FD\u4E0A\u4F20 9 \u5F20\u56FE\u7247"
+        });
+      }
+      images = body.images;
+    }
     const updatedData = {
       ...momentData,
       author: {
-        nickname: ((_a = body.author) == null ? void 0 : _a.nickname) || ((_b = momentData.author) == null ? void 0 : _b.nickname) || "Leyili",
-        avatar: ((_c = body.author) == null ? void 0 : _c.avatar) || ((_d = momentData.author) == null ? void 0 : _d.avatar) || "/images/lcj.svg"
+        nickname,
+        avatar
       },
-      content: body.content !== void 0 ? body.content : momentData.content,
+      content,
       timestamp: body.timestamp !== void 0 ? body.timestamp : momentData.timestamp,
-      images: body.images !== void 0 ? body.images : momentData.images || []
+      images
     };
     await kv.setItem(momentKey, updatedData);
     return {
@@ -3307,10 +3418,7 @@ const _id__put$2 = defineEventHandler(async (event) => {
     if (error.statusCode) {
       throw error;
     }
-    throw createError({
-      statusCode: 500,
-      message: error.message || "\u66F4\u65B0\u670B\u53CB\u5708\u52A8\u6001\u5931\u8D25"
-    });
+    handleApiError(error, "\u66F4\u65B0\u670B\u53CB\u5708\u52A8\u6001\u5931\u8D25", 500);
   }
 });
 
@@ -3357,10 +3465,7 @@ const index_get$2 = defineEventHandler(async (event) => {
       data: moments
     };
   } catch (error) {
-    throw createError({
-      statusCode: 500,
-      message: error.message || "\u83B7\u53D6\u670B\u53CB\u5708\u52A8\u6001\u5931\u8D25"
-    });
+    handleApiError(error, "\u83B7\u53D6\u670B\u53CB\u5708\u52A8\u6001\u5931\u8D25", 500);
   }
 });
 
@@ -3380,10 +3485,19 @@ const index_post$2 = defineEventHandler(async (event) => {
     });
   }
   const body = await readBody(event);
-  if (!body.content) {
+  const content = validateAndTrim(body.content, FIELD_LIMITS.MOMENT_CONTENT, "\u52A8\u6001\u5185\u5BB9");
+  const nickname = ((_a = body.author) == null ? void 0 : _a.nickname) ? validateAndTrim(body.author.nickname, FIELD_LIMITS.MOMENT_NICKNAME, "\u6635\u79F0") : "Leyili";
+  const avatar = ((_b = body.author) == null ? void 0 : _b.avatar) ? validateAndTrim(body.author.avatar, FIELD_LIMITS.MOMENT_AVATAR, "\u5934\u50CF") : "/images/lcj.svg";
+  if (!content) {
     throw createError({
       statusCode: 400,
       message: "\u5185\u5BB9\u4E0D\u80FD\u4E3A\u7A7A"
+    });
+  }
+  if (body.images && Array.isArray(body.images) && body.images.length > 9) {
+    throw createError({
+      statusCode: 400,
+      message: "\u6700\u591A\u53EA\u80FD\u4E0A\u4F20 9 \u5F20\u56FE\u7247"
     });
   }
   try {
@@ -3396,10 +3510,10 @@ const index_post$2 = defineEventHandler(async (event) => {
     const momentData = {
       id: parseInt(newId),
       author: {
-        nickname: ((_a = body.author) == null ? void 0 : _a.nickname) || "Leyili",
-        avatar: ((_b = body.author) == null ? void 0 : _b.avatar) || "/images/lcj.svg"
+        nickname,
+        avatar
       },
-      content: body.content,
+      content,
       timestamp: body.timestamp || timestamp,
       images: body.images || []
     };
@@ -3413,10 +3527,7 @@ const index_post$2 = defineEventHandler(async (event) => {
     };
   } catch (error) {
     console.error("\u521B\u5EFA\u670B\u53CB\u5708\u52A8\u6001\u5931\u8D25:", error);
-    throw createError({
-      statusCode: 500,
-      message: error.message || "\u521B\u5EFA\u670B\u53CB\u5708\u52A8\u6001\u5931\u8D25"
-    });
+    handleApiError(error, "\u521B\u5EFA\u670B\u53CB\u5708\u52A8\u6001\u5931\u8D25", 500);
   }
 });
 
@@ -3464,10 +3575,7 @@ const _id__delete = defineEventHandler(async (event) => {
     if (error.statusCode) {
       throw error;
     }
-    throw createError({
-      statusCode: 500,
-      message: error.message || "\u5220\u9664\u6587\u7AE0\u5931\u8D25"
-    });
+    handleApiError(error, "\u5220\u9664\u6587\u7AE0\u5931\u8D25", 500);
   }
 });
 
@@ -3502,10 +3610,7 @@ const _id__get = defineEventHandler(async (event) => {
     if (error.statusCode) {
       throw error;
     }
-    throw createError({
-      statusCode: 500,
-      message: error.message || "\u83B7\u53D6\u6587\u7AE0\u5931\u8D25"
-    });
+    handleApiError(error, "\u83B7\u53D6\u6587\u7AE0\u5931\u8D25", 500);
   }
 });
 
@@ -3541,16 +3646,34 @@ const _id__put = defineEventHandler(async (event) => {
         message: "\u6587\u7AE0\u4E0D\u5B58\u5728"
       });
     }
+    const updates = {};
+    if (body.title !== void 0) {
+      updates.title = validateAndTrim(body.title, FIELD_LIMITS.POST_TITLE, "\u6807\u9898");
+    }
+    if (body.body !== void 0) {
+      updates.body = validateAndTrim(body.body, FIELD_LIMITS.POST_BODY, "\u6587\u7AE0\u5185\u5BB9");
+    }
+    if (body.user !== void 0) {
+      updates.user = validateAndTrim(body.user, FIELD_LIMITS.POST_USER, "\u4F5C\u8005");
+    }
+    if (body.cover !== void 0) {
+      updates.cover = validateAndTrim(body.cover, FIELD_LIMITS.POST_COVER, "\u5C01\u9762");
+    }
+    if (body.avatar !== void 0) {
+      updates.avatar = validateAndTrim(body.avatar, FIELD_LIMITS.FRIEND_AVATAR, "\u5934\u50CF");
+    }
+    if (body.date !== void 0) {
+      updates.date = body.date;
+    }
+    if (body.ratio !== void 0) {
+      updates.ratio = body.ratio;
+    }
+    if (body.likes !== void 0) {
+      updates.likes = body.likes;
+    }
     const updatedPost = {
       ...existingPost,
-      ...body.title !== void 0 && { title: body.title },
-      ...body.date !== void 0 && { date: body.date },
-      ...body.cover !== void 0 && { cover: body.cover },
-      ...body.ratio !== void 0 && { ratio: body.ratio },
-      ...body.user !== void 0 && { user: body.user },
-      ...body.avatar !== void 0 && { avatar: body.avatar },
-      ...body.likes !== void 0 && { likes: body.likes },
-      ...body.body !== void 0 && { body: body.body }
+      ...updates
     };
     await kv.setItem(postKey, updatedPost);
     return {
@@ -3561,10 +3684,7 @@ const _id__put = defineEventHandler(async (event) => {
     if (error.statusCode) {
       throw error;
     }
-    throw createError({
-      statusCode: 500,
-      message: error.message || "\u66F4\u65B0\u6587\u7AE0\u5931\u8D25"
-    });
+    handleApiError(error, "\u66F4\u65B0\u6587\u7AE0\u5931\u8D25", 500);
   }
 });
 
@@ -3606,9 +3726,10 @@ const index_get = defineEventHandler(async (event) => {
       data: posts
     };
   } catch (error) {
+    const isProd = process.env.NITRO_PRESET === "cloudflare-pages";
     return {
       success: false,
-      error: error.message || "\u83B7\u53D6\u6587\u7AE0\u5217\u8868\u5931\u8D25"
+      error: isProd ? "\u83B7\u53D6\u6587\u7AE0\u5217\u8868\u5931\u8D25" : error.message || "\u83B7\u53D6\u6587\u7AE0\u5217\u8868\u5931\u8D25"
     };
   }
 });
@@ -3629,7 +3750,12 @@ const index_post = defineEventHandler(async (event) => {
   }
   const body = await readBody(event);
   const kv = getKVStorage(event);
-  if (!body.title || !body.body) {
+  const title = validateAndTrim(body.title, FIELD_LIMITS.POST_TITLE, "\u6807\u9898");
+  const postBody = validateAndTrim(body.body, FIELD_LIMITS.POST_BODY, "\u6587\u7AE0\u5185\u5BB9");
+  const user = body.user ? validateAndTrim(body.user, FIELD_LIMITS.POST_USER, "\u4F5C\u8005") : "lcj";
+  const cover = body.cover ? validateAndTrim(body.cover, FIELD_LIMITS.POST_COVER, "\u5C01\u9762") : "";
+  const avatar = body.avatar ? validateAndTrim(body.avatar, FIELD_LIMITS.FRIEND_AVATAR, "\u5934\u50CF") : "";
+  if (!title || !postBody) {
     throw createError({
       statusCode: 400,
       message: "\u6807\u9898\u548C\u5185\u5BB9\u4E0D\u80FD\u4E3A\u7A7A"
@@ -3641,14 +3767,14 @@ const index_post = defineEventHandler(async (event) => {
     const newId = postsList.length > 0 ? String(Math.max(...postsList.map((id) => parseInt(id))) + 1) : "1";
     const postData = {
       id: newId,
-      title: body.title,
+      title,
       date: body.date || (/* @__PURE__ */ new Date()).toISOString().split("T")[0],
-      cover: body.cover || "",
+      cover,
       ratio: body.ratio || 0.75,
-      user: body.user || "lcj",
-      avatar: body.avatar || "",
+      user,
+      avatar,
       likes: body.likes || 0,
-      body: body.body
+      body: postBody
     };
     const postKey = `post:${newId}`;
     await kv.setItem(postKey, postData);
@@ -3659,10 +3785,7 @@ const index_post = defineEventHandler(async (event) => {
       data: postData
     };
   } catch (error) {
-    throw createError({
-      statusCode: 500,
-      message: error.message || "\u521B\u5EFA\u6587\u7AE0\u5931\u8D25"
-    });
+    handleApiError(error, "\u521B\u5EFA\u6587\u7AE0\u5931\u8D25", 500);
   }
 });
 
@@ -3718,10 +3841,7 @@ const ____path__get = defineEventHandler(async (event) => {
     if (error.statusCode) {
       throw error;
     }
-    throw createError({
-      statusCode: 500,
-      message: error.message || "\u83B7\u53D6\u6587\u4EF6\u5931\u8D25"
-    });
+    handleApiError(error, "\u83B7\u53D6\u6587\u4EF6\u5931\u8D25", 500);
   }
 });
 
@@ -3787,10 +3907,7 @@ const image_post = defineEventHandler(async (event) => {
     if (error.statusCode) {
       throw error;
     }
-    throw createError({
-      statusCode: 500,
-      message: error.message || "\u4E0A\u4F20\u5931\u8D25"
-    });
+    handleApiError(error, "\u4E0A\u4F20\u5931\u8D25", 500);
   }
 });
 

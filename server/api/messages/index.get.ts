@@ -1,4 +1,5 @@
 import { getKVStorage } from '~/server/utils/kv';
+import { handleApiError } from '~/server/utils/errorHandler';
 
 // 获取所有留言列表
 export default defineEventHandler(async (event) => {
@@ -40,9 +41,11 @@ export default defineEventHandler(async (event) => {
       data: messages
     };
   } catch (error: any) {
+    // 使用安全的错误处理，但 GET 请求返回错误对象而不是抛出
+    const isProd = process.env.NODE_ENV === 'production' || process.env.NITRO_PRESET === 'cloudflare-pages';
     return {
       success: false,
-      error: error.message || '获取留言列表失败'
+      error: isProd ? '获取留言列表失败' : (error.message || '获取留言列表失败')
     };
   }
 });

@@ -1,4 +1,5 @@
 import { getKVStorage } from '~/server/utils/kv';
+import { handleApiError } from '~/server/utils/errorHandler';
 
 // 获取已批准的友链列表（公开接口）
 export default defineEventHandler(async (event) => {
@@ -27,10 +28,7 @@ export default defineEventHandler(async (event) => {
       data: friends
     };
   } catch (error: any) {
-    throw createError({
-      statusCode: 500,
-      message: error.message || '获取友链列表失败'
-    });
+    handleApiError(error, '获取友链列表失败', 500);
   }
 });
 

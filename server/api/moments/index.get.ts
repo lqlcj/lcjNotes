@@ -1,4 +1,5 @@
 import { getKVStorage } from '~/server/utils/kv';
+import { handleApiError } from '~/server/utils/errorHandler';
 
 // 获取所有朋友圈动态列表（公开接口）
 export default defineEventHandler(async (event) => {
@@ -49,10 +50,7 @@ export default defineEventHandler(async (event) => {
       data: moments
     };
   } catch (error: any) {
-    throw createError({
-      statusCode: 500,
-      message: error.message || '获取朋友圈动态失败'
-    });
+    handleApiError(error, '获取朋友圈动态失败', 500);
   }
 });
 

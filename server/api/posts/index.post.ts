@@ -1,4 +1,6 @@
 import { getKVStorage } from '~/server/utils/kv';
+import { validateAndTrim, validateLength, FIELD_LIMITS } from '~/server/utils/validation';
+import { handleApiError } from '~/server/utils/errorHandler';
 
 // 创建新文章
 export default defineEventHandler(async (event) => {
@@ -16,8 +18,15 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event);
   const kv = getKVStorage(event);
   
+  // 验证并清理输入
+  const title = validateAndTrim(body.title, FIELD_LIMITS.POST_TITLE, '标题');
+  const postBody = validateAndTrim(body.body, FIELD_LIMITS.POST_BODY, '文章内容');
+  const user = body.user ? validateAndTrim(body.user, FIELD_LIMITS.POST_USER, '作者') : 'lcj';
+  const cover = body.cover ? validateAndTrim(body.cover, FIELD_LIMITS.POST_COVER, '封面') : '';
+  const avatar = body.avatar ? validateAndTrim(body.avatar, FIELD_LIMITS.FRIEND_AVATAR, '头像') : '';
+  
   // 验证必填字段
-  if (!body.title || !body.body) {
+  if (!title || !postBody) {
     throw createError({
       statusCode: 400,
       message: '标题和内容不能为空'
@@ -35,14 +44,14 @@ export default defineEventHandler(async (event) => {
     // 构建文章数据
     const postData = {
       id: newId,
-      title: body.title,
+      title: title,
       date: body.date || new Date().toISOString().split('T')[0],
-      cover: body.cover || '',
+      cover: cover,
       ratio: body.ratio || 0.75,
-      user: body.user || 'lcj',
-      avatar: body.avatar || '',
+      user: user,
+      avatar: avatar,
       likes: body.likes || 0,
-      body: body.body
+      body: postBody
     };
     
     // 保存文章
@@ -58,10 +67,7 @@ export default defineEventHandler(async (event) => {
       data: postData
     };
   } catch (error: any) {
-    throw createError({
-      statusCode: 500,
-      message: error.message || '创建文章失败'
-    });
+    handleApiError(error, '创建文章失败', 500);
   }
 });
 

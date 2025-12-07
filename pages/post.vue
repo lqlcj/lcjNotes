@@ -46,7 +46,7 @@
   // 使用 public 目录下的图片
   const defaultCover = '/images/loading.webp';
   // 保持依赖动态导入，解决 820KB bloat 问题
-  import { default as MarkdownIt } from 'markdown-it';
+  import { createSafeMarkdownIt } from '~/utils/markdown';
 
   const route = useRoute();
   const notesStore = useNotesStore();
@@ -113,12 +113,8 @@
           console.log('尝试从 filePath 加载文章:', filePath);
           const parsed = await notesStore.getPostByPath(filePath);
           if (parsed) {
-            // 初始化解析器
-            const md = new MarkdownIt({
-              html: true,
-              linkify: true,
-              typographer: true
-            });
+            // 初始化安全的解析器
+            const md = createSafeMarkdownIt();
             post.value = parsed;
             htmlContent.value = md.render(parsed.body);
             errorMessage.value = '';

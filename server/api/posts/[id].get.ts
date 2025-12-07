@@ -1,4 +1,5 @@
 import { getKVStorage } from '~/server/utils/kv';
+import { handleApiError } from '~/server/utils/errorHandler';
 
 // 获取单篇文章的完整内容
 export default defineEventHandler(async (event) => {
@@ -31,10 +32,7 @@ export default defineEventHandler(async (event) => {
     if (error.statusCode) {
       throw error;
     }
-    throw createError({
-      statusCode: 500,
-      message: error.message || '获取文章失败'
-    });
+    handleApiError(error, '获取文章失败', 500);
   }
 });
 

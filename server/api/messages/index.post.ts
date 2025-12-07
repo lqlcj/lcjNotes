@@ -1,16 +1,33 @@
 import { getKVStorage } from '~/server/utils/kv';
 import { verifyTurnstile } from '~/server/utils/turnstile';
+import { validateAndTrim, validateLength, FIELD_LIMITS } from '~/server/utils/validation';
+import { handleApiError } from '~/server/utils/errorHandler';
 
 // 创建新留言（公开接口，不需要认证；如果提供认证token，可以设置自定义时间）
 export default defineEventHandler(async (event) => {
   const kv = getKVStorage(event);
   const body = await readBody(event);
   
+  // 验证并清理输入
+  const name = validateAndTrim(body.name, FIELD_LIMITS.MESSAGE_NAME, '姓名');
+  const content = validateAndTrim(body.content, FIELD_LIMITS.MESSAGE_CONTENT, '留言内容');
+  const email = body.email ? validateAndTrim(body.email, FIELD_LIMITS.MESSAGE_EMAIL, '邮箱') : '';
+  const website = body.website ? validateAndTrim(body.website, FIELD_LIMITS.MESSAGE_WEBSITE, '网站') : '';
+  const avatar = body.avatar ? validateAndTrim(body.avatar, FIELD_LIMITS.FRIEND_AVATAR, '头像') : '';
+  
   // 验证必填字段
-  if (!body.name || !body.content) {
+  if (!name || !content) {
     throw createError({
       statusCode: 400,
       message: '姓名和留言内容不能为空'
+    });
+  }
+  
+  // 验证邮箱格式（如果提供了邮箱）
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw createError({
+      statusCode: 400,
+      message: '邮箱格式不正确'
     });
   }
   
@@ -71,12 +88,12 @@ export default defineEventHandler(async (event) => {
     
     const messageData = {
       id: newId,
-      name: body.name,
-      email: body.email || '',
-      content: body.content,
+      name: name,
+      email: email,
+      content: content,
       date: messageDate,
-      avatar: body.avatar || '',
-      website: body.website || '',
+      avatar: avatar,
+      website: website,
       ip: isAdmin ? 'admin' : (event.headers.get('cf-connecting-ip') || event.headers.get('x-forwarded-for') || 'unknown')
     };
     
@@ -100,10 +117,7 @@ export default defineEventHandler(async (event) => {
       }
     };
   } catch (error: any) {
-    throw createError({
-      statusCode: 500,
-      message: error.message || '创建留言失败'
-    });
+    handleApiError(error, '创建留言失败', 500);
   }
 });
 

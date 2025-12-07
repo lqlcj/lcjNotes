@@ -1,4 +1,6 @@
 import { getKVStorage } from '~/server/utils/kv';
+import { validateAndTrim, FIELD_LIMITS } from '~/server/utils/validation';
+import { handleApiError } from '~/server/utils/errorHandler';
 
 // 管理员直接添加友链（不需要经过申请流程）
 export default defineEventHandler(async (event) => {
@@ -15,8 +17,14 @@ export default defineEventHandler(async (event) => {
 
   const body = await readBody(event);
   
+  // 验证并清理输入
+  const name = validateAndTrim(body.name, FIELD_LIMITS.FRIEND_NAME, '网站名称');
+  const url = validateAndTrim(body.url, FIELD_LIMITS.FRIEND_URL, '网站链接');
+  const description = body.description ? validateAndTrim(body.description, FIELD_LIMITS.FRIEND_DESCRIPTION, '网站描述') : '';
+  const avatar = body.avatar ? validateAndTrim(body.avatar, FIELD_LIMITS.FRIEND_AVATAR, '头像') : '/images/home/avatar.webp';
+  
   // 验证必填字段
-  if (!body.name || !body.url) {
+  if (!name || !url) {
     throw createError({
       statusCode: 400,
       message: '网站名称和链接不能为空'
@@ -25,7 +33,7 @@ export default defineEventHandler(async (event) => {
 
   // 验证 URL 格式
   try {
-    new URL(body.url);
+    new URL(url);
   } catch {
     throw createError({
       statusCode: 400,
@@ -46,10 +54,10 @@ export default defineEventHandler(async (event) => {
     // 构建友链数据
     const friendData = {
       id: newId,
-      name: body.name,
-      url: body.url,
-      description: body.description || '',
-      avatar: body.avatar || '/images/home/avatar.webp',
+      name: name,
+      url: url,
+      description: description,
+      avatar: avatar,
       date: new Date().toISOString().split('T')[0]
     };
     
@@ -67,10 +75,7 @@ export default defineEventHandler(async (event) => {
       message: '友链添加成功'
     };
   } catch (error: any) {
-    throw createError({
-      statusCode: 500,
-      message: error.message || '添加友链失败'
-    });
+    handleApiError(error, '添加友链失败', 500);
   }
 });
 

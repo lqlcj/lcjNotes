@@ -1,4 +1,5 @@
 import { getKVStorage } from '~/server/utils/kv';
+import { handleApiError } from '~/server/utils/errorHandler';
 
 // 删除已批准的友链（需要管理员认证）
 export default defineEventHandler(async (event) => {
@@ -40,10 +41,7 @@ export default defineEventHandler(async (event) => {
       message: '删除成功'
     };
   } catch (error: any) {
-    throw createError({
-      statusCode: 500,
-      message: error.message || '删除友链失败'
-    });
+    handleApiError(error, '删除友链失败', 500);
   }
 });
 

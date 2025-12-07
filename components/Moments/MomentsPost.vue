@@ -15,7 +15,7 @@
         </div>
         <div class="post-content">
           <div class="nickname">{{ post.author.nickname }}</div>
-          <p class="content-text" v-html="post.content.replace(/\n/g, '<br/>')"></p>
+          <p class="content-text" v-html="sanitizeContent(post.content)"></p>
           <div v-if="post.images && post.images.length > 0" class="image-gallery">
             <div v-if="post.images.length === 1" class="image-wrapper single-image">
               <img :src="post.images[0]" alt="post image" class="gallery-image" loading="lazy" decoding="async"
@@ -52,6 +52,39 @@
   import LoadingMessage from '~/components/Common/LoadingMessage.vue'
   // 使用 public 目录下的图片
   const avatarImage = '/images/lcj.svg'
+
+  // 清理内容，防止 XSS 攻击
+  // 移除危险标签和属性，只保留安全的换行符
+  const sanitizeContent = (content) => {
+    if (!content || typeof content !== 'string') {
+      return ''
+    }
+    
+    // 危险标签列表
+    const dangerousTags = ['script', 'iframe', 'object', 'embed', 'form', 'input', 'button', 'select', 'textarea', 'meta', 'link', 'style', 'base', 'frame', 'frameset']
+    
+    let safeContent = content
+    
+    // 移除危险标签
+    dangerousTags.forEach(tag => {
+      const regex = new RegExp(`<${tag}[^>]*>.*?</${tag}>`, 'gis')
+      safeContent = safeContent.replace(regex, '')
+      const selfClosingRegex = new RegExp(`<${tag}[^>]*/?>`, 'gi')
+      safeContent = safeContent.replace(selfClosingRegex, '')
+    })
+    
+    // 移除所有 on* 事件处理器属性
+    safeContent = safeContent.replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '')
+    safeContent = safeContent.replace(/\s*on\w+\s*=\s*[^\s>]*/gi, '')
+    
+    // 移除 javascript: 协议
+    safeContent = safeContent.replace(/javascript:/gi, '')
+    
+    // 将换行符转换为 <br/>
+    safeContent = safeContent.replace(/\n/g, '<br/>')
+    
+    return safeContent
+  }
 
   // 数据状态
   const momentsDataFromAPI = ref([])

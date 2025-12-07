@@ -1,2 +1,0 @@
-import{d as t,f as e}from"../../_/nitro.mjs";import{g as s}from"../../_/kv.mjs";const a=t(async t=>{try{const e=s(t),a="friends:list",o=await e.getItem(a)||[],r=[];for(const t of o){const s=`friend:${t}`,a=await e.getItem(s);a&&r.push(a)}return r.sort((t,e)=>new Date(e.date).getTime()-new Date(t.date).getTime()),{success:!0,data:r}}catch(t){throw e({statusCode:500,message:t.message||"获取友链列表失败"})}});export{a as default};
-//# sourceMappingURL=index.get2.mjs.map

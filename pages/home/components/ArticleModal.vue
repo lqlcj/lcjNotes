@@ -45,7 +45,7 @@ import { useNotesStore } from '~/stores/notesStore'
 // 使用 public 目录下的图片
 const defaultCover = '/images/loading.webp'
 // 保持依赖动态导入，解决 820KB bloat 问题
-import { default as MarkdownIt } from 'markdown-it'
+import { createSafeMarkdownIt } from '~/utils/markdown'
 
 const props = defineProps({
   visible: {
@@ -98,12 +98,8 @@ const loadArticle = async (postId) => {
       
       if (response && response.success && response.data) {
         const postData = response.data
-        // 初始化解析器
-        const md = new MarkdownIt({
-          html: true,
-          linkify: true,
-          typographer: true
-        })
+        // 初始化安全的解析器
+        const md = createSafeMarkdownIt()
         
         // 转换为兼容格式
         post.value = {

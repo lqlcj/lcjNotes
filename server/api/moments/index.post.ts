@@ -1,4 +1,6 @@
 import { getKVStorage } from '~/server/utils/kv';
+import { validateAndTrim, FIELD_LIMITS } from '~/server/utils/validation';
+import { handleApiError } from '~/server/utils/errorHandler';
 
 // 创建新朋友圈动态（需要管理员认证）
 export default defineEventHandler(async (event) => {
@@ -15,11 +17,24 @@ export default defineEventHandler(async (event) => {
 
   const body = await readBody(event);
   
+  // 验证并清理输入
+  const content = validateAndTrim(body.content, FIELD_LIMITS.MOMENT_CONTENT, '动态内容');
+  const nickname = body.author?.nickname ? validateAndTrim(body.author.nickname, FIELD_LIMITS.MOMENT_NICKNAME, '昵称') : 'Leyili';
+  const avatar = body.author?.avatar ? validateAndTrim(body.author.avatar, FIELD_LIMITS.MOMENT_AVATAR, '头像') : '/images/lcj.svg';
+  
   // 验证必填字段
-  if (!body.content) {
+  if (!content) {
     throw createError({
       statusCode: 400,
       message: '内容不能为空'
+    });
+  }
+  
+  // 验证图片数组长度
+  if (body.images && Array.isArray(body.images) && body.images.length > 9) {
+    throw createError({
+      statusCode: 400,
+      message: '最多只能上传 9 张图片'
     });
   }
 
@@ -40,10 +55,10 @@ export default defineEventHandler(async (event) => {
     const momentData = {
       id: parseInt(newId),
       author: {
-        nickname: body.author?.nickname || 'Leyili',
-        avatar: body.author?.avatar || '/images/lcj.svg'
+        nickname: nickname,
+        avatar: avatar
       },
-      content: body.content,
+      content: content,
       timestamp: body.timestamp || timestamp,
       images: body.images || []
     };
@@ -62,10 +77,7 @@ export default defineEventHandler(async (event) => {
     };
   } catch (error: any) {
     console.error('创建朋友圈动态失败:', error);
-    throw createError({
-      statusCode: 500,
-      message: error.message || '创建朋友圈动态失败'
-    });
+    handleApiError(error, '创建朋友圈动态失败', 500);
   }
 });
 

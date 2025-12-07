@@ -1,13 +1,21 @@
 import { getKVStorage } from '~/server/utils/kv';
 import { verifyTurnstile } from '~/server/utils/turnstile';
+import { validateAndTrim, FIELD_LIMITS } from '~/server/utils/validation';
+import { handleApiError } from '~/server/utils/errorHandler';
 
 // 提交友链申请
 export default defineEventHandler(async (event) => {
   const kv = getKVStorage(event);
   const body = await readBody(event);
   
+  // 验证并清理输入
+  const name = validateAndTrim(body.name, FIELD_LIMITS.FRIEND_NAME, '网站名称');
+  const url = validateAndTrim(body.url, FIELD_LIMITS.FRIEND_URL, '网站链接');
+  const description = body.description ? validateAndTrim(body.description, FIELD_LIMITS.FRIEND_DESCRIPTION, '网站描述') : '';
+  const avatar = body.avatar ? validateAndTrim(body.avatar, FIELD_LIMITS.FRIEND_AVATAR, '头像') : '';
+  
   // 验证必填字段
-  if (!body.name || !body.url) {
+  if (!name || !url) {
     throw createError({
       statusCode: 400,
       message: '网站名称和链接不能为空'
@@ -16,7 +24,7 @@ export default defineEventHandler(async (event) => {
 
   // 验证 URL 格式
   try {
-    new URL(body.url);
+    new URL(url);
   } catch {
     throw createError({
       statusCode: 400,
@@ -61,10 +69,10 @@ export default defineEventHandler(async (event) => {
     // 构建申请数据
     const requestData = {
       id: newId,
-      name: body.name,
-      url: body.url,
-      description: body.description || '',
-      avatar: body.avatar || '',
+      name: name,
+      url: url,
+      description: description,
+      avatar: avatar,
       status: 'pending', // pending, approved, rejected
       createdAt: new Date().toISOString(),
       ip: getHeader(event, 'cf-connecting-ip') || getHeader(event, 'x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
@@ -86,10 +94,7 @@ export default defineEventHandler(async (event) => {
       }
     };
   } catch (error: any) {
-    throw createError({
-      statusCode: 500,
-      message: error.message || '提交申请失败'
-    });
+    handleApiError(error, '提交申请失败', 500);
   }
 });
 

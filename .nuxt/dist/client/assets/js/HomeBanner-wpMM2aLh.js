@@ -1,0 +1,1 @@
+import{_ as a,c as o,a as e,o as s}from"./entry-BoDkxE-2.js";const n={class:"banner-wrapper"},c="/images/Logo2.webp",t={__name:"HomeBanner",setup(r){return(_,p)=>(s(),o("div",n,[e("div",{class:"banner-content"},[e("img",{src:c,alt:"Logo",class:"banner-logo"})])]))}},m=a(t,[["__scopeId","data-v-d428f444"]]);export{m as default};
