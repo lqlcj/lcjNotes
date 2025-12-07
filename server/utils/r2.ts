@@ -72,9 +72,9 @@ export function getMimeTypeFromExt(ext: string): string {
 /**
  * 从图片URL中提取R2存储的key
  * 支持多种格式：
- * 1. https://photo.lcjlq.com/assets/2024-12/uuid.jpg (使用r2PublicUrl)
- * 2. /api/r2/assets/2024-12/uuid.jpg (使用代理路由)
- * 3. assets/2024-12/uuid.jpg (直接key格式)
+ * 1. https://photo.lcjlq.com/assets/2025-12/uuid.jpg (使用r2PublicUrl)
+ * 2. /api/r2/assets/2025-12/uuid.jpg (使用代理路由)
+ * 3. assets/2025-12/uuid.jpg (直接key格式)
  * @param url 图片URL
  * @returns R2 key，如果不是R2图片则返回null
  */
@@ -86,44 +86,47 @@ export function extractR2KeyFromUrl(url: string): string | null {
   // 清理URL：移除查询参数和锚点
   let cleanUrl = url.split('?')[0].split('#')[0].trim();
   
-  // 方法1: 使用正则表达式直接从URL中提取assets/路径（最通用）
-  const assetsMatch = cleanUrl.match(/assets\/[^?#\s]+/);
-  if (assetsMatch) {
-    return assetsMatch[0];
-  }
-  
   try {
-    // 方法2: 处理完整URL (https://photo.lcjlq.com/assets/...)
+    // 方法1: 处理完整URL (https://photo.lcjlq.com/assets/...)
     if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://')) {
-      const urlObj = new URL(cleanUrl);
-      const path = urlObj.pathname;
-      // 移除开头的斜杠
-      const key = path.startsWith('/') ? path.substring(1) : path;
-      // 检查是否是assets目录下的文件
-      if (key.startsWith('assets/')) {
-        return key;
+      try {
+        const urlObj = new URL(cleanUrl);
+        const path = urlObj.pathname;
+        // 移除开头的斜杠
+        const key = path.startsWith('/') ? path.substring(1) : path;
+        // 检查是否是assets目录下的文件
+        if (key.startsWith('assets/')) {
+          return key;
+        }
+      } catch (e) {
+        // URL解析失败，继续尝试其他方法
       }
-      return null;
     }
 
-    // 方法3: 处理代理路由 (/api/r2/assets/...)
+    // 方法2: 处理代理路由 (/api/r2/assets/...)
     if (cleanUrl.startsWith('/api/r2/')) {
       const key = cleanUrl.replace('/api/r2/', '');
       if (key.startsWith('assets/')) {
         return key;
       }
-      return null;
     }
 
-    // 方法4: 如果URL直接是key格式 (assets/...)
+    // 方法3: 如果URL直接是key格式 (assets/...)
     if (cleanUrl.startsWith('assets/')) {
       return cleanUrl;
     }
 
+    // 方法4: 使用正则表达式直接从URL中提取assets/路径（备用方法）
+    // 匹配 assets/ 后面直到URL结束或遇到 ? # 空白字符的内容
+    const assetsMatch = cleanUrl.match(/assets\/[^\s?#]+/);
+    if (assetsMatch) {
+      return assetsMatch[0];
+    }
+
     return null;
   } catch (error) {
-    // 如果URL解析失败，尝试最后的备用方法：直接查找assets/
-    const fallbackMatch = cleanUrl.match(/assets\/[^?#\s]+/);
+    // 最后的备用方法：使用正则表达式
+    const fallbackMatch = cleanUrl.match(/assets\/[^\s?#]+/);
     if (fallbackMatch) {
       return fallbackMatch[0];
     }

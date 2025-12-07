@@ -56,19 +56,40 @@ export default defineEventHandler(async (event) => {
           if (r2Key) {
             console.log(`提取到R2 key: ${r2Key}`);
             try {
-              await r2.delete(r2Key);
-              console.log(`✓ 已删除R2图片: ${r2Key}`);
+              // 执行删除操作
+              const deleteResult = await r2.delete(r2Key);
+              console.log(`✓ 已删除R2图片: ${r2Key}`, deleteResult);
             } catch (deleteError: any) {
-              // 如果删除失败，记录日志但不中断流程
-              console.error(`✗ 删除R2图片失败 ${r2Key}:`, deleteError?.message || deleteError);
+              // 如果删除失败，记录详细错误信息
+              console.error(`✗ 删除R2图片失败 ${r2Key}:`, {
+                message: deleteError?.message,
+                error: deleteError,
+                stack: deleteError?.stack
+              });
             }
           } else {
             console.log(`⚠ 无法从URL提取R2 key，跳过: ${imageUrl}`);
+            // 尝试手动提取
+            const manualMatch = imageUrl.match(/assets\/[^\s?#]+/);
+            if (manualMatch) {
+              const manualKey = manualMatch[0];
+              console.log(`尝试手动提取key: ${manualKey}`);
+              try {
+                await r2.delete(manualKey);
+                console.log(`✓ 使用手动提取的key删除成功: ${manualKey}`);
+              } catch (e: any) {
+                console.error(`✗ 手动提取的key删除失败: ${manualKey}`, e?.message);
+              }
+            }
           }
         }
       } catch (r2Error: any) {
         // R2操作失败，记录日志但不中断删除流程
-        console.error('删除朋友圈图片时出错:', r2Error?.message || r2Error);
+        console.error('删除朋友圈图片时出错:', {
+          message: r2Error?.message,
+          error: r2Error,
+          stack: r2Error?.stack
+        });
       }
     } else {
       console.log('朋友圈动态没有图片，跳过图片删除');
