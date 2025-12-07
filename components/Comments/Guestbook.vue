@@ -558,6 +558,35 @@
     box-sizing: border-box;
   }
 
+  /* 自定义滚动条样式 - 桌面端 */
+  .comments-list::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .comments-list::-webkit-scrollbar-track {
+    background: rgba(252, 251, 249, 0.5);
+    border-radius: 8px;
+  }
+
+  .comments-list::-webkit-scrollbar-thumb {
+    background: rgba(104, 68, 77, 0.15);
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    transition: background 0.3s ease;
+  }
+
+  .comments-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(104, 68, 77, 0.25);
+    background-clip: padding-box;
+  }
+
+  /* Firefox 滚动条样式 */
+  .comments-list {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(104, 68, 77, 0.15) rgba(252, 251, 249, 0.5);
+  }
+
   .empty-state {
     text-align: center;
     padding: 40px;
