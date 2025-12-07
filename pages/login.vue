@@ -359,6 +359,12 @@
               </div>
 
               <div class="form-group">
+                <label>发布时间（可选，留空则使用当前时间）</label>
+                <input v-model="momentTimestampInput" type="datetime-local" />
+                <small class="form-hint">格式：YYYY-MM-DD HH:mm:ss，留空则使用当前时间</small>
+              </div>
+
+              <div class="form-group">
                 <label>图片（可选）</label>
                 <div class="images-upload-section">
                   <div class="upload-area">
@@ -491,6 +497,7 @@
   const submittingMoment = ref(false);
   const momentFormData = ref({
     content: '',
+    timestamp: '',
     author: {
       nickname: 'Leyili',
       avatar: '/images/home/avatar.webp'
@@ -505,6 +512,34 @@
     },
     set: (value) => {
       momentFormData.value.images = value.split('\n').filter(url => url.trim());
+    }
+  });
+
+  // 朋友圈时间输入（用于表单输入，转换为API需要的格式）
+  const momentTimestampInput = computed({
+    get: () => {
+      if (!momentFormData.value.timestamp) return '';
+      // 将 "创建时间: 2025-12-06 20:31:00" 转换为 "2025-12-06T20:31"
+      const match = momentFormData.value.timestamp.match(/创建时间:\s*(\d{4}-\d{2}-\d{2})\s+(\d{2}):(\d{2}):(\d{2})/);
+      if (match) {
+        return `${match[1]}T${match[2]}:${match[3]}`;
+      }
+      return '';
+    },
+    set: (value) => {
+      if (!value) {
+        momentFormData.value.timestamp = '';
+        return;
+      }
+      // 将 "2025-12-06T20:31" 转换为 "创建时间: 2025-12-06 20:31:00"
+      const date = new Date(value);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const seconds = String(date.getSeconds()).padStart(2, '0');
+      momentFormData.value.timestamp = `创建时间: ${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     }
   });
 
@@ -1244,6 +1279,7 @@
     editingMoment.value = moment;
     momentFormData.value = {
       content: moment.content || '',
+      timestamp: moment.timestamp || '',
       author: {
         nickname: moment.author?.nickname || 'Leyili',
         avatar: moment.author?.avatar || '/images/home/avatar.webp'
@@ -1288,6 +1324,18 @@
     const token = localStorage.getItem('admin_token');
 
     try {
+      // 准备提交的数据
+      const submitData = {
+        content: momentFormData.value.content,
+        author: momentFormData.value.author,
+        images: momentFormData.value.images || []
+      };
+
+      // 如果有时间戳，添加到提交数据中
+      if (momentFormData.value.timestamp) {
+        submitData.timestamp = momentFormData.value.timestamp;
+      }
+
       if (editingMoment.value) {
         // 更新朋友圈
         const response = await $fetch(`/api/moments/${editingMoment.value.id}`, {
@@ -1295,13 +1343,15 @@
           headers: {
             'Authorization': `Bearer ${token}`
           },
-          body: momentFormData.value
+          body: submitData
         });
 
         if (response.success) {
           alert('更新成功');
           closeMomentForm();
           loadMoments();
+        } else {
+          alert(response.message || '更新失败');
         }
       } else {
         // 创建朋友圈
@@ -1310,17 +1360,20 @@
           headers: {
             'Authorization': `Bearer ${token}`
           },
-          body: momentFormData.value
+          body: submitData
         });
 
         if (response.success) {
           alert('创建成功');
           closeMomentForm();
           loadMoments();
+        } else {
+          alert(response.message || '创建失败');
         }
       }
     } catch (error) {
-      alert(error?.data?.message || '保存失败');
+      console.error('保存朋友圈失败:', error);
+      alert(error?.data?.message || error?.message || '保存失败，请检查网络连接');
     } finally {
       submittingMoment.value = false;
     }
@@ -1332,6 +1385,7 @@
     editingMoment.value = null;
     momentFormData.value = {
       content: '',
+      timestamp: '',
       author: {
         nickname: 'Leyili',
         avatar: '/images/home/avatar.webp'
