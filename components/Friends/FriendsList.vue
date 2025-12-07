@@ -3,13 +3,11 @@
   
   功能：
     - 显示已批准的友链列表
-    - 点击卡片显示确认对话框
-    - 外部链接跳转确认
+    - 点击卡片直接在新页面跳转
   
   特性：
     - 网格布局
     - 图片加载错误处理（使用默认头像）
-    - 确认对话框防止误点
     - 响应式设计
 -->
 <template>
@@ -26,8 +24,7 @@
           v-for="(friend, index) in friends" 
           :key="index" 
           class="friend-card glass-panel"
-          :class="{ 'show-confirm': confirmingIndex === index }"
-          @click="handleCardClick(friend.url, index)"
+          @click="handleCardClick(friend.url)"
         >
           <div class="friend-avatar">
             <img 
@@ -45,21 +42,6 @@
           
           <!-- 外部链接图标 - 始终显示 -->
           <div class="friend-arrow">↗</div>
-          
-          <!-- 确认按钮区域 -->
-          <div v-if="confirmingIndex === index" class="confirm-overlay">
-            <div class="confirm-content">
-              <p class="confirm-text">即将跳转到外部链接</p>
-              <div class="confirm-buttons">
-                <button class="confirm-btn confirm" @click.stop="confirmNavigate(friend.url, index)">
-                  确认跳转
-                </button>
-                <button class="confirm-btn cancel" @click.stop="cancelConfirm">
-                  取消
-                </button>
-              </div>
-            </div>
-          </div>
         </div>
     </div>
   </div>
@@ -71,7 +53,6 @@
   const defaultAvatar = '/images/home/avatar.webp'
 
   const friends = ref([])
-  const confirmingIndex = ref(null)
   const isLoading = ref(true)
 
   // 加载友链数据
@@ -102,25 +83,9 @@
     event.target.src = defaultAvatar
   }
 
-  // 处理卡片点击
-  const handleCardClick = (url, index) => {
-    // 如果已经在确认状态，不重复触发
-    if (confirmingIndex.value === index) {
-      return
-    }
-    // 显示确认按钮
-    confirmingIndex.value = index
-  }
-
-  // 确认跳转
-  const confirmNavigate = (url, index) => {
+  // 处理卡片点击 - 直接跳转
+  const handleCardClick = (url) => {
     window.open(url, '_blank', 'noopener,noreferrer')
-    confirmingIndex.value = null
-  }
-
-  // 取消确认
-  const cancelConfirm = () => {
-    confirmingIndex.value = null
   }
 
   onMounted(() => {
@@ -186,14 +151,6 @@
       0 12px 40px rgba(255, 165, 0, 0.12),
       0 6px 20px rgba(255, 200, 150, 0.18),
       0 3px 12px rgba(0, 0, 0, 0.06);
-  }
-
-  .friend-card.show-confirm {
-    border-color: rgba(104, 68, 77, 0.3);
-    box-shadow:
-      0 8px 32px rgba(255, 165, 0, 0.12),
-      0 4px 16px rgba(255, 200, 150, 0.18),
-      0 2px 8px rgba(0, 0, 0, 0.06);
   }
 
   .friend-card:hover .friend-arrow {
@@ -265,82 +222,6 @@
     transform: translate(4px, -4px);
   }
 
-  /* 确认覆盖层 */
-  .confirm-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(252, 251, 249, 0.98);
-    backdrop-filter: blur(4px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10;
-    border-radius: 8px;
-    animation: fadeIn 0.2s ease;
-  }
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-
-  .confirm-content {
-    text-align: center;
-    padding: 16px;
-  }
-
-  .confirm-text {
-    font-size: 0.85rem;
-    color: #2c3e50;
-    margin: 0 0 12px 0;
-    font-weight: 500;
-  }
-
-  .confirm-buttons {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-  }
-
-  .confirm-btn {
-    padding: 6px 16px;
-    border: 1px solid #d4c5b0;
-    border-radius: 6px;
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-weight: 500;
-  }
-
-  .confirm-btn.confirm {
-    background: linear-gradient(135deg, #8ec5fc 0%, #e0c3fc 100%);
-    color: #fff;
-    border-color: transparent;
-  }
-
-  .confirm-btn.confirm:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(142, 197, 252, 0.4);
-  }
-
-  .confirm-btn.cancel {
-    background: #fff;
-    color: #666;
-    border-color: #d4c5b0;
-  }
-
-  .confirm-btn.cancel:hover {
-    background: #f5f5f5;
-    border-color: #c4b5a0;
-  }
-
   /* 响应式设计 */
   @media (max-width: 768px) {
     .friends-grid {
@@ -364,16 +245,6 @@
     .friend-description {
       font-size: 0.7rem;
     }
-
-    .confirm-text {
-      font-size: 0.8rem;
-      margin-bottom: 10px;
-    }
-
-    .confirm-btn {
-      padding: 5px 12px;
-      font-size: 0.75rem;
-    }
   }
 
   /* ========== 深色模式支持 ========== */
@@ -394,15 +265,5 @@
         0 6px 20px rgba(0, 0, 0, 0.3);
     }
 
-    .friend-card.show-confirm {
-      border-color: rgba(212, 165, 181, 0.3);
-      box-shadow:
-        0 8px 32px rgba(0, 0, 0, 0.4),
-        0 4px 16px rgba(0, 0, 0, 0.3);
-    }
-
-    .confirm-overlay {
-      background: rgba(50, 45, 45, 0.98);
-    }
   }
 </style>
