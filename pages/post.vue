@@ -175,10 +175,11 @@
   }
 
   .post-container {
-    max-width: 800px;
+    max-width: 1000px;
     width: 100%;
     margin: 0 auto;
     min-height: 80vh;
+    overflow-x: hidden;
   }
 
   .nav-bar {
@@ -205,12 +206,18 @@
     border: 1px solid rgba(255, 255, 255, 0.8);
     border-radius: 12px;
     box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
-    padding: 40px;
+    padding: 40px 30px;
+    overflow-x: hidden;
+    max-width: 100%;
+    width: 100%;
+    margin: 0 auto;
   }
 
   .article-content {
     opacity: 1;
     transition: opacity 0.5s;
+    max-width: 100%;
+    margin: 0 auto;
   }
 
   .cover-img img {
@@ -246,6 +253,36 @@
     padding: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     line-height: 1.7;
+    overflow-x: hidden;
+    word-wrap: break-word;
+    word-break: break-word;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  /* 防止代码块和表格导致横向滚动 */
+  .markdown-body pre,
+  .markdown-body code {
+    max-width: 100%;
+    overflow-x: auto;
+    word-wrap: normal;
+    word-break: normal;
+  }
+
+  .markdown-body pre {
+    white-space: pre;
+  }
+
+  .markdown-body table {
+    max-width: 100%;
+    overflow-x: auto;
+    display: block;
+    white-space: nowrap;
+  }
+
+  .markdown-body img {
+    max-width: 100%;
+    height: auto;
   }
 
   .loading {
