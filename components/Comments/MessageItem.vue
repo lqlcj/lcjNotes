@@ -112,6 +112,10 @@ const replyForm = ref({
   content: ''
 });
 
+// 全局标记，确保脚本只加载一次
+let turnstileScriptLoaded = false;
+let turnstileScriptLoading = false;
+
 const toggleReplyForm = () => {
   showReplyForm.value = !showReplyForm.value;
   if (showReplyForm.value) {
@@ -129,19 +133,46 @@ const loadTurnstile = () => {
     return;
   }
 
+  // 如果脚本已加载，直接渲染
   if (window.turnstile) {
-    renderTurnstile();
+    nextTick(() => {
+      renderTurnstile();
+    });
     return;
   }
 
-  const script = document.createElement('script');
-  script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
-  script.async = true;
-  script.defer = true;
-  script.onload = () => {
-    renderTurnstile();
-  };
-  document.head.appendChild(script);
+  // 如果脚本正在加载，等待加载完成
+  if (turnstileScriptLoading) {
+    const checkInterval = setInterval(() => {
+      if (window.turnstile) {
+        clearInterval(checkInterval);
+        nextTick(() => {
+          renderTurnstile();
+        });
+      }
+    }, 100);
+    return;
+  }
+
+  // 加载脚本
+  if (!turnstileScriptLoaded && !document.querySelector('script[src="https://challenges.cloudflare.com/turnstile/v0/api.js"]')) {
+    turnstileScriptLoading = true;
+    const script = document.createElement('script');
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+    script.async = true;
+    script.defer = true;
+    script.onload = () => {
+      turnstileScriptLoaded = true;
+      turnstileScriptLoading = false;
+      nextTick(() => {
+        renderTurnstile();
+      });
+    };
+    script.onerror = () => {
+      turnstileScriptLoading = false;
+    };
+    document.head.appendChild(script);
+  }
 };
 
 const renderTurnstile = () => {
@@ -149,41 +180,61 @@ const renderTurnstile = () => {
     return;
   }
 
-  // 清理旧的 widget
-  if (turnstileWidgetId && window.turnstile) {
+  // 确保清理旧的 widget
+  if (turnstileWidgetId !== null) {
     try {
-      window.turnstile.remove(turnstileWidgetId);
+      if (window.turnstile && typeof window.turnstile.remove === 'function') {
+        window.turnstile.remove(turnstileWidgetId);
+      }
     } catch (e) {
-      // 忽略错误
+      console.warn('清理 Turnstile widget 失败:', e);
     }
+    turnstileWidgetId = null;
   }
 
-  turnstileWidgetId = window.turnstile.render(turnstileContainer.value, {
-    sitekey: props.turnstileSiteKey,
-    callback: (token) => {
-      replyTurnstileToken.value = token;
-    },
-    'error-callback': () => {
-      replyTurnstileToken.value = '';
-      submitError.value = '验证失败，请重试';
-    },
-    'expired-callback': () => {
-      replyTurnstileToken.value = '';
-    },
-    theme: 'light',
-    size: 'normal'
-  });
+  // 确保容器是空的
+  if (turnstileContainer.value) {
+    turnstileContainer.value.innerHTML = '';
+  }
+
+  try {
+    turnstileWidgetId = window.turnstile.render(turnstileContainer.value, {
+      sitekey: props.turnstileSiteKey,
+      callback: (token) => {
+        replyTurnstileToken.value = token;
+      },
+      'error-callback': () => {
+        replyTurnstileToken.value = '';
+        submitError.value = '验证失败，请重试';
+      },
+      'expired-callback': () => {
+        replyTurnstileToken.value = '';
+      },
+      theme: 'light',
+      size: 'normal'
+    });
+  } catch (e) {
+    console.error('渲染 Turnstile widget 失败:', e);
+    turnstileWidgetId = null;
+  }
 };
 
 const resetTurnstile = () => {
-  if (turnstileWidgetId && window.turnstile) {
+  if (turnstileWidgetId !== null && window.turnstile) {
     try {
-      window.turnstile.remove(turnstileWidgetId);
+      if (typeof window.turnstile.remove === 'function') {
+        window.turnstile.remove(turnstileWidgetId);
+      }
     } catch (e) {
-      // 忽略错误
+      console.warn('清理 Turnstile widget 失败:', e);
     }
     turnstileWidgetId = null;
-    replyTurnstileToken.value = '';
+  }
+  replyTurnstileToken.value = '';
+  
+  // 清空容器
+  if (turnstileContainer.value) {
+    turnstileContainer.value.innerHTML = '';
   }
 };
 
@@ -244,6 +295,14 @@ const formatDate = (dateString) => {
   });
 };
 
+// 监听回复表单的显示状态，确保清理
+watch(showReplyForm, (newVal) => {
+  if (!newVal) {
+    // 表单关闭时清理
+    resetTurnstile();
+  }
+});
+
 onUnmounted(() => {
   resetTurnstile();
 });
@@ -252,6 +311,8 @@ onUnmounted(() => {
 <style scoped>
 .message-item-wrapper {
   margin-bottom: 15px;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .message-item-wrapper.is-reply {
@@ -259,6 +320,7 @@ onUnmounted(() => {
   margin-top: 15px;
   border-left: 2px solid rgba(104, 68, 77, 0.2);
   padding-left: 15px;
+  max-width: calc(100% - 30px);
 }
 
 .message-item {
@@ -266,6 +328,10 @@ onUnmounted(() => {
   margin: 0;
   transition: all 0.3s ease-in-out;
   cursor: default;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
 
 .message-item:hover {
@@ -328,8 +394,11 @@ onUnmounted(() => {
   color: #555;
   line-height: 1.6;
   word-break: break-word;
+  overflow-wrap: break-word;
   white-space: pre-wrap;
   margin-bottom: 12px;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .message-website-link {
@@ -358,6 +427,8 @@ onUnmounted(() => {
   margin-top: 12px;
   padding-top: 12px;
   border-top: 1px solid rgba(104, 68, 77, 0.1);
+  display: flex;
+  justify-content: flex-end;
 }
 
 .reply-btn {
@@ -365,8 +436,8 @@ onUnmounted(() => {
   color: #68444d;
   border: 1px solid rgba(104, 68, 77, 0.2);
   border-radius: 6px;
-  padding: 6px 12px;
-  font-size: 13px;
+  padding: 4px 10px;
+  font-size: 12px;
   cursor: pointer;
   transition: all 0.3s ease-in-out;
 }
@@ -490,10 +561,41 @@ onUnmounted(() => {
 @media (max-width: 768px) {
   .message-item-wrapper.is-reply {
     margin-left: 15px;
+    padding-left: 10px;
+    max-width: calc(100% - 15px);
+  }
+
+  .message-item {
+    padding: 12px;
   }
 
   .form-row {
     grid-template-columns: 1fr;
+  }
+
+  .message-item-wrapper {
+    min-width: 0;
+  }
+
+  .message-header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .message-author {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .message-info {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .message-info h4 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 </style>

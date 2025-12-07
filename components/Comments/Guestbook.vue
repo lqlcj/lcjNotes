@@ -159,18 +159,37 @@
       return;
     }
 
-    // 动态加载 Turnstile script
+    // 如果脚本已加载，直接渲染
     if (window.turnstile) {
-      renderTurnstile();
+      nextTick(() => {
+        renderTurnstile();
+      });
       return;
     }
 
+    // 检查脚本是否已经存在
+    if (document.querySelector('script[src="https://challenges.cloudflare.com/turnstile/v0/api.js"]')) {
+      // 脚本已存在，等待加载完成
+      const checkInterval = setInterval(() => {
+        if (window.turnstile) {
+          clearInterval(checkInterval);
+          nextTick(() => {
+            renderTurnstile();
+          });
+        }
+      }, 100);
+      return;
+    }
+
+    // 动态加载 Turnstile script
     const script = document.createElement('script');
     script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
     script.async = true;
     script.defer = true;
     script.onload = () => {
-      renderTurnstile();
+      nextTick(() => {
+        renderTurnstile();
+      });
     };
     document.head.appendChild(script);
   };
@@ -181,27 +200,55 @@
       return;
     }
 
-    turnstileWidgetId = window.turnstile.render(turnstileContainer.value, {
-      sitekey: turnstileSiteKey,
-      callback: (token) => {
-        turnstileToken.value = token;
-      },
-      'error-callback': () => {
-        turnstileToken.value = '';
-        submitError.value = '验证失败，请重试';
-      },
-      'expired-callback': () => {
-        turnstileToken.value = '';
-      },
-      theme: 'light',
-      size: 'normal'
-    });
+    // 如果已有 widget，先清理
+    if (turnstileWidgetId !== null) {
+      try {
+        if (typeof window.turnstile.remove === 'function') {
+          window.turnstile.remove(turnstileWidgetId);
+        }
+      } catch (e) {
+        console.warn('清理 Turnstile widget 失败:', e);
+      }
+      turnstileWidgetId = null;
+    }
+
+    // 清空容器
+    if (turnstileContainer.value) {
+      turnstileContainer.value.innerHTML = '';
+    }
+
+    try {
+      turnstileWidgetId = window.turnstile.render(turnstileContainer.value, {
+        sitekey: turnstileSiteKey,
+        callback: (token) => {
+          turnstileToken.value = token;
+        },
+        'error-callback': () => {
+          turnstileToken.value = '';
+          submitError.value = '验证失败，请重试';
+        },
+        'expired-callback': () => {
+          turnstileToken.value = '';
+        },
+        theme: 'light',
+        size: 'normal'
+      });
+    } catch (e) {
+      console.error('渲染 Turnstile widget 失败:', e);
+      turnstileWidgetId = null;
+    }
   };
 
   // 重置 Turnstile
   const resetTurnstile = () => {
-    if (turnstileWidgetId && window.turnstile) {
-      window.turnstile.reset(turnstileWidgetId);
+    if (turnstileWidgetId !== null && window.turnstile) {
+      try {
+        if (typeof window.turnstile.reset === 'function') {
+          window.turnstile.reset(turnstileWidgetId);
+        }
+      } catch (e) {
+        console.warn('重置 Turnstile widget 失败:', e);
+      }
       turnstileToken.value = '';
     }
   };
@@ -279,8 +326,18 @@
 
   onUnmounted(() => {
     // 清理 Turnstile
-    if (turnstileWidgetId && window.turnstile) {
-      window.turnstile.remove(turnstileWidgetId);
+    if (turnstileWidgetId !== null && window.turnstile) {
+      try {
+        if (typeof window.turnstile.remove === 'function') {
+          window.turnstile.remove(turnstileWidgetId);
+        }
+      } catch (e) {
+        console.warn('清理 Turnstile widget 失败:', e);
+      }
+      turnstileWidgetId = null;
+    }
+    if (turnstileContainer.value) {
+      turnstileContainer.value.innerHTML = '';
     }
   });
 </script>
@@ -496,6 +553,9 @@
     padding: 20px;
     max-height: 600px;
     overflow-y: auto;
+    overflow-x: hidden;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .empty-state {
@@ -508,6 +568,10 @@
     display: flex;
     flex-direction: column;
     gap: 15px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
   }
 
   .turnstile-container {
@@ -528,6 +592,16 @@
 
     .comments-list {
       padding: 15px;
+      overflow-x: hidden;
+    }
+
+    .comments-container {
+      overflow-x: hidden;
+      max-width: 100%;
+    }
+
+    .comments-content {
+      overflow-x: hidden;
     }
   }
 </style>
