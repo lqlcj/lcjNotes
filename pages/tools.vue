@@ -1,11 +1,11 @@
-<template>
+﻿<template>
   <div class="tools-page">
     <div class="tools-container">
       <div class="tools-box">
         <!-- 页面标题 -->
         <PageHeader title="Tools" subtitle="Useful tools and utilities." />
 
-        <!-- Tab 标签页 -->
+        <!-- Tab 标签�?-->
         <div class="tabs-container">
           <div class="tabs-header">
             <button v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id"
@@ -16,7 +16,7 @@
 
           <!-- Tab 内容区域 -->
           <div class="tabs-content">
-            <!-- 书签标签页 -->
+            <!-- 书签标签�?-->
             <div v-if="activeTab === 'bookmarks'" class="tab-panel">
               <div class="bookmarks-content">
                 <LoadingMessage v-if="bookmarksLoading" text="飘洋过海来看你~" />
@@ -37,7 +37,7 @@
                       </div>
                     </div>
 
-                    <!-- 确认框 -->
+                    <!-- 确认�?-->
                     <div v-else class="bookmark-confirm">
                       <div class="confirm-content">
                         <div class="confirm-icon">🔗</div>
@@ -63,7 +63,7 @@
               </div>
             </div>
 
-            <!-- 管理后台标签页 -->
+            <!-- 管理后台标签�?-->
             <div v-if="activeTab === 'admin'" class="tab-panel">
               <AdminPanel />
             </div>
@@ -77,14 +77,14 @@
 <script setup>
   import { ref, onMounted, watch } from 'vue'
   import PageHeader from '~/components/HeaderBar/PageHeader.vue'
-  import AdminPanel from '~/pages/login.vue'
+  import AdminPanel from '~/pages/me.vue'
   import LoadingMessage from '~/components/Common/LoadingMessage.vue'
 
   // Tab 配置
   const tabs = [
     { id: 'bookmarks', label: '书签' },
     { id: 'knowledge', label: '知识库' },
-    { id: 'admin', label: 'Login' }
+    { id: 'admin', label: 'Me' }
   ]
 
   // 当前激活的标签
@@ -110,14 +110,14 @@
     }
   }
 
-  // 监听标签切换，加载书签
+  // 监听标签切换，加载书�?
   watch(activeTab, (newTab) => {
     if (newTab === 'bookmarks' && bookmarks.value.length === 0) {
       loadBookmarks()
     }
   })
 
-  // 显示确认框
+  // 显示确认�?
   const showConfirm = (bookmarkId) => {
     confirmingBookmarkId.value = bookmarkId
   }
@@ -163,7 +163,7 @@
     box-sizing: border-box;
   }
 
-  /* Tab 标签页样式 */
+  /* Tab 标签页样�?*/
   .tabs-container {
     width: 100%;
     margin-top: 40px;
@@ -324,7 +324,7 @@
     -webkit-box-orient: vertical;
   }
 
-  /* 确认框样式 */
+  /* 确认框样�?*/
   .bookmark-confirm {
     width: 100%;
     display: flex;
@@ -429,7 +429,7 @@
     max-width: 100%;
   }
 
-  /* 响应式设计 */
+  /* 响应式设�?*/
   @media (max-width: 768px) {
     .tools-page {
       padding: 30px 10px 60px;

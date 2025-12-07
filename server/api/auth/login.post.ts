@@ -1,3 +1,5 @@
+import { verifyTurnstile } from '~/server/utils/turnstile';
+
 // 登录验证
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
@@ -9,6 +11,34 @@ export default defineEventHandler(async (event) => {
       statusCode: 500,
       message: '服务器未配置管理员密码'
     });
+  }
+  
+  // 验证 Turnstile token（防止撞库）
+  const turnstileSecretKey = useRuntimeConfig().turnstileSecretKey || process.env.TURNSTILE_SECRET_KEY;
+  if (turnstileSecretKey) {
+    const turnstileToken = body.turnstileToken;
+    
+    if (!turnstileToken) {
+      throw createError({
+        statusCode: 400,
+        message: '请完成人机验证'
+      });
+    }
+    
+    // 获取客户端 IP
+    const clientIP = getHeader(event, 'cf-connecting-ip') || 
+                     getHeader(event, 'x-forwarded-for')?.split(',')[0]?.trim() || 
+                     'unknown';
+    
+    // 验证 Turnstile token
+    const isValid = await verifyTurnstile(turnstileToken, turnstileSecretKey, clientIP);
+    
+    if (!isValid) {
+      throw createError({
+        statusCode: 400,
+        message: '人机验证失败，请重试'
+      });
+    }
   }
   
   // 验证用户名和密码

@@ -1366,7 +1366,7 @@ const _TXLV4rBvqsYiKFUYas4nE2ajd4M1kbGvbTN66ecZKaY = (function(nitro) {
 
 const rootDir = "G:/newblog";
 
-const appHead = {"meta":[{"charset":"utf-8"},{"name":"viewport","content":"width=device-width, initial-scale=1.0"}],"link":[{"rel":"icon","type":"image/svg+xml","href":"/images/logo.svg"},{"rel":"shortcut icon","type":"image/svg+xml","href":"/images/logo.svg"},{"rel":"apple-touch-icon","href":"/images/logo.svg"},{"rel":"stylesheet","href":"/styles/styles.css"}],"style":[],"script":[],"noscript":[],"title":"♥Leyili"};
+const appHead = {"meta":[{"charset":"utf-8"},{"name":"viewport","content":"width=device-width, initial-scale=1.0"}],"link":[{"rel":"icon","type":"image/x-icon","href":"/favicon.ico"},{"rel":"shortcut icon","type":"image/x-icon","href":"/favicon.ico"},{"rel":"apple-touch-icon","href":"/images/logo.svg"},{"rel":"stylesheet","href":"/styles/styles.css"}],"style":[],"script":[],"noscript":[],"title":"♥Leyili"};
 
 const appRootTag = "div";
 
@@ -2258,7 +2258,32 @@ const styles$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   default: styles
 }, Symbol.toStringTag, { value: 'Module' }));
 
+async function verifyTurnstile(token, secretKey, remoteip) {
+  if (!token || !secretKey) {
+    return false;
+  }
+  try {
+    const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        secret: secretKey,
+        response: token,
+        remoteip
+      })
+    });
+    const data = await response.json();
+    return data.success === true;
+  } catch (error) {
+    console.error("Turnstile verification error:", error);
+    return false;
+  }
+}
+
 const login_post = defineEventHandler(async (event) => {
+  var _a, _b;
   const body = await readBody(event);
   const adminPassword = useRuntimeConfig().adminPassword || process.env.ADMIN_PASSWORD;
   const adminUsername = "lcj";
@@ -2267,6 +2292,24 @@ const login_post = defineEventHandler(async (event) => {
       statusCode: 500,
       message: "\u670D\u52A1\u5668\u672A\u914D\u7F6E\u7BA1\u7406\u5458\u5BC6\u7801"
     });
+  }
+  const turnstileSecretKey = useRuntimeConfig().turnstileSecretKey || process.env.TURNSTILE_SECRET_KEY;
+  if (turnstileSecretKey) {
+    const turnstileToken = body.turnstileToken;
+    if (!turnstileToken) {
+      throw createError({
+        statusCode: 400,
+        message: "\u8BF7\u5B8C\u6210\u4EBA\u673A\u9A8C\u8BC1"
+      });
+    }
+    const clientIP = getHeader(event, "cf-connecting-ip") || ((_b = (_a = getHeader(event, "x-forwarded-for")) == null ? void 0 : _a.split(",")[0]) == null ? void 0 : _b.trim()) || "unknown";
+    const isValid = await verifyTurnstile(turnstileToken, turnstileSecretKey, clientIP);
+    if (!isValid) {
+      throw createError({
+        statusCode: 400,
+        message: "\u4EBA\u673A\u9A8C\u8BC1\u5931\u8D25\uFF0C\u8BF7\u91CD\u8BD5"
+      });
+    }
   }
   if (body.username !== adminUsername) {
     throw createError({
@@ -2769,30 +2812,6 @@ const requests_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProp
   __proto__: null,
   default: requests_get
 }, Symbol.toStringTag, { value: 'Module' }));
-
-async function verifyTurnstile(token, secretKey, remoteip) {
-  if (!token || !secretKey) {
-    return false;
-  }
-  try {
-    const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        secret: secretKey,
-        response: token,
-        remoteip
-      })
-    });
-    const data = await response.json();
-    return data.success === true;
-  } catch (error) {
-    console.error("Turnstile verification error:", error);
-    return false;
-  }
-}
 
 const requests_post = defineEventHandler(async (event) => {
   var _a, _b, _c, _d;
