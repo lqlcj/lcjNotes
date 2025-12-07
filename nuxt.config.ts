@@ -36,7 +36,7 @@ export default defineNuxtConfig({
   // 应用配置
   app: {
     head: {
-      title: '♥Leyili',
+      title: 'Leyili 花园',
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1.0' }

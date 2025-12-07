@@ -1366,7 +1366,7 @@ const _a8G5zQjNbMZqOJDuY5Q3bQXMLlbys_A8j40O7J2SHbI = (function(nitro) {
 
 const rootDir = "G:/lcjNotes/lcjNotes";
 
-const appHead = {"meta":[{"charset":"utf-8"},{"name":"viewport","content":"width=device-width, initial-scale=1.0"}],"link":[{"rel":"icon","type":"image/svg+xml","href":"/images/lcj.svg"},{"rel":"icon","type":"image/x-icon","href":"/favicon.ico"},{"rel":"shortcut icon","type":"image/x-icon","href":"/favicon.ico"},{"rel":"apple-touch-icon","href":"/images/lcj.svg"},{"rel":"stylesheet","href":"/styles/styles.css"}],"style":[],"script":[],"noscript":[],"title":"♥Leyili"};
+const appHead = {"meta":[{"charset":"utf-8"},{"name":"viewport","content":"width=device-width, initial-scale=1.0"}],"link":[{"rel":"icon","type":"image/svg+xml","href":"/images/lcj.svg"},{"rel":"icon","type":"image/x-icon","href":"/favicon.ico"},{"rel":"shortcut icon","type":"image/x-icon","href":"/favicon.ico"},{"rel":"apple-touch-icon","href":"/images/lcj.svg"},{"rel":"stylesheet","href":"/styles/styles.css"}],"style":[],"script":[],"noscript":[],"title":"Leyili 花园"};
 
 const appRootTag = "div";
 

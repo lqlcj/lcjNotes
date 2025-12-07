@@ -92,7 +92,7 @@
               </svg>
               作者
             </h3>
-            <p>&nbsp;&nbsp;元宵 (LCJ)</p>
+            <p>&nbsp;&nbsp;Leyili</p>
           </section>
 
           <!-- <section>

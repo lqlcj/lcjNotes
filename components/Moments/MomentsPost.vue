@@ -2,60 +2,42 @@
   <div class="moments-list">
     <!-- Loading 状态 -->
     <LoadingMessage v-if="isLoadingData" text="飘洋过海来看你~" />
-    
+
     <!-- 内容区域 -->
     <template v-else>
       <div v-if="posts.length === 0" class="empty-state">
-        <p>暂无动态</p>
+        <p>稍等一下~</p>
       </div>
       <div v-for="post in posts" :key="post.id" class="post-item">
-      <div class="avatar-container">
-        <img 
-          :src="post.author.avatar || avatarImage" 
-          alt="avatar" 
-          class="avatar-img" 
-          loading="lazy"
-          decoding="async"
-          @error="handleAvatarError" 
-        />
-      </div>
-      <div class="post-content">
-        <div class="nickname">{{ post.author.nickname }}</div>
-        <p class="content-text" v-html="post.content.replace(/\n/g, '<br/>')"></p>
-        <div v-if="post.images && post.images.length > 0" class="image-gallery">
-          <div v-if="post.images.length === 1" class="image-wrapper single-image">
-            <img 
-              :src="post.images[0]" 
-              alt="post image" 
-              class="gallery-image"
-              loading="lazy"
-              decoding="async"
-              @click="openImageViewer(post.images[0])" 
-            />
-          </div>
-          <div v-else class="image-grid" :class="{ 'four-grid': post.images.length === 4 }">
-            <div v-for="(image, index) in post.images" :key="index" class="image-wrapper grid-image">
-              <img 
-                :src="image" 
-                alt="post image" 
-                class="gallery-image" 
-                loading="lazy"
-                decoding="async"
-                @click="openImageViewer(image)" 
-              />
+        <div class="avatar-container">
+          <img :src="post.author.avatar || avatarImage" alt="avatar" class="avatar-img" loading="lazy" decoding="async"
+            @error="handleAvatarError" />
+        </div>
+        <div class="post-content">
+          <div class="nickname">{{ post.author.nickname }}</div>
+          <p class="content-text" v-html="post.content.replace(/\n/g, '<br/>')"></p>
+          <div v-if="post.images && post.images.length > 0" class="image-gallery">
+            <div v-if="post.images.length === 1" class="image-wrapper single-image">
+              <img :src="post.images[0]" alt="post image" class="gallery-image" loading="lazy" decoding="async"
+                @click="openImageViewer(post.images[0])" />
+            </div>
+            <div v-else class="image-grid" :class="{ 'four-grid': post.images.length === 4 }">
+              <div v-for="(image, index) in post.images" :key="index" class="image-wrapper grid-image">
+                <img :src="image" alt="post image" class="gallery-image" loading="lazy" decoding="async"
+                  @click="openImageViewer(image)" />
+              </div>
             </div>
           </div>
+          <div class="timestamp">{{ post.timestamp }}</div>
         </div>
-        <div class="timestamp">{{ post.timestamp }}</div>
       </div>
-    </div>
 
-    <!-- 加载更多按钮 -->
-    <div v-if="hasMore" class="load-more-container">
-      <button class="load-more-btn" @click="loadMore">
-        {{ isLoading ? '加载中...' : '加载更多' }}
-      </button>
-    </div>
+      <!-- 加载更多按钮 -->
+      <div v-if="hasMore" class="load-more-container">
+        <button class="load-more-btn" @click="loadMore">
+          {{ isLoading ? '加载中...' : '加载更多' }}
+        </button>
+      </div>
 
       <!-- 图片预览遮罩层 -->
       <div v-if="viewerImage" class="image-viewer" @click="closeImageViewer">
@@ -99,7 +81,7 @@
       if (!momentsDataFromAPI.value || !Array.isArray(momentsDataFromAPI.value) || momentsDataFromAPI.value.length === 0) {
         return []
       }
-      
+
       return momentsDataFromAPI.value
     } catch (error) {
       console.error('处理 Moments 数据失败:', error)
