@@ -228,7 +228,7 @@
                     </div>
                     <div class="moment-info">
                       <h4>{{ moment.author?.nickname || 'Leyili' }}</h4>
-                      <span class="moment-date">{{ moment.timestamp || '未知时间' }}</span>
+                      <span class="moment-date">{{ formatMomentDate(moment.timestamp) }}</span>
                     </div>
                   </div>
                   <div class="moment-actions">
@@ -236,8 +236,8 @@
                     <button @click="deleteMoment(moment.id)" class="btn-delete">删除</button>
                   </div>
                 </div>
-                <div class="moment-content">
-                  {{ moment.content }}
+                <div class="moment-content" :title="moment.content">
+                  {{ moment.content || '(无内容)' }}
                 </div>
                 <div v-if="moment.images && moment.images.length > 0" class="moment-images">
                   <span class="image-count">{{ moment.images.length }} 张图片</span>
@@ -1367,6 +1367,36 @@
     });
   };
 
+  // 格式化朋友圈时间戳（支持 "创建时间: 2025-12-06 20:31:00" 格式）
+  const formatMomentDate = (timestamp) => {
+    if (!timestamp) return '未知时间';
+    
+    // 如果已经是 "创建时间: 2025-12-06 20:31:00" 格式，直接返回
+    if (typeof timestamp === 'string' && timestamp.includes('创建时间:')) {
+      return timestamp.replace('创建时间:', '').trim();
+    }
+    
+    // 尝试解析为日期
+    try {
+      const date = new Date(timestamp);
+      if (!isNaN(date.getTime())) {
+        return date.toLocaleString('zh-CN', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
+      }
+    } catch (e) {
+      // 解析失败，返回原始值
+    }
+    
+    // 如果都不行，返回原始值
+    return timestamp || '未知时间';
+  };
+
   // 提交留言表单
   const handleMessageSubmit = async () => {
     submittingMessage.value = true;
@@ -1612,7 +1642,8 @@
     try {
       const response = await $fetch('/api/moments');
       if (response.success) {
-        moments.value = response.data || [];
+        // 修复：API返回的数据结构是 { moments: [...], total: ..., ... }
+        moments.value = response.data?.moments || [];
       }
     } catch (error) {
       console.error('加载朋友圈失败:', error);
@@ -1622,18 +1653,30 @@
   };
 
   // 编辑朋友圈
-  const editMoment = (moment) => {
-    editingMoment.value = moment;
-    momentFormData.value = {
-      content: moment.content || '',
-      timestamp: moment.timestamp || '',
-      author: {
-        nickname: moment.author?.nickname || 'Leyili',
-        avatar: moment.author?.avatar || '/images/home/avatar.webp'
-      },
-      images: moment.images || []
-    };
-    showMomentForm.value = true;
+  const editMoment = async (moment) => {
+    try {
+      // 从API重新获取完整数据，确保数据完整
+      const response = await $fetch(`/api/moments/${moment.id}`);
+      if (response.success) {
+        const momentData = response.data;
+        editingMoment.value = momentData;
+        momentFormData.value = {
+          content: momentData.content || '',
+          timestamp: momentData.timestamp || '',
+          author: {
+            nickname: momentData.author?.nickname || 'Leyili',
+            avatar: momentData.author?.avatar || '/images/lcj.svg'
+          },
+          images: momentData.images || []
+        };
+        showMomentForm.value = true;
+      } else {
+        alert('加载朋友圈数据失败');
+      }
+    } catch (error) {
+      console.error('加载朋友圈失败:', error);
+      alert('加载朋友圈失败');
+    }
   };
 
   // 删除朋友圈
@@ -2540,6 +2583,12 @@
     line-height: 1.6;
     color: #555;
     word-break: break-word;
+    max-height: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
   }
 
   .moment-images {
