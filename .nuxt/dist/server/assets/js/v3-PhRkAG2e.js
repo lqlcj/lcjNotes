@@ -1,2 +1,0 @@
-import{hasInjectionContext as r,inject as o}from"G:/newblog/node_modules/vue/index.mjs";import{useHead as u,headSymbol as a}from"G:/newblog/node_modules/@unhead/vue/dist/index.mjs";import{t as s}from"../../server.mjs";function i(e){const t=e||s();return t?.ssrContext?.head||t?.runWithContext(()=>{if(r())return o(a)})}function m(e,t={}){const n=i(t.nuxt);if(n)return u(e,{head:n,...t})}export{m as u};
-//# sourceMappingURL=v3-PhRkAG2e.js.map
