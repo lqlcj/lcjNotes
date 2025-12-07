@@ -69,3 +69,51 @@ export function getMimeTypeFromExt(ext: string): string {
   return mimeTypes[ext.toLowerCase()] || 'image/jpeg';
 }
 
+/**
+ * 从图片URL中提取R2存储的key
+ * 支持两种格式：
+ * 1. https://photo.lcjlq.com/assets/2024-12/uuid.jpg (使用r2PublicUrl)
+ * 2. /api/r2/assets/2024-12/uuid.jpg (使用代理路由)
+ * @param url 图片URL
+ * @returns R2 key，如果不是R2图片则返回null
+ */
+export function extractR2KeyFromUrl(url: string): string | null {
+  if (!url || typeof url !== 'string') {
+    return null;
+  }
+
+  try {
+    // 处理完整URL (https://photo.lcjlq.com/assets/...)
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      const urlObj = new URL(url);
+      const path = urlObj.pathname;
+      // 移除开头的斜杠
+      const key = path.startsWith('/') ? path.substring(1) : path;
+      // 检查是否是assets目录下的文件
+      if (key.startsWith('assets/')) {
+        return key;
+      }
+      return null;
+    }
+
+    // 处理代理路由 (/api/r2/assets/...)
+    if (url.startsWith('/api/r2/')) {
+      const key = url.replace('/api/r2/', '');
+      if (key.startsWith('assets/')) {
+        return key;
+      }
+      return null;
+    }
+
+    // 如果URL直接是key格式 (assets/...)
+    if (url.startsWith('assets/')) {
+      return url;
+    }
+
+    return null;
+  } catch (error) {
+    console.error('提取R2 key失败:', error);
+    return null;
+  }
+}
+

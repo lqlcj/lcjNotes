@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { getKVStorage } from '~/server/utils/kv';
+import { getR2Storage, extractR2KeyFromUrl } from '~/server/utils/r2';
 import { handleApiError } from '~/server/utils/errorHandler';
 import { verifyAuth } from '~/server/utils/auth';
 
@@ -20,13 +21,33 @@ export default defineEventHandler(async (event) => {
   
   try {
     const postKey = `post:${id}`;
-    const existingPost = await kv.getItem(postKey);
+    const existingPost = await kv.getItem(postKey) as any;
     
     if (!existingPost) {
       throw createError({
         statusCode: 404,
         message: '文章不存在'
       });
+    }
+    
+    // 删除封面图片（如果存在且是R2图片）
+    if (existingPost.cover) {
+      try {
+        const r2Key = extractR2KeyFromUrl(existingPost.cover);
+        if (r2Key) {
+          const r2 = getR2Storage(event);
+          try {
+            await r2.delete(r2Key);
+            console.log(`已删除文章封面图片: ${r2Key}`);
+          } catch (deleteError) {
+            // 如果删除失败，记录日志但不中断流程
+            console.error(`删除封面图片失败 ${r2Key}:`, deleteError);
+          }
+        }
+      } catch (r2Error) {
+        // R2操作失败，记录日志但不中断删除流程
+        console.error('删除文章封面图片时出错:', r2Error);
+      }
     }
     
     // 删除文章
