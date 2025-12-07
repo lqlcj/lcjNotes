@@ -2,7 +2,7 @@
 import { defineStore } from "pinia";
 // 使用 public 目录下的图片
 const defaultCover = "/images/loading.webp";
-const defaultAvatar = "/images/home/avatar.webp";
+const defaultAvatar = "/images/lcj.svg";
 
 // Notes 数据仓库
 export const useNotesStore = defineStore("notes", {

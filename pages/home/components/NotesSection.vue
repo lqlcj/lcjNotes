@@ -117,7 +117,7 @@
 
   // 使用 public 目录下的图片
   const defaultCover = '/images/loading.webp'
-  const defaultAvatar = '/images/home/avatar.webp'
+  const defaultAvatar = '/images/lcj.svg'
 
   const notesStore = useNotesStore()
 

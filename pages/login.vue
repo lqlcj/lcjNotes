@@ -350,7 +350,7 @@
 
               <div class="form-group">
                 <label>头像URL</label>
-                <input v-model="momentFormData.author.avatar" type="text" placeholder="/images/home/avatar.webp" />
+                <input v-model="momentFormData.author.avatar" type="text" placeholder="/images/lcj.svg" />
               </div>
 
               <div class="form-group">
@@ -452,6 +452,16 @@
         </div>
       </div>
     </div>
+
+    <!-- 成功提示 -->
+    <Transition name="toast">
+      <div v-if="showSuccessToast" class="success-toast">
+        <div class="toast-content">
+          <span class="toast-icon">✓</span>
+          <span class="toast-message">{{ successMessage }}</span>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -500,7 +510,7 @@
     timestamp: '',
     author: {
       nickname: 'Leyili',
-      avatar: '/images/home/avatar.webp'
+      avatar: '/images/lcj.svg'
     },
     images: []
   });
@@ -693,7 +703,7 @@
       });
 
       if (response.success) {
-        alert('删除成功');
+        showSuccess('删除成功');
         loadPosts();
       }
     } catch (error) {
@@ -718,7 +728,7 @@
         });
 
         if (response.success) {
-          alert('更新成功');
+          showSuccess('更新成功');
           closeForm();
           loadPosts();
         }
@@ -733,7 +743,7 @@
         });
 
         if (response.success) {
-          alert('创建成功');
+          showSuccess('创建成功');
           closeForm();
           loadPosts();
         }
@@ -985,7 +995,7 @@
       });
 
       if (response.success) {
-        alert('删除成功');
+        showSuccess('删除成功');
         loadMessages();
       }
     } catch (error) {
@@ -1027,7 +1037,7 @@
       });
 
       if (response.success) {
-        alert('留言创建成功');
+        showSuccess('留言创建成功');
         closeMessageForm();
         loadMessages();
       }
@@ -1104,7 +1114,7 @@
       });
 
       if (response.success) {
-        alert('批准成功');
+        showSuccess('批准成功');
         loadFriendsRequests();
         loadApprovedFriends();
       }
@@ -1132,7 +1142,7 @@
       });
 
       if (response.success) {
-        alert('已拒绝');
+        showSuccess('已拒绝');
         loadFriendsRequests();
       }
     } catch (error) {
@@ -1156,7 +1166,7 @@
       });
 
       if (response.success) {
-        alert('删除成功');
+        showSuccess('删除成功');
         loadFriendsRequests();
       }
     } catch (error) {
@@ -1180,7 +1190,7 @@
       });
 
       if (response.success) {
-        alert('删除成功');
+        showSuccess('删除成功');
         loadApprovedFriends();
       }
     } catch (error) {
@@ -1237,7 +1247,7 @@
       });
 
       if (response.success) {
-        alert('友链添加成功');
+        showSuccess('友链添加成功');
         closeFriendForm();
         loadApprovedFriends();
       }
@@ -1305,7 +1315,7 @@
       });
 
       if (response.success) {
-        alert('删除成功');
+        showSuccess('删除成功');
         loadMoments();
       }
     } catch (error) {
@@ -1347,7 +1357,7 @@
         });
 
         if (response.success) {
-          alert('更新成功');
+          showSuccess('更新成功');
           closeMomentForm();
           loadMoments();
         } else {
@@ -1364,7 +1374,7 @@
         });
 
         if (response.success) {
-          alert('创建成功');
+          showSuccess('创建成功');
           closeMomentForm();
           loadMoments();
         } else {
@@ -1388,7 +1398,7 @@
       timestamp: '',
       author: {
         nickname: 'Leyili',
-        avatar: '/images/home/avatar.webp'
+        avatar: '/images/lcj.svg'
       },
       images: []
     };
@@ -2097,6 +2107,67 @@
   .status-badge.rejected {
     background: #f8d7da;
     color: #721c24;
+  }
+
+  /* 成功提示样式 */
+  .success-toast {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10000;
+    pointer-events: none;
+  }
+
+  .toast-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(76, 175, 80, 0.95);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(10px);
+    min-width: 200px;
+    justify-content: center;
+  }
+
+  .toast-icon {
+    font-size: 18px;
+    font-weight: bold;
+    line-height: 1;
+  }
+
+  .toast-message {
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  /* Toast 动画 */
+  .toast-enter-active,
+  .toast-leave-active {
+    transition: all 0.3s ease;
+  }
+
+  .toast-enter-from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+
+  .toast-enter-to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  .toast-leave-from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  .toast-leave-to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
   }
 
   .request-info,

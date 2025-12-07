@@ -62,7 +62,7 @@
 <script setup>
   import { ref, onBeforeUnmount, computed, onMounted, nextTick } from 'vue'
   // 使用 public 目录下的图片
-  const avatarImage = '/images/home/avatar.webp'
+  const avatarImage = '/images/lcj.svg'
 
   // 数据状态
   const momentsDataFromAPI = ref([])
@@ -75,6 +75,8 @@
 
     // 处理头像路径（支持多种格式）
     if (
+      !path || 
+      path.trim() === '' ||
       path === '~/assets/images/home/avatar.webp' ||
       path === '/src/assets/images/home/avatar.webp' ||
       path === '@/assets/images/home/avatar.webp' ||

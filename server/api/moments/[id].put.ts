@@ -40,7 +40,7 @@ export default defineEventHandler(async (event) => {
       ...momentData,
       author: {
         nickname: body.author?.nickname || momentData.author?.nickname || 'Leyili',
-        avatar: body.author?.avatar || momentData.author?.avatar || '/images/home/avatar.webp'
+        avatar: body.author?.avatar || momentData.author?.avatar || '/images/lcj.svg'
       },
       content: body.content !== undefined ? body.content : momentData.content,
       timestamp: body.timestamp !== undefined ? body.timestamp : momentData.timestamp,
