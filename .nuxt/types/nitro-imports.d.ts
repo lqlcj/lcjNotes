@@ -48,6 +48,7 @@ declare global {
   const fromNodeMiddleware: typeof import('../../node_modules/h3').fromNodeMiddleware
   const fromPlainHandler: typeof import('../../node_modules/h3').fromPlainHandler
   const fromWebHandler: typeof import('../../node_modules/h3').fromWebHandler
+  const generateAssetFileName: typeof import('../../server/utils/r2').generateAssetFileName
   const generateETag: typeof import('../../server/utils/cache').generateETag
   const generateFileName: typeof import('../../server/utils/r2').generateFileName
   const getCookie: typeof import('../../node_modules/h3').getCookie
@@ -55,6 +56,7 @@ declare global {
   const getHeaders: typeof import('../../node_modules/h3').getHeaders
   const getKVStorage: typeof import('../../server/utils/kv').getKVStorage
   const getMethod: typeof import('../../node_modules/h3').getMethod
+  const getMimeTypeFromExt: typeof import('../../server/utils/r2').getMimeTypeFromExt
   const getProxyRequestHeaders: typeof import('../../node_modules/h3').getProxyRequestHeaders
   const getQuery: typeof import('../../node_modules/h3').getQuery
   const getR2Storage: typeof import('../../server/utils/r2').getR2Storage
@@ -74,7 +76,8 @@ declare global {
   const getRouteRules: typeof import('../../node_modules/nitropack/dist/runtime/internal/route-rules').getRouteRules
   const getRouterParam: typeof import('../../node_modules/h3').getRouterParam
   const getRouterParams: typeof import('../../node_modules/h3').getRouterParams
-  const getSession: typeof import('../../server/utils/session').getSession
+  const getSession: typeof import('../../node_modules/h3').getSession
+  const getUserSession: typeof import('../../server/utils/session').getUserSession
   const getValidatedQuery: typeof import('../../node_modules/h3').getValidatedQuery
   const getValidatedRouterParams: typeof import('../../node_modules/h3').getValidatedRouterParams
   const handleApiError: typeof import('../../server/utils/errorHandler').handleApiError
@@ -157,14 +160,14 @@ export { getRouteRules } from 'nitropack/runtime/internal/route-rules';
 export { useEvent } from 'nitropack/runtime/internal/context';
 export { defineTask, runTask } from 'nitropack/runtime/internal/task';
 export { defineNitroErrorHandler } from 'nitropack/runtime/internal/error/utils';
-export { appendCorsHeaders, appendCorsPreflightHeaders, appendHeader, appendHeaders, appendResponseHeader, appendResponseHeaders, assertMethod, callNodeListener, clearResponseHeaders, clearSession, createApp, createAppEventHandler, createError, createEvent, createEventStream, createRouter, defaultContentType, defineEventHandler, defineLazyEventHandler, defineNodeListener, defineNodeMiddleware, defineRequestMiddleware, defineResponseMiddleware, defineWebSocket, defineWebSocketHandler, deleteCookie, dynamicEventHandler, eventHandler, fetchWithEvent, fromNodeMiddleware, fromPlainHandler, fromWebHandler, getCookie, getHeader, getHeaders, getMethod, getProxyRequestHeaders, getQuery, getRequestFingerprint, getRequestHeader, getRequestHeaders, getRequestHost, getRequestIP, getRequestPath, getRequestProtocol, getRequestURL, getRequestWebStream, getResponseHeader, getResponseHeaders, getResponseStatus, getResponseStatusText, getRouterParam, getRouterParams, getValidatedQuery, getValidatedRouterParams, handleCacheHeaders, handleCors, isCorsOriginAllowed, isError, isEvent, isEventHandler, isMethod, isPreflightRequest, isStream, isWebResponse, lazyEventHandler, parseCookies, promisifyNodeListener, proxyRequest, readBody, readFormData, readMultipartFormData, readRawBody, readValidatedBody, removeResponseHeader, sanitizeStatusCode, sanitizeStatusMessage, sealSession, send, sendError, sendIterable, sendNoContent, sendProxy, sendRedirect, sendStream, sendWebResponse, serveStatic, setCookie, setHeader, setHeaders, setResponseHeader, setResponseHeaders, setResponseStatus, splitCookiesString, toEventHandler, toNodeListener, toPlainHandler, toWebHandler, toWebRequest, unsealSession, updateSession, useBase, useSession, writeEarlyHints } from 'h3';
+export { appendCorsHeaders, appendCorsPreflightHeaders, appendHeader, appendHeaders, appendResponseHeader, appendResponseHeaders, assertMethod, callNodeListener, clearResponseHeaders, clearSession, createApp, createAppEventHandler, createError, createEvent, createEventStream, createRouter, defaultContentType, defineEventHandler, defineLazyEventHandler, defineNodeListener, defineNodeMiddleware, defineRequestMiddleware, defineResponseMiddleware, defineWebSocket, defineWebSocketHandler, deleteCookie, dynamicEventHandler, eventHandler, fetchWithEvent, fromNodeMiddleware, fromPlainHandler, fromWebHandler, getCookie, getHeader, getHeaders, getMethod, getProxyRequestHeaders, getQuery, getRequestFingerprint, getRequestHeader, getRequestHeaders, getRequestHost, getRequestIP, getRequestPath, getRequestProtocol, getRequestURL, getRequestWebStream, getResponseHeader, getResponseHeaders, getResponseStatus, getResponseStatusText, getRouterParam, getRouterParams, getSession, getValidatedQuery, getValidatedRouterParams, handleCacheHeaders, handleCors, isCorsOriginAllowed, isError, isEvent, isEventHandler, isMethod, isPreflightRequest, isStream, isWebResponse, lazyEventHandler, parseCookies, promisifyNodeListener, proxyRequest, readBody, readFormData, readMultipartFormData, readRawBody, readValidatedBody, removeResponseHeader, sanitizeStatusCode, sanitizeStatusMessage, sealSession, send, sendError, sendIterable, sendNoContent, sendProxy, sendRedirect, sendStream, sendWebResponse, serveStatic, setCookie, setHeader, setHeaders, setResponseHeader, setResponseHeaders, setResponseStatus, splitCookiesString, toEventHandler, toNodeListener, toPlainHandler, toWebHandler, toWebRequest, unsealSession, updateSession, useBase, useSession, writeEarlyHints } from 'h3';
 export { buildAssetsURL as __buildAssetsURL, publicAssetsURL as __publicAssetsURL } from 'G:/lcjNotes/lcjNotes/node_modules/@nuxt/nitro-server/dist/runtime/utils/paths';
 export { defineAppConfig } from 'G:/lcjNotes/lcjNotes/node_modules/@nuxt/nitro-server/dist/runtime/utils/config';
 export { verifyAuth, isAdmin } from 'G:/lcjNotes/lcjNotes/server/utils/auth';
 export { setCacheHeaders, setPostsListCacheHeaders, setPostDetailCacheHeaders, checkETag, generateETag } from 'G:/lcjNotes/lcjNotes/server/utils/cache';
 export { createSafeError, handleApiError } from 'G:/lcjNotes/lcjNotes/server/utils/errorHandler';
 export { getKVStorage } from 'G:/lcjNotes/lcjNotes/server/utils/kv';
-export { getR2Storage, generateFileName, isValidImageType } from 'G:/lcjNotes/lcjNotes/server/utils/r2';
-export { createSession, getSession, destroySession, isAuthenticated, requireAuth } from 'G:/lcjNotes/lcjNotes/server/utils/session';
+export { getR2Storage, generateFileName, generateAssetFileName, isValidImageType, getMimeTypeFromExt } from 'G:/lcjNotes/lcjNotes/server/utils/r2';
+export { createSession, getUserSession, destroySession, isAuthenticated, requireAuth } from 'G:/lcjNotes/lcjNotes/server/utils/session';
 export { verifyTurnstile } from 'G:/lcjNotes/lcjNotes/server/utils/turnstile';
 export { FIELD_LIMITS, validateLength, validateAndTrim } from 'G:/lcjNotes/lcjNotes/server/utils/validation';

@@ -3,7 +3,7 @@ import { Server } from 'node:http';
 import { resolve, dirname, join } from 'node:path';
 import nodeCrypto from 'node:crypto';
 import { parentPort, threadId } from 'node:worker_threads';
-import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, createError, getQuery as getQuery$1, readBody, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus, getRouterParam, setCookie, deleteCookie, getCookie, getHeader, setHeader, readFormData, getResponseStatusText } from 'file://G:/lcjNotes/lcjNotes/node_modules/h3/dist/index.mjs';
+import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, createError, getQuery as getQuery$1, readBody, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus, getRouterParam, setCookie, deleteCookie, getCookie, readFormData, getHeader, setHeader, getResponseStatusText } from 'file://G:/lcjNotes/lcjNotes/node_modules/h3/dist/index.mjs';
 import { escapeHtml } from 'file://G:/lcjNotes/lcjNotes/node_modules/@vue/shared/dist/shared.cjs.js';
 import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLinks } from 'file://G:/lcjNotes/lcjNotes/node_modules/vue-bundle-renderer/dist/runtime.mjs';
 import { parseURL, withoutBase, joinURL, getQuery, withQuery, withTrailingSlash, decodePath, withLeadingSlash, withoutTrailingSlash, joinRelativeURL } from 'file://G:/lcjNotes/lcjNotes/node_modules/ufo/dist/index.mjs';
@@ -1458,7 +1458,22 @@ const plugins = [
 _KALrG6HWC5DsF1iB5xLtcxqD_gXRBB5_KIe3mv6Ln4
 ];
 
-const assets = {};
+const assets = {
+  "/index.mjs": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"256af-ZwGWBUKZlSYeyJa8eGvBfy3aiQI\"",
+    "mtime": "2025-12-07T17:11:18.620Z",
+    "size": 153263,
+    "path": "index.mjs"
+  },
+  "/index.mjs.map": {
+    "type": "application/json",
+    "etag": "\"87e72-2MCqmcOapnr4p1NZWvtbxTpZ//I\"",
+    "mtime": "2025-12-07T17:11:18.623Z",
+    "size": 556658,
+    "path": "index.mjs.map"
+  }
+};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));
@@ -1868,6 +1883,9 @@ async function getIslandContext(event) {
   return ctx;
 }
 
+const _lazy_aEiV1C = () => Promise.resolve().then(function () { return delete_delete$1; });
+const _lazy_smjiin = () => Promise.resolve().then(function () { return list_get$1; });
+const _lazy_e1Y4kR = () => Promise.resolve().then(function () { return upload_post$1; });
 const _lazy_uOvIXJ = () => Promise.resolve().then(function () { return check_get$1; });
 const _lazy_8rD6vD = () => Promise.resolve().then(function () { return login_post$1; });
 const _lazy_ixVewG = () => Promise.resolve().then(function () { return logout_post$1; });
@@ -1901,6 +1919,9 @@ const _lazy_DuBKWK = () => Promise.resolve().then(function () { return renderer$
 
 const handlers = [
   { route: '', handler: _FLioW9, lazy: false, middleware: true, method: undefined },
+  { route: '/api/assets/delete', handler: _lazy_aEiV1C, lazy: true, middleware: false, method: "delete" },
+  { route: '/api/assets/list', handler: _lazy_smjiin, lazy: true, middleware: false, method: "get" },
+  { route: '/api/assets/upload', handler: _lazy_e1Y4kR, lazy: true, middleware: false, method: "post" },
   { route: '/api/auth/check', handler: _lazy_uOvIXJ, lazy: true, middleware: false, method: "get" },
   { route: '/api/auth/login', handler: _lazy_8rD6vD, lazy: true, middleware: false, method: "post" },
   { route: '/api/auth/logout', handler: _lazy_ixVewG, lazy: true, middleware: false, method: "post" },
@@ -2263,6 +2284,63 @@ const styles$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   default: styles
 }, Symbol.toStringTag, { value: 'Module' }));
 
+function getR2Storage(event) {
+  var _a, _b;
+  const env = (_b = (_a = event.context) == null ? void 0 : _a.cloudflare) == null ? void 0 : _b.env;
+  if (env == null ? void 0 : env.BLOG_R2) {
+    return env.BLOG_R2;
+  }
+  throw new Error("R2 storage not available. Please configure BLOG_R2 binding in Cloudflare Pages.");
+}
+function generateUUID() {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = Math.random() * 16 | 0;
+    const v = c === "x" ? r : r & 3 | 8;
+    return v.toString(16);
+  });
+}
+function generateFileName(originalName) {
+  var _a;
+  const now = /* @__PURE__ */ new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const uuid = generateUUID();
+  const ext = ((_a = originalName.split(".").pop()) == null ? void 0 : _a.toLowerCase()) || "jpg";
+  const validExts = ["jpg", "jpeg", "png", "webp", "gif"];
+  const finalExt = validExts.includes(ext) ? ext : "jpg";
+  return `assets/${year}-${month}/${uuid}.${finalExt}`;
+}
+function generateAssetFileName(originalName) {
+  return generateFileName(originalName);
+}
+function isValidImageType(mimeType) {
+  const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
+  return allowedTypes.includes(mimeType);
+}
+
+function isProduction() {
+  return process.env.NITRO_PRESET === "cloudflare-pages";
+}
+function createSafeError(statusCode, defaultMessage, error) {
+  if (isProduction()) {
+    return createError({
+      statusCode,
+      message: defaultMessage
+    });
+  }
+  const message = (error == null ? void 0 : error.message) ? `${defaultMessage}: ${error.message}` : defaultMessage;
+  return createError({
+    statusCode,
+    message
+  });
+}
+function handleApiError(error, defaultMessage, statusCode = 500) {
+  if (error.statusCode) {
+    throw error;
+  }
+  throw createSafeError(statusCode, defaultMessage, error);
+}
+
 const SESSION_COOKIE_NAME = "admin_session";
 const SESSION_MAX_AGE = 60 * 60 * 24 * 7;
 const SESSION_SECRET_MIN_LENGTH = 32;
@@ -2346,7 +2424,7 @@ async function createSession(event, sessionData) {
     path: "/"
   });
 }
-async function getSession(event) {
+async function getUserSession(event) {
   const encrypted = getCookie(event, SESSION_COOKIE_NAME);
   if (!encrypted) {
     return null;
@@ -2372,11 +2450,11 @@ function destroySession(event) {
   });
 }
 async function isAuthenticated(event) {
-  const session = await getSession(event);
+  const session = await getUserSession(event);
   return session !== null;
 }
 async function requireAuth(event) {
-  const session = await getSession(event);
+  const session = await getUserSession(event);
   if (!session) {
     throw createError({
       statusCode: 401,
@@ -2384,6 +2462,180 @@ async function requireAuth(event) {
     });
   }
 }
+
+async function verifyAuth(event) {
+  await requireAuth(event);
+}
+async function isAdmin(event) {
+  try {
+    await requireAuth(event);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+const auth = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  isAdmin: isAdmin,
+  verifyAuth: verifyAuth
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const delete_delete = defineEventHandler(async (event) => {
+  await verifyAuth(event);
+  try {
+    const query = getQuery$1(event);
+    const key = query.key;
+    if (!key) {
+      throw createError({
+        statusCode: 400,
+        message: "\u7F3A\u5C11\u6587\u4EF6 key \u53C2\u6570"
+      });
+    }
+    if (!key.startsWith("assets/")) {
+      throw createError({
+        statusCode: 400,
+        message: "\u53EA\u80FD\u5220\u9664 assets \u76EE\u5F55\u4E0B\u7684\u6587\u4EF6"
+      });
+    }
+    const r2 = getR2Storage(event);
+    await r2.delete(key);
+    return {
+      success: true,
+      message: "\u5220\u9664\u6210\u529F"
+    };
+  } catch (error) {
+    if (error.statusCode) {
+      throw error;
+    }
+    handleApiError(error, "\u5220\u9664\u5931\u8D25", 500);
+  }
+});
+
+const delete_delete$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: delete_delete
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const list_get = defineEventHandler(async (event) => {
+  await verifyAuth(event);
+  try {
+    const r2 = getR2Storage(event);
+    const query = getQuery$1(event);
+    const cursor = query.cursor;
+    const limit = Math.min(parseInt(query.limit) || 50, 100);
+    const listOptions = {
+      limit,
+      prefix: "assets/"
+      // 只列出 assets 目录下的文件
+    };
+    if (cursor) {
+      listOptions.cursor = cursor;
+    }
+    const result = await r2.list(listOptions);
+    const imageFiles = (result.objects || []).filter((obj) => {
+      const name = obj.key.toLowerCase();
+      return name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".png") || name.endsWith(".webp") || name.endsWith(".gif");
+    });
+    const r2PublicUrl = useRuntimeConfig().r2PublicUrl;
+    const assets = imageFiles.map((obj) => {
+      const fileName = obj.key;
+      const publicUrl = r2PublicUrl ? `${r2PublicUrl}/${fileName}` : `/api/r2/${fileName}`;
+      return {
+        key: fileName,
+        name: fileName.split("/").pop() || fileName,
+        url: publicUrl,
+        size: obj.size || 0,
+        uploaded: obj.uploaded ? new Date(obj.uploaded).toISOString() : null,
+        etag: obj.etag || ""
+      };
+    });
+    assets.sort((a, b) => {
+      const timeA = a.uploaded ? new Date(a.uploaded).getTime() : 0;
+      const timeB = b.uploaded ? new Date(b.uploaded).getTime() : 0;
+      return timeB - timeA;
+    });
+    return {
+      success: true,
+      data: {
+        assets,
+        cursor: result.cursor || null,
+        truncated: result.truncated || false,
+        hasMore: result.truncated || false
+      }
+    };
+  } catch (error) {
+    if (error.statusCode) {
+      throw error;
+    }
+    handleApiError(error, "\u83B7\u53D6\u56FE\u7247\u5217\u8868\u5931\u8D25", 500);
+  }
+});
+
+const list_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: list_get
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const upload_post = defineEventHandler(async (event) => {
+  await verifyAuth(event);
+  try {
+    const formData = await readFormData(event);
+    const file = formData.get("file");
+    if (!file) {
+      throw createError({
+        statusCode: 400,
+        message: "\u6CA1\u6709\u4E0A\u4F20\u6587\u4EF6"
+      });
+    }
+    if (!isValidImageType(file.type)) {
+      throw createError({
+        statusCode: 400,
+        message: "\u4E0D\u652F\u6301\u7684\u6587\u4EF6\u7C7B\u578B\uFF0C\u4EC5\u652F\u6301\uFF1AJPEG, PNG, WebP, GIF"
+      });
+    }
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      throw createError({
+        statusCode: 400,
+        message: "\u6587\u4EF6\u5927\u5C0F\u4E0D\u80FD\u8D85\u8FC7 10MB"
+      });
+    }
+    const r2 = getR2Storage(event);
+    const fileName = generateAssetFileName(file.name);
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    await r2.put(fileName, buffer, {
+      httpMetadata: {
+        contentType: file.type,
+        cacheControl: "public, max-age=31536000"
+        // 缓存 1 年
+      }
+    });
+    const r2PublicUrl = useRuntimeConfig().r2PublicUrl;
+    const publicUrl = r2PublicUrl ? `${r2PublicUrl}/${fileName}` : `/api/r2/${fileName}`;
+    return {
+      success: true,
+      data: {
+        key: fileName,
+        name: fileName.split("/").pop() || fileName,
+        url: publicUrl,
+        size: file.size,
+        type: file.type
+      }
+    };
+  } catch (error) {
+    if (error.statusCode) {
+      throw error;
+    }
+    handleApiError(error, "\u4E0A\u4F20\u5931\u8D25", 500);
+  }
+});
+
+const upload_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: upload_post
+}, Symbol.toStringTag, { value: 'Module' }));
 
 const check_get = defineEventHandler(async (event) => {
   const authenticated = await isAuthenticated(event);
@@ -2585,47 +2837,6 @@ function getKVStorage(event) {
     throw new Error("Storage not available. Please configure BLOG_D2 or BLOG_KV binding in Cloudflare Pages.");
   }
 }
-
-function isProduction() {
-  return process.env.NITRO_PRESET === "cloudflare-pages";
-}
-function createSafeError(statusCode, defaultMessage, error) {
-  if (isProduction()) {
-    return createError({
-      statusCode,
-      message: defaultMessage
-    });
-  }
-  const message = (error == null ? void 0 : error.message) ? `${defaultMessage}: ${error.message}` : defaultMessage;
-  return createError({
-    statusCode,
-    message
-  });
-}
-function handleApiError(error, defaultMessage, statusCode = 500) {
-  if (error.statusCode) {
-    throw error;
-  }
-  throw createSafeError(statusCode, defaultMessage, error);
-}
-
-async function verifyAuth(event) {
-  await requireAuth(event);
-}
-async function isAdmin(event) {
-  try {
-    await requireAuth(event);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-const auth = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
-  __proto__: null,
-  isAdmin: isAdmin,
-  verifyAuth: verifyAuth
-}, Symbol.toStringTag, { value: 'Module' }));
 
 const _id__delete$a = defineEventHandler(async (event) => {
   await verifyAuth(event);
@@ -3902,25 +4113,6 @@ const index_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProper
   __proto__: null,
   default: index_post
 }, Symbol.toStringTag, { value: 'Module' }));
-
-function getR2Storage(event) {
-  var _a, _b;
-  const env = (_b = (_a = event.context) == null ? void 0 : _a.cloudflare) == null ? void 0 : _b.env;
-  if (env == null ? void 0 : env.BLOG_R2) {
-    return env.BLOG_R2;
-  }
-  throw new Error("R2 storage not available. Please configure BLOG_R2 binding in Cloudflare Pages.");
-}
-function generateFileName(originalName) {
-  const timestamp = Date.now();
-  const random = Math.random().toString(36).substring(2, 9);
-  const ext = originalName.split(".").pop() || "jpg";
-  return `covers/${timestamp}-${random}.${ext}`;
-}
-function isValidImageType(mimeType) {
-  const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
-  return allowedTypes.includes(mimeType);
-}
 
 const ____path__get = defineEventHandler(async (event) => {
   var _a;

@@ -50,6 +50,9 @@
           <button @click="activeTab = 'bookmarks'" :class="['tab-btn', { active: activeTab === 'bookmarks' }]">
             书签管理
           </button>
+          <button @click="activeTab = 'assets'" :class="['tab-btn', { active: activeTab === 'assets' }]">
+            图床管理
+          </button>
         </div>
 
         <!-- 文章管理 -->
@@ -252,6 +255,77 @@
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 图床管理 -->
+        <div v-if="activeTab === 'assets'" class="tab-content">
+          <div class="admin-actions">
+            <button @click="triggerAssetUpload" class="btn-primary" :disabled="uploadingAsset">
+              {{ uploadingAsset ? '上传中...' : '+ 上传图片' }}
+            </button>
+            <input 
+              ref="assetFileInput" 
+              type="file" 
+              accept="image/jpeg,image/jpg,image/png,image/webp,image/gif" 
+              multiple
+              @change="handleAssetFileSelect"
+              style="display: none"
+            />
+            <button @click="loadAssets" class="btn-secondary" :disabled="assetsLoading">
+              {{ assetsLoading ? '加载中...' : '刷新' }}
+            </button>
+          </div>
+
+          <!-- 拖拽上传区域 -->
+          <div 
+            class="asset-upload-zone"
+            :class="{ 'dragover': isDragging, 'uploading': uploadingAsset }"
+            @drop.prevent="handleDrop"
+            @dragover.prevent="isDragging = true"
+            @dragleave.prevent="isDragging = false"
+            @click="triggerAssetUpload"
+          >
+            <div v-if="!uploadingAsset" class="upload-zone-content">
+              <p>📁 拖拽图片到这里或点击上传</p>
+              <p class="upload-hint">支持 JPG、PNG、WebP、GIF，最大 10MB</p>
+            </div>
+            <div v-else class="upload-zone-content">
+              <p>上传中... {{ assetUploadProgress }}%</p>
+            </div>
+          </div>
+
+          <!-- 图片列表 -->
+          <div class="assets-list">
+            <div v-if="assetsLoading" class="loading">加载中...</div>
+            <div v-else-if="assets.length === 0" class="empty">
+              还没有图片，上传第一张吧！
+            </div>
+            <div v-else class="assets-grid">
+              <div v-for="asset in assets" :key="asset.key" class="asset-card glass-card">
+                <div class="asset-image-wrapper">
+                  <img :src="asset.url" :alt="asset.name" @error="handleImageError" />
+                  <div class="asset-overlay">
+                    <button @click.stop="copyAssetUrl(asset.url)" class="btn-copy">复制链接</button>
+                    <button @click.stop="deleteAsset(asset.key)" class="btn-delete" :disabled="deletingAssets.includes(asset.key)">
+                      {{ deletingAssets.includes(asset.key) ? '删除中...' : '删除' }}
+                    </button>
+                  </div>
+                </div>
+                <div class="asset-info">
+                  <p class="asset-name" :title="asset.name">{{ asset.name }}</p>
+                  <p class="asset-meta">
+                    {{ formatFileSize(asset.size) }} · 
+                    {{ formatDate(asset.uploaded) }}
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 加载更多 -->
+            <div v-if="hasMoreAssets && !assetsLoading" class="load-more">
+              <button @click="loadMoreAssets" class="btn-secondary">加载更多</button>
             </div>
           </div>
         </div>
@@ -688,6 +762,17 @@
   const momentFileInput = ref(null);
   const uploadingMomentImages = ref(false);
   const momentUploadProgress = ref(0);
+
+  // 图床管理相关
+  const assetFileInput = ref(null);
+  const assets = ref([]);
+  const assetsLoading = ref(false);
+  const uploadingAsset = ref(false);
+  const assetUploadProgress = ref(0);
+  const isDragging = ref(false);
+  const deletingAssets = ref([]);
+  const assetsCursor = ref(null);
+  const hasMoreAssets = ref(false);
 
   // 成功提示相关
   const showSuccessToast = ref(false);
@@ -1260,9 +1345,9 @@
     }
   };
 
-  // 格式化日期
+  // 格式化日期（统一使用，支持空值返回 '未知'）
   const formatDate = (dateString) => {
-    if (!dateString) return '';
+    if (!dateString) return '未知';
     const date = new Date(dateString);
     return date.toLocaleString('zh-CN', {
       year: 'numeric',
@@ -1761,6 +1846,204 @@
       description: ''
     };
   };
+
+  // ========== 图床管理相关方法 ==========
+  
+  // 触发文件选择
+  const triggerAssetUpload = () => {
+    assetFileInput.value?.click();
+  };
+
+  // 处理文件选择
+  const handleAssetFileSelect = async (event) => {
+    const files = Array.from(event.target.files || []);
+    if (files.length === 0) return;
+
+    // 验证文件
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+    const maxSize = 10 * 1024 * 1024; // 10MB
+
+    for (const file of files) {
+      if (!validTypes.includes(file.type)) {
+        alert(`${file.name} 不是支持的图片格式`);
+        continue;
+      }
+      if (file.size > maxSize) {
+        alert(`${file.name} 文件大小超过 10MB`);
+        continue;
+      }
+      await uploadAsset(file);
+    }
+
+    // 清空文件输入
+    if (assetFileInput.value) {
+      assetFileInput.value.value = '';
+    }
+  };
+
+  // 处理拖拽上传
+  const handleDrop = async (event) => {
+    isDragging.value = false;
+    const files = Array.from(event.dataTransfer.files || []);
+    if (files.length === 0) return;
+
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+    const maxSize = 10 * 1024 * 1024;
+
+    for (const file of files) {
+      if (!validTypes.includes(file.type)) {
+        alert(`${file.name} 不是支持的图片格式`);
+        continue;
+      }
+      if (file.size > maxSize) {
+        alert(`${file.name} 文件大小超过 10MB`);
+        continue;
+      }
+      await uploadAsset(file);
+    }
+  };
+
+  // 上传图片
+  const uploadAsset = async (file) => {
+    uploadingAsset.value = true;
+    assetUploadProgress.value = 0;
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      // 模拟上传进度
+      const progressInterval = setInterval(() => {
+        if (assetUploadProgress.value < 90) {
+          assetUploadProgress.value += 10;
+        }
+      }, 200);
+
+      const response = await $fetch('/api/assets/upload', {
+        method: 'POST',
+        body: formData
+      });
+
+      clearInterval(progressInterval);
+      assetUploadProgress.value = 100;
+
+      if (response.success) {
+        showSuccess('上传成功');
+        // 添加到列表顶部
+        assets.value.unshift(response.data);
+        // 重置进度
+        setTimeout(() => {
+          assetUploadProgress.value = 0;
+        }, 500);
+      } else {
+        throw new Error('上传失败');
+      }
+    } catch (error) {
+      console.error('上传失败:', error);
+      alert(error?.data?.message || '上传失败，请重试');
+    } finally {
+      uploadingAsset.value = false;
+      assetUploadProgress.value = 0;
+    }
+  };
+
+  // 加载图片列表
+  const loadAssets = async (cursor = null) => {
+    assetsLoading.value = true;
+    try {
+      const params = cursor ? { cursor } : {};
+      const response = await $fetch('/api/assets/list', {
+        query: params
+      });
+
+      if (response.success) {
+        if (cursor) {
+          // 追加数据
+          assets.value.push(...response.data.assets);
+        } else {
+          // 替换数据
+          assets.value = response.data.assets;
+        }
+        assetsCursor.value = response.data.cursor;
+        hasMoreAssets.value = response.data.hasMore;
+      }
+    } catch (error) {
+      console.error('加载图片列表失败:', error);
+      alert(error?.data?.message || '加载失败');
+    } finally {
+      assetsLoading.value = false;
+    }
+  };
+
+  // 加载更多
+  const loadMoreAssets = () => {
+    if (assetsCursor.value && hasMoreAssets.value) {
+      loadAssets(assetsCursor.value);
+    }
+  };
+
+  // 删除图片
+  const deleteAsset = async (key) => {
+    if (!confirm('确定要删除这张图片吗？')) return;
+
+    deletingAssets.value.push(key);
+    try {
+      const response = await $fetch('/api/assets/delete', {
+        method: 'DELETE',
+        query: { key }
+      });
+
+      if (response.success) {
+        showSuccess('删除成功');
+        // 从列表中移除
+        assets.value = assets.value.filter(asset => asset.key !== key);
+      } else {
+        alert(response.message || '删除失败');
+      }
+    } catch (error) {
+      console.error('删除失败:', error);
+      alert(error?.data?.message || '删除失败');
+    } finally {
+      deletingAssets.value = deletingAssets.value.filter(k => k !== key);
+    }
+  };
+
+  // 复制图片链接
+  const copyAssetUrl = async (url) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      showSuccess('链接已复制到剪贴板');
+    } catch (error) {
+      // 降级方案
+      const textarea = document.createElement('textarea');
+      textarea.value = url;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      showSuccess('链接已复制到剪贴板');
+    }
+  };
+
+  // 格式化文件大小
+  const formatFileSize = (bytes) => {
+    if (!bytes) return '0 B';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  };
+
+  // 处理图片加载错误
+  const handleImageError = (event) => {
+    event.target.src = '/images/placeholder.png'; // 可以设置一个占位图
+  };
+
+  // 监听标签页切换，加载图床数据
+  watch(activeTab, (newTab) => {
+    if (newTab === 'assets' && assets.value.length === 0) {
+      loadAssets();
+    }
+  });
 </script>
 
 <style scoped>
@@ -2652,6 +2935,153 @@
     .requests-grid,
     .friends-grid {
       grid-template-columns: 1fr;
+    }
+  }
+
+  /* 图床管理样式 */
+  .asset-upload-zone {
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    padding: 40px;
+    text-align: center;
+    margin: 20px 0;
+    background: rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .asset-upload-zone:hover,
+  .asset-upload-zone.dragover {
+    border-color: #6c5ce7;
+    background: rgba(108, 92, 231, 0.1);
+  }
+
+  .asset-upload-zone.uploading {
+    border-color: #6c5ce7;
+    background: rgba(108, 92, 231, 0.2);
+    cursor: not-allowed;
+  }
+
+  .upload-zone-content {
+    pointer-events: none;
+  }
+
+  .upload-zone-content p {
+    margin: 8px 0;
+    font-size: 1rem;
+    color: #666;
+  }
+
+  .upload-hint {
+    font-size: 0.85rem !important;
+    color: #999 !important;
+  }
+
+  .assets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+  }
+
+  .asset-card {
+    overflow: hidden;
+    transition: transform 0.3s;
+  }
+
+  .asset-card:hover {
+    transform: translateY(-4px);
+  }
+
+  .asset-image-wrapper {
+    position: relative;
+    width: 100%;
+    padding-top: 100%; /* 1:1 比例 */
+    background: #f5f5f5;
+    overflow: hidden;
+  }
+
+  .asset-image-wrapper img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+  }
+
+  .asset-card:hover .asset-image-wrapper img {
+    transform: scale(1.05);
+  }
+
+  .asset-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .asset-card:hover .asset-overlay {
+    opacity: 1;
+  }
+
+  .btn-copy {
+    padding: 8px 16px;
+    background: #6c5ce7;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background 0.3s;
+  }
+
+  .btn-copy:hover {
+    background: #5a4fcf;
+  }
+
+  .asset-info {
+    padding: 12px;
+  }
+
+  .asset-name {
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin: 0 0 4px 0;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .asset-meta {
+    font-size: 0.75rem;
+    color: #999;
+    margin: 0;
+  }
+
+  .load-more {
+    text-align: center;
+    margin: 30px 0;
+  }
+
+  @media (max-width: 768px) {
+    .assets-grid {
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 15px;
+    }
+
+    .asset-upload-zone {
+      padding: 30px 20px;
     }
   }
 </style>

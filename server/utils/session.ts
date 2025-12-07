@@ -3,7 +3,7 @@
  * 使用加密的 HttpOnly Cookie 存储会话信息
  */
 
-import { getCookie, setCookie, deleteCookie } from 'h3'
+import { getCookie, setCookie, deleteCookie, createError } from 'h3'
 
 // Session 配置
 const SESSION_COOKIE_NAME = 'admin_session'
@@ -133,11 +133,11 @@ export async function createSession(event: any, sessionData: { username: string;
 }
 
 /**
- * 获取 Session
+ * 获取用户 Session（重命名以避免与 h3 的 getSession 冲突）
  * @param event H3 事件对象
  * @returns 会话数据或 null
  */
-export async function getSession(event: any): Promise<{ username: string; loginTime: number } | null> {
+export async function getUserSession(event: any): Promise<{ username: string; loginTime: number } | null> {
   const encrypted = getCookie(event, SESSION_COOKIE_NAME)
   
   if (!encrypted) {
@@ -178,7 +178,7 @@ export function destroySession(event: any): void {
  * @returns 如果已登录返回 true，否则返回 false
  */
 export async function isAuthenticated(event: any): Promise<boolean> {
-  const session = await getSession(event)
+  const session = await getUserSession(event)
   return session !== null
 }
 
@@ -187,7 +187,7 @@ export async function isAuthenticated(event: any): Promise<boolean> {
  * 如果未认证，抛出 401 错误
  */
 export async function requireAuth(event: any): Promise<void> {
-  const session = await getSession(event)
+  const session = await getUserSession(event)
   
   if (!session) {
     throw createError({

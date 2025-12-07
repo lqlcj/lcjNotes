@@ -3,7 +3,7 @@
  * 用于验证用户身份，替代原来的 Bearer token 验证
  */
 
-import { requireAuth, getSession } from '~/server/utils/session';
+import { requireAuth } from '~/server/utils/session';
 
 /**
  * 验证用户是否已登录

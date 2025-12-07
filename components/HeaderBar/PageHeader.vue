@@ -94,6 +94,7 @@ Props:
     font-size: 1rem;
     color: #888;
     margin-top: 5px;
+    margin-bottom: 20px;
     letter-spacing: 2px;
   }
 
@@ -143,6 +144,7 @@ Props:
       font-size: 0.9rem;
       letter-spacing: 1px;
       margin-top: 3px;
+      margin-bottom: 15px;
     }
 
     .divider-line {
@@ -166,6 +168,7 @@ Props:
     .subtitle {
       font-size: 0.8rem;
       letter-spacing: 0.5px;
+      margin-bottom: 12px;
     }
 
     .divider-line {
