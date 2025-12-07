@@ -45,7 +45,7 @@
     {
       type: 'about',
       title: 'About Us',
-      description: '关于我们',
+      description: '关于我',
       link: '/about',
       backgroundImage: 'https://file.nbfox.com/wp-content/uploads/2020/11/28/SbGo04.jpg@water750.jpg'
     },

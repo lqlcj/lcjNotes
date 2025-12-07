@@ -48,12 +48,6 @@
           >
             友链管理
           </button>
-          <button 
-            @click="activeTab = 'moments'" 
-            :class="['tab-btn', { active: activeTab === 'moments' }]"
-          >
-            朋友圈管理
-          </button>
         </div>
 
         <!-- 文章管理 -->
@@ -196,57 +190,6 @@
                   <p><strong>链接：</strong><a :href="friend.url" target="_blank">{{ friend.url }}</a></p>
                   <p v-if="friend.description"><strong>描述：</strong>{{ friend.description }}</p>
                   <p><strong>添加时间：</strong>{{ friend.date }}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 朋友圈管理 -->
-        <div v-if="activeTab === 'moments'" class="tab-content">
-          <div class="admin-actions">
-            <button @click="showMomentForm = true" class="btn-primary">
-              + 发布动态
-            </button>
-            <button @click="migrateMoments" class="btn-secondary" :disabled="migratingMoments">
-              {{ migratingMoments ? '迁移中...' : '导入 JSON 数据' }}
-            </button>
-          </div>
-          
-          <div class="moments-list-admin">
-            <div v-if="momentsLoading" class="loading">加载中...</div>
-            <div v-else-if="moments.length === 0" class="empty">
-              还没有动态，点击上方按钮发布第一条吧！
-            </div>
-            <div v-else class="moments-grid">
-              <div 
-                v-for="moment in moments" 
-                :key="moment.id" 
-                class="moment-card glass-card"
-              >
-                <div class="moment-header">
-                  <div class="moment-author">
-                    <img :src="moment.author?.avatar || '/images/home/avatar.webp'" alt="avatar" class="moment-avatar" />
-                    <span class="moment-nickname">{{ moment.author?.nickname || 'Leyili' }}</span>
-                  </div>
-                  <div class="moment-actions">
-                    <button @click="editMoment(moment)" class="btn-edit">编辑</button>
-                    <button @click="deleteMoment(moment.id)" class="btn-delete">删除</button>
-                  </div>
-                </div>
-                <div class="moment-content">
-                  <p class="moment-text">{{ moment.content }}</p>
-                  <div v-if="moment.images && moment.images.length > 0" class="moment-images-preview">
-                    <img 
-                      v-for="(img, idx) in moment.images.slice(0, 3)" 
-                      :key="idx" 
-                      :src="img" 
-                      alt="moment image"
-                      class="moment-preview-img"
-                    />
-                    <span v-if="moment.images.length > 3" class="moment-more-images">+{{ moment.images.length - 3 }}</span>
-                  </div>
-                  <p class="moment-timestamp">{{ moment.timestamp }}</p>
                 </div>
               </div>
             </div>
@@ -450,94 +393,6 @@
             </form>
           </div>
         </div>
-
-        <!-- 创建/编辑朋友圈表单 -->
-        <div v-if="showMomentForm" class="form-modal">
-          <div class="form-content glass-card">
-            <div class="form-header">
-              <h2>{{ editingMoment ? '编辑动态' : '发布动态' }}</h2>
-              <button @click="closeMomentForm" class="close-btn">×</button>
-            </div>
-            
-            <form @submit.prevent="handleMomentSubmit">
-              <div class="form-group">
-                <label>昵称</label>
-                <input v-model="momentForm.author.nickname" type="text" />
-              </div>
-
-              <div class="form-group">
-                <label>头像 URL</label>
-                <input v-model="momentForm.author.avatar" type="url" placeholder="/images/home/avatar.webp" />
-              </div>
-
-              <div class="form-group">
-                <label>动态内容 *</label>
-                <textarea 
-                  v-model="momentForm.content" 
-                  rows="6" 
-                  required
-                  placeholder="分享你的想法..."
-                ></textarea>
-              </div>
-
-              <div class="form-group">
-                <label>图片（可多选）</label>
-                <div class="moment-images-section">
-                  <input 
-                    ref="momentImagesInput"
-                    type="file" 
-                    accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
-                    multiple
-                    @change="handleMomentImagesSelect"
-                    style="display: none;"
-                  />
-                  <button 
-                    type="button" 
-                    @click="triggerMomentImagesInput"
-                    class="btn-upload"
-                    :disabled="uploadingMomentImages"
-                  >
-                    {{ uploadingMomentImages ? '上传中...' : '📤 上传图片' }}
-                  </button>
-                  
-                  <!-- 图片预览 -->
-                  <div v-if="momentImagesPreview.length > 0" class="moment-images-preview-grid">
-                    <div 
-                      v-for="(img, index) in momentImagesPreview" 
-                      :key="index" 
-                      class="moment-image-preview-item"
-                    >
-                      <img :src="img" alt="预览" />
-                      <button 
-                        type="button" 
-                        @click="removeMomentImage(index)"
-                        class="btn-remove-image"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label>时间（可选，留空则使用当前时间）</label>
-                <input 
-                  v-model="momentForm.timestamp" 
-                  type="text" 
-                  placeholder="创建时间: 2025-01-01 12:00:00"
-                />
-              </div>
-
-              <div class="form-actions">
-                <button type="button" @click="closeMomentForm" class="btn-secondary">取消</button>
-                <button type="submit" class="btn-primary" :disabled="submittingMoment">
-                  {{ submittingMoment ? '保存中...' : '保存' }}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
       </div>
     </div>
   </div>
@@ -568,13 +423,6 @@ const messagesLoading = ref(false);
 const showMessageForm = ref(false);
 const submittingMessage = ref(false);
 
-// 朋友圈管理相关
-const moments = ref([]);
-const momentsLoading = ref(false);
-const showMomentForm = ref(false);
-const editingMoment = ref(null);
-const submittingMoment = ref(false);
-
 // 友链管理相关
 const friendsRequests = ref([]);
 const friendsRequestsLoading = ref(false);
@@ -603,16 +451,6 @@ const friendForm = ref({
   avatar: ''
 });
 
-const momentForm = ref({
-  content: '',
-  author: {
-    nickname: 'Leyili',
-    avatar: '/images/home/avatar.webp'
-  },
-  images: [],
-  timestamp: ''
-});
-
 const formData = ref({
   title: '',
   date: new Date().toISOString().split('T')[0],
@@ -630,11 +468,6 @@ const uploading = ref(false);
 const uploadProgress = ref(0);
 const coverPreview = ref('');
 
-// 朋友圈图片上传相关
-const momentImagesInput = ref(null);
-const uploadingMomentImages = ref(false);
-const momentImagesPreview = ref([]);
-
 // 检查是否已登录
 onMounted(() => {
   const token = localStorage.getItem('admin_token');
@@ -644,7 +477,6 @@ onMounted(() => {
     loadMessages();
     loadFriendsRequests();
     loadApprovedFriends();
-    loadMoments();
   }
 });
 
@@ -1206,243 +1038,6 @@ const closeFriendForm = () => {
     description: '',
     avatar: ''
   };
-};
-
-// 加载朋友圈列表
-const loadMoments = async () => {
-  momentsLoading.value = true;
-  try {
-    const response = await $fetch('/api/moments');
-    if (response.success) {
-      moments.value = response.data;
-    }
-  } catch (error) {
-    console.error('加载朋友圈失败:', error);
-  } finally {
-    momentsLoading.value = false;
-  }
-};
-
-// 编辑朋友圈动态
-const editMoment = async (moment) => {
-  try {
-    const response = await $fetch(`/api/moments/${moment.id}`);
-    if (response.success) {
-      editingMoment.value = response.data;
-      momentForm.value = {
-        content: response.data.content || '',
-        author: {
-          nickname: response.data.author?.nickname || 'Leyili',
-          avatar: response.data.author?.avatar || '/images/home/avatar.webp'
-        },
-        images: response.data.images || [],
-        timestamp: response.data.timestamp || ''
-      };
-      momentImagesPreview.value = response.data.images || [];
-      showMomentForm.value = true;
-    }
-  } catch (error) {
-    console.error('加载朋友圈动态失败:', error);
-    alert('加载朋友圈动态失败');
-  }
-};
-
-// 删除朋友圈动态
-const deleteMoment = async (id) => {
-  if (!confirm('确定要删除这条动态吗？')) {
-    return;
-  }
-  
-  const token = localStorage.getItem('admin_token');
-  try {
-    const response = await $fetch(`/api/moments/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    
-    if (response.success) {
-      alert('删除成功');
-      loadMoments();
-    }
-  } catch (error) {
-    alert(error?.data?.message || '删除失败');
-  }
-};
-
-// 提交朋友圈表单
-const handleMomentSubmit = async () => {
-  if (!momentForm.value.content.trim()) {
-    alert('请输入动态内容');
-    return;
-  }
-  
-  submittingMoment.value = true;
-  const token = localStorage.getItem('admin_token');
-  
-  try {
-    if (editingMoment.value) {
-      // 更新动态
-      const response = await $fetch(`/api/moments/${editingMoment.value.id}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: momentForm.value
-      });
-      
-      if (response.success) {
-        alert('更新成功');
-        closeMomentForm();
-        loadMoments();
-      }
-    } else {
-      // 创建动态
-      const response = await $fetch('/api/moments', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: momentForm.value
-      });
-      
-      if (response.success) {
-        alert('发布成功');
-        closeMomentForm();
-        loadMoments();
-      }
-    }
-  } catch (error) {
-    alert(error?.data?.message || '操作失败');
-  } finally {
-    submittingMoment.value = false;
-  }
-};
-
-// 关闭朋友圈表单
-const closeMomentForm = () => {
-  showMomentForm.value = false;
-  editingMoment.value = null;
-  momentForm.value = {
-    content: '',
-    author: {
-      nickname: 'Leyili',
-      avatar: '/images/home/avatar.webp'
-    },
-    images: [],
-    timestamp: ''
-  };
-  momentImagesPreview.value = [];
-};
-
-// 触发朋友圈图片选择
-const triggerMomentImagesInput = () => {
-  momentImagesInput.value?.click();
-};
-
-// 处理朋友圈图片选择
-const handleMomentImagesSelect = async (event) => {
-  const files = Array.from(event.target.files || []);
-  if (files.length === 0) return;
-
-  // 验证文件类型和大小
-  const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
-  const maxSize = 10 * 1024 * 1024; // 10MB
-
-  for (const file of files) {
-    if (!validTypes.includes(file.type)) {
-      alert(`文件 ${file.name} 不支持，仅支持：JPEG, PNG, WebP, GIF`);
-      continue;
-    }
-    if (file.size > maxSize) {
-      alert(`文件 ${file.name} 大小超过 10MB`);
-      continue;
-    }
-
-    // 显示预览
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      momentImagesPreview.value.push(e.target?.result);
-    };
-    reader.readAsDataURL(file);
-
-    // 上传文件
-    await uploadMomentImage(file);
-  }
-
-  // 清空文件输入
-  if (momentImagesInput.value) {
-    momentImagesInput.value.value = '';
-  }
-};
-
-// 上传朋友圈图片到 R2
-const uploadMomentImage = async (file) => {
-  uploadingMomentImages.value = true;
-  const token = localStorage.getItem('admin_token');
-
-  try {
-    const formDataToSend = new FormData();
-    formDataToSend.append('file', file);
-
-    const response = await $fetch('/api/upload/image', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      },
-      body: formDataToSend
-    });
-
-    if (response.success) {
-      // 添加到图片列表
-      momentForm.value.images.push(response.data.url);
-    } else {
-      throw new Error('上传失败');
-    }
-  } catch (error) {
-    console.error('上传失败:', error);
-    alert(error?.data?.message || '图片上传失败，请重试');
-  } finally {
-    uploadingMomentImages.value = false;
-  }
-};
-
-// 删除朋友圈图片预览
-const removeMomentImage = (index) => {
-  momentImagesPreview.value.splice(index, 1);
-  momentForm.value.images.splice(index, 1);
-};
-
-// 迁移朋友圈数据（从 JSON 导入到 KV）
-const migrateMoments = async () => {
-  if (!confirm('确定要将 data/moments.json 中的数据导入到 KV 吗？\n\n注意：已存在的动态不会被覆盖。')) {
-    return;
-  }
-  
-  migratingMoments.value = true;
-  const token = localStorage.getItem('admin_token');
-  
-  try {
-    const response = await $fetch('/api/moments/migrate', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    
-    if (response.success) {
-      alert(`迁移成功！\n导入: ${response.data.migrated} 条\n跳过: ${response.data.skipped} 条\n总计: ${response.data.total} 条`);
-      loadMoments();
-    } else {
-      alert(response.message || '迁移失败');
-    }
-  } catch (error) {
-    console.error('迁移失败:', error);
-    alert(error?.data?.message || '迁移失败，请检查是否在本地环境运行');
-  } finally {
-    migratingMoments.value = false;
-  }
 };
 </script>
 
@@ -2073,161 +1668,6 @@ const migrateMoments = async () => {
   .requests-grid,
   .friends-grid {
     grid-template-columns: 1fr;
-  }
-}
-
-/* 朋友圈管理样式 */
-.moments-list-admin {
-  margin-top: 20px;
-}
-
-.moments-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-  gap: 20px;
-}
-
-.moment-card {
-  padding: 20px;
-}
-
-.moment-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
-}
-
-.moment-author {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.moment-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
-  object-fit: cover;
-}
-
-.moment-nickname {
-  font-weight: 600;
-  color: #576b95;
-  font-size: 14px;
-}
-
-.moment-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.moment-content {
-  margin-top: 10px;
-}
-
-.moment-text {
-  color: #333;
-  line-height: 1.6;
-  margin-bottom: 10px;
-  word-break: break-word;
-}
-
-.moment-images-preview {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 10px;
-}
-
-.moment-preview-img {
-  width: 60px;
-  height: 60px;
-  object-fit: cover;
-  border-radius: 4px;
-  border: 1px solid #ddd;
-}
-
-.moment-more-images {
-  width: 60px;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f5f5f5;
-  border-radius: 4px;
-  color: #666;
-  font-size: 12px;
-  border: 1px solid #ddd;
-}
-
-.moment-timestamp {
-  font-size: 11px;
-  color: #999;
-  margin-top: 8px;
-}
-
-.moment-images-section {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.moment-images-preview-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  gap: 10px;
-}
-
-.moment-image-preview-item {
-  position: relative;
-  width: 100px;
-  height: 100px;
-  border-radius: 4px;
-  overflow: hidden;
-  border: 1px solid #ddd;
-}
-
-.moment-image-preview-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.btn-remove-image {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  width: 24px;
-  height: 24px;
-  background: rgba(0, 0, 0, 0.6);
-  color: white;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.3s;
-}
-
-.btn-remove-image:hover {
-  background: rgba(0, 0, 0, 0.8);
-}
-
-@media (max-width: 768px) {
-  .moments-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .moment-images-preview-grid {
-    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-  }
-  
-  .moment-image-preview-item {
-    width: 80px;
-    height: 80px;
   }
 }
 </style>

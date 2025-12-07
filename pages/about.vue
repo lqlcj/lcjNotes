@@ -183,7 +183,7 @@
 
             <transition name="comments-fade">
               <div v-if="commentsExpanded" class="comments-container">
-                <Guestbook />
+                <Giscus v-bind="giscusConfig" />
               </div>
             </transition>
           </section>
@@ -200,11 +200,12 @@
 </template>
 
 <script setup>
-  import { reactive, ref, onBeforeUnmount } from 'vue'
+  import { reactive, ref, onBeforeUnmount, defineAsyncComponent } from 'vue'
   import OutlineButton from '~/components/Common/OutlineButton.vue'
-  import Guestbook from '~/components/Comments/Guestbook.vue'
+  import { giscusConfig } from '~/config/giscus'
 
   // 留言板异步加载
+  const Giscus = defineAsyncComponent(() => import('~/components/Comments/Giscus.vue'))
 
   const emailAddress = "cli20220909@gmail.com"
 

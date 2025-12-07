@@ -6,7 +6,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
   
   // CSS 配置
-  css: ['~/assets/styles/styles.css'],
+  css: [],
   
   // 模块配置
   modules: [
@@ -42,7 +42,8 @@ export default defineNuxtConfig({
         { name: 'viewport', content: 'width=device-width, initial-scale=1.0' }
       ],
       link: [
-        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
+        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+        { rel: 'stylesheet', href: '/styles/styles.css' }
       ]
     },
     pageTransition: { name: 'page', mode: 'out-in' },

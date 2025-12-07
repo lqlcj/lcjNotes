@@ -1366,7 +1366,7 @@ const _TXLV4rBvqsYiKFUYas4nE2ajd4M1kbGvbTN66ecZKaY = (function(nitro) {
 
 const rootDir = "G:/newblog";
 
-const appHead = {"meta":[{"charset":"utf-8"},{"name":"viewport","content":"width=device-width, initial-scale=1.0"}],"link":[{"rel":"icon","type":"image/x-icon","href":"/favicon.ico"}],"style":[],"script":[],"noscript":[],"title":"♥Leyili"};
+const appHead = {"meta":[{"charset":"utf-8"},{"name":"viewport","content":"width=device-width, initial-scale=1.0"}],"link":[{"rel":"icon","type":"image/x-icon","href":"/favicon.ico"},{"rel":"stylesheet","href":"/styles/styles.css"}],"style":[],"script":[],"noscript":[],"title":"♥Leyili"};
 
 const appRootTag = "div";
 
@@ -1457,22 +1457,7 @@ const plugins = [
 _iS2Hx_aRY6b5luI5ZFAVScoHeBMFBXD6z47xxZowt8
 ];
 
-const assets = {
-  "/index.mjs": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"20814-GrxVEeSHZATMokR+Iu35ZFNSmmQ\"",
-    "mtime": "2025-12-06T21:42:53.531Z",
-    "size": 133140,
-    "path": "index.mjs"
-  },
-  "/index.mjs.map": {
-    "type": "application/json",
-    "etag": "\"781a7-AwFLN7TL+ZRR2c0ojvkUSiCEY00\"",
-    "mtime": "2025-12-06T21:42:53.531Z",
-    "size": 491943,
-    "path": "index.mjs.map"
-  }
-};
+const assets = {};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));

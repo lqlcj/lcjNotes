@@ -60,15 +60,16 @@ newblog/
 ├── nuxt.config.ts          # Nuxt 配置文件
 ├── package.json            # 项目依赖
 │
-├── assets/                 # 静态资源
+├── public/                 # 公共静态资源
 │   ├── images/            # 图片资源
 │   │   ├── background-body.webp
 │   │   ├── carousel/      # 轮播图
 │   │   ├── home/          # 首页图片
 │   │   └── Moments/       # 动态图片
-│   └── styles/            # 样式文件
-│       ├── fonts.css      # 字体定义
-│       └── styles.css     # 全局样式
+│   ├── styles/            # 样式文件
+│   │   ├── fonts.css      # 字体定义
+│   │   └── styles.css     # 全局样式
+│   └── fonts/             # 字体文件
 │
 ├── components/            # Vue 组件
 │   ├── BackToTop/        # 返回顶部组件
@@ -204,8 +205,8 @@ export const giscusConfig = {
 
 ### 自定义样式
 
-- **全局样式**：`assets/styles/styles.css`
-- **字体配置**：`assets/styles/fonts.css`
+- **全局样式**：`public/styles/styles.css`
+- **字体配置**：`public/styles/fonts.css`
 - **布局配置**：`config/layout.js`
 
 ### 修改网站信息

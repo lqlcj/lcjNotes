@@ -55,11 +55,12 @@
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    /* 🔴 恢复原样：完全保留你原本的背景写法，不做任何缩放或固定 */
+    /* 图案背景设置：支持平铺显示 */
     background-image: v-bind('backgroundImageUrl');
-    background-size: cover;
+    background-size: auto;
     background-position: center;
-    background-repeat: no-repeat;
+    background-repeat: repeat;
+    background-attachment: fixed;
   }
 
   /* 新增布局样式：只负责撑开高度，不涉及颜色或图片 */

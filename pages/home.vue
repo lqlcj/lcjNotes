@@ -40,7 +40,7 @@
 
         <transition name="comments-slide">
           <div v-if="commentsExpanded" class="comments-content">
-            <Guestbook />
+            <Giscus v-bind="giscusConfig" />
           </div>
         </transition>
       </div>
@@ -56,11 +56,12 @@
   import HomeProfile from './home/components/HomeProfile.vue'
   import InfoCards from './home/components/InfoCards.vue'
   import ImpressionCarousel from './home/components/ImpressionCarousel.vue'
+  import { giscusConfig } from '~/config/giscus'
   import { layoutConfig } from '~/config/layout'
   import { useConfetti } from '~/composables/useConfetti'
 
-  // 留言板组件
-  import Guestbook from '~/components/Comments/Guestbook.vue'
+  // 留言板异步加载，确保在其他组件加载完成后再加载
+  const Giscus = defineAsyncComponent(() => import('~/components/Comments/Giscus.vue'))
 
   const { birthday } = useConfetti()
 
