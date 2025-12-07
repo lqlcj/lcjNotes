@@ -1,0 +1,53 @@
+@font-face {
+  font-family: "Conv_FuturaStd-Book";
+  src: url("/fonts/FuturaStd-Book.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Conv_FuturaStd-Medium";
+  src: url("/fonts/FuturaStd-Medium.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Conv_FuturaStd-Heavy";
+  src: url("/fonts/FuturaStd-Heavy.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Conv_FuturaStd-Light";
+  src: url("/fonts/FuturaStd-Light.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* --- 1. 定义本地字体 --- */
+@font-face {
+  font-family: "Caveat";
+  /* public 目录下的文件，直接用 /fonts/... 访问 */
+  src: url("/fonts/Caveat-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* --- 霞鹜文楷字体 --- */
+@font-face {
+  font-family: "LXGW WenKai";
+  src: url("/fonts/LXGWWenKai-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* --- 2. 定义全站默认字体 (因为没下载 Noto Serif，我们用系统宋体代替) --- */
+body {
+  /* 优先用 Noto (如果系统有)，没有就用宋体/明体，保证 Welcome 页的气质 */
+  font-family: "Noto Serif SC", "Songti SC", "SimSun", "STSong",
+    "Times New Roman", serif;
+}

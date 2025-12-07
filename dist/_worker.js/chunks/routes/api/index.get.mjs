@@ -1,0 +1,2 @@
+import{d as t,f as e}from"../../_/nitro.mjs";import{g as s}from"../../_/kv.mjs";const a=t(async t=>{try{const e=s(t),a="bookmarks:list",o=await e.getItem(a)||[],r=[];for(const t of o){const s=`bookmark:${t}`,a=await e.getItem(s);a&&r.push(a)}return r.sort((t,e)=>{const s=t.createdAt?new Date(t.createdAt).getTime():0;return(e.createdAt?new Date(e.createdAt).getTime():0)-s}),{success:!0,data:r}}catch(t){throw e({statusCode:500,message:t.message||"获取书签列表失败"})}});export{a as default};
+//# sourceMappingURL=index.get.mjs.map

@@ -1,0 +1,2 @@
+async function verifyTurnstile(e,r,t){if(!e||!r)return!1;try{const n=await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({secret:r,response:e,remoteip:t})});return!0===(await n.json()).success}catch(e){return console.error("Turnstile verification error:",e),!1}}export{verifyTurnstile as v};
+//# sourceMappingURL=turnstile.mjs.map

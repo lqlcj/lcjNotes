@@ -1,0 +1,23 @@
+@import "/styles/fonts.css";
+
+/* --- 全局重置样式 --- */
+* {
+  box-sizing: border-box; /* 关键！让 padding 不会把盒子撑大 */
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  width: 100%;
+  overflow-x: hidden; /* 核心！强制禁止横向滚动条，只允许竖着滚 */
+  font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB",
+    "Microsoft YaHei", Arial, sans-serif;
+}
+
+/* 图片自适应：防止大图撑破手机屏幕 */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
