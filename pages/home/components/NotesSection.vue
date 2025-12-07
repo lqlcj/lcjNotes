@@ -411,7 +411,7 @@
     max-width: 100%;
     box-sizing: border-box;
     overflow: hidden;
-    /* 完全隐藏滚动条，防止加载时闪烁 */
+    /* 完全隐藏滚动条，因为已使用分页 */
     /* 确保组件有最小高度，始终可见 */
     display: block;
     /* 确保显示 */
@@ -439,7 +439,7 @@
     box-sizing: border-box;
     position: relative;
     overflow: hidden;
-    /* 完全隐藏滚动条，防止加载时闪烁 */
+    /* 完全隐藏滚动条，因为已使用分页 */
   }
 
   /* 瀑布流布局 - 小红书风格 */
