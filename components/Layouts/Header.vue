@@ -15,6 +15,10 @@
         Friends
       </NuxtLink>
 
+      <NuxtLink to="/tools" class="nav-link" active-class="select">
+        Tools
+      </NuxtLink>
+
       <NuxtLink to="/about" class="nav-link" active-class="select">
         About
       </NuxtLink>

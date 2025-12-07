@@ -1,9 +1,14 @@
 ﻿<template>
   <div class="moments-list">
-    <div v-if="posts.length === 0" class="empty-state">
-      <p>暂无动态</p>
-    </div>
-    <div v-for="post in posts" :key="post.id" class="post-item">
+    <!-- Loading 状态 -->
+    <LoadingMessage v-if="isLoadingData" text="飘洋过海来看你~" />
+    
+    <!-- 内容区域 -->
+    <template v-else>
+      <div v-if="posts.length === 0" class="empty-state">
+        <p>暂无动态</p>
+      </div>
+      <div v-for="post in posts" :key="post.id" class="post-item">
       <div class="avatar-container">
         <img 
           :src="post.author.avatar || avatarImage" 
@@ -52,15 +57,17 @@
       </button>
     </div>
 
-    <!-- 图片预览遮罩层 -->
-    <div v-if="viewerImage" class="image-viewer" @click="closeImageViewer">
-      <img :src="viewerImage" alt="预览图片" class="viewer-image" @click.stop />
-    </div>
+      <!-- 图片预览遮罩层 -->
+      <div v-if="viewerImage" class="image-viewer" @click="closeImageViewer">
+        <img :src="viewerImage" alt="预览图片" class="viewer-image" @click.stop />
+      </div>
+    </template>
   </div>
 </template>
 
 <script setup>
   import { ref, onBeforeUnmount, computed, onMounted, nextTick } from 'vue'
+  import LoadingMessage from '~/components/Common/LoadingMessage.vue'
   // 使用 public 目录下的图片
   const avatarImage = '/images/lcj.svg'
 
