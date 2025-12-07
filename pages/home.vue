@@ -1,3 +1,15 @@
+<!--
+  主页组件
+  
+  功能：
+    - 整合首页各个组件（Banner、文本块、文章列表、留言板）
+    - 双语文案展示
+    - 分隔线装饰
+  
+  特性：
+    - 响应式布局
+    - 移动端文本块垂直堆叠
+-->
 <template>
   <div class="preview-page">
     <div class="preview-container">
@@ -61,7 +73,6 @@
 
   // 处理下载按钮点击
   const handleDownload = () => {
-    console.log('下载按钮被点击')
     // 可以在这里添加下载逻辑
   }
 

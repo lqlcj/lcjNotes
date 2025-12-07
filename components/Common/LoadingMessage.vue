@@ -1,3 +1,16 @@
+<!--
+  加载消息组件
+  
+  功能：
+    - 显示加载动画和自定义文字
+    - 三个点的跳动动画效果
+    - 支持自定义加载文字
+  
+  特性：
+    - 响应式设计
+    - 支持减少动画偏好设置
+    - 波浪emoji动画效果
+-->
 <template>
   <div class="loading-container">
     <div class="loading-content">

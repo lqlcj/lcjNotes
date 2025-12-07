@@ -2734,7 +2734,6 @@ function getKVStorage(event) {
   if (env == null ? void 0 : env.BLOG_D2) {
     const db = env.BLOG_D2;
     const initTable = async () => {
-      var _a2;
       try {
         await db.exec(`
           CREATE TABLE IF NOT EXISTS kv_store (
@@ -2743,9 +2742,6 @@ function getKVStorage(event) {
           )
         `);
       } catch (e) {
-        if (!((_a2 = e.message) == null ? void 0 : _a2.includes("already exists"))) {
-          console.log("D2 table initialization note:", e.message || e);
-        }
       }
     };
     initTable().catch(() => {
@@ -3726,7 +3722,6 @@ const index_get$2 = defineEventHandler(async (event) => {
       if (recoveredIds.length > 0) {
         momentsList = recoveredIds;
         await kv.setItem(momentsListKey, momentsList);
-        console.log(`\u6062\u590D\u4E86 ${recoveredIds.length} \u6761\u65E7\u670B\u53CB\u5708\u6570\u636E`);
       }
     }
     const moments = [];

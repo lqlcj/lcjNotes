@@ -89,8 +89,6 @@ export const useNotesStore = defineStore("notes", {
       // 如果已经加载过，就直接返回
       if (this.isLoaded) return;
 
-      console.log("Pinia: 正在从 API 加载文章元数据...");
-
       try {
         const response = await $fetch('/api/posts');
         
@@ -125,7 +123,6 @@ export const useNotesStore = defineStore("notes", {
           this.isLoaded = true;
         } else {
           // API 返回空数据，清空文章列表，不显示假数据
-          console.log("API 返回空数据，清空文章列表");
           this.allPosts = [];
           this.isLoaded = true;
           // 不再回退到文件系统，避免显示假数据

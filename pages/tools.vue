@@ -1,4 +1,19 @@
-﻿<template>
+﻿<!--
+  工具页面组件
+  
+  功能：
+    - Tab 标签页切换（书签、管理后台）
+    - 书签列表展示
+    - 书签点击确认对话框
+    - 集成管理后台页面
+  
+  特性：
+    - 标签页切换动画
+    - 书签卡片网格布局
+    - 外部链接跳转确认
+    - 响应式设计
+-->
+<template>
   <div class="tools-page">
     <div class="tools-container">
       <div class="tools-box">
@@ -23,9 +38,13 @@
                 <div v-else-if="bookmarks.length === 0" class="empty-state">
                   <p class="placeholder-text">还没有书签，去管理后台添加吧~</p>
                 </div>
-                <div v-else class="bookmarks-grid">
-                  <div v-for="bookmark in bookmarks" :key="bookmark.id" class="bookmark-card"
-                    :class="{ 'showing-confirm': confirmingBookmarkId === bookmark.id }">
+                <div v-else class="bookmarks-waterfall">
+                  <div v-for="colIndex in columnCount" :key="colIndex" class="waterfall-column"
+                    :ref="el => setColumnRef(el, colIndex - 1)">
+                    <div v-for="bookmark in getColumnItems(colIndex - 1)" :key="bookmark.id" 
+                      class="bookmark-card"
+                      :class="{ 'showing-confirm': confirmingBookmarkId === bookmark.id }"
+                      :ref="el => setCardRef(el, bookmark.id)">
                     <!-- 正常显示内容 -->
                     <div v-if="confirmingBookmarkId !== bookmark.id" class="bookmark-content"
                       @click="showConfirm(bookmark.id)">
@@ -51,6 +70,7 @@
                         </div>
                       </div>
                     </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -70,7 +90,7 @@
 </template>
 
 <script setup>
-  import { ref, onMounted, watch } from 'vue'
+  import { ref, onMounted, onUnmounted, watch, computed, nextTick } from 'vue'
   import PageHeader from '~/components/HeaderBar/PageHeader.vue'
   import AdminPanel from '~/pages/me.vue'
   import LoadingMessage from '~/components/Common/LoadingMessage.vue'
@@ -89,6 +109,102 @@
   const bookmarksLoading = ref(false)
   const confirmingBookmarkId = ref(null)
 
+  // 瀑布流相关状态
+  const columnRefs = ref([])
+  const cardRefs = ref(new Map())
+  const columnItems = ref([]) // 每列的数据 [[], [], []]
+  const columnHeights = ref([]) // 每列的高度 [0, 0, 0]
+
+  // 响应式列数
+  const columnCount = computed(() => {
+    if (typeof window === 'undefined') return 3 // SSR 默认3列
+    const width = window.innerWidth
+    // 超小屏：2列
+    if (width < 480) return 2
+    // 小屏手机：2列
+    if (width < 640) return 2
+    // 平板：2列
+    if (width < 1024) return 2
+    // 桌面：3列
+    return 3
+  })
+
+  // 设置列引用
+  const setColumnRef = (el, index) => {
+    if (el) {
+      columnRefs.value[index] = el
+    }
+  }
+
+  // 设置卡片引用
+  const setCardRef = (el, id) => {
+    if (el) {
+      cardRefs.value.set(id, el)
+    }
+  }
+
+  // 获取指定列的数据
+  const getColumnItems = (colIndex) => {
+    return columnItems.value[colIndex] || []
+  }
+
+  // 初始化列数据
+  const initColumns = () => {
+    const count = columnCount.value
+    columnItems.value = Array(count).fill(null).map(() => [])
+    columnHeights.value = Array(count).fill(0)
+  }
+
+  // 将数据分配到最短的列
+  const distributeItems = () => {
+    initColumns()
+    const items = bookmarks.value
+
+    items.forEach((item) => {
+      // 找到最短的列
+      const shortestColIndex = columnHeights.value.indexOf(Math.min(...columnHeights.value))
+
+      // 添加到最短列
+      columnItems.value[shortestColIndex].push(item)
+
+      // 估算高度（基于内容长度）
+      const estimatedHeight = 120 + (item.description ? 40 : 0) + (item.url ? 20 : 0)
+      columnHeights.value[shortestColIndex] += estimatedHeight
+    })
+  }
+
+  // 更新所有列的实际高度
+  const updateColumnHeights = () => {
+    const count = columnCount.value
+    columnHeights.value = Array(count).fill(0)
+
+    columnItems.value.forEach((items, colIndex) => {
+      let totalHeight = 0
+      items.forEach(item => {
+        const cardEl = cardRefs.value.get(item.id)
+        if (cardEl) {
+          totalHeight += cardEl.offsetHeight + 15 // 15px 是 gap
+        }
+      })
+      columnHeights.value[colIndex] = totalHeight
+    })
+  }
+
+  // 窗口大小变化处理（防抖）
+  let resizeTimer = null
+  const handleResize = () => {
+    if (resizeTimer) clearTimeout(resizeTimer)
+    resizeTimer = setTimeout(() => {
+      cardRefs.value.clear()
+      distributeItems()
+      nextTick(() => {
+        setTimeout(() => {
+          updateColumnHeights()
+        }, 100)
+      })
+    }, 150)
+  }
+
   // 加载书签列表
   const loadBookmarks = async () => {
     bookmarksLoading.value = true
@@ -96,6 +212,14 @@
       const response = await $fetch('/api/bookmarks')
       if (response.success) {
         bookmarks.value = response.data || []
+        // 数据加载完成后，分配数据到列
+        if (bookmarks.value.length > 0) {
+          await nextTick()
+          setTimeout(() => {
+            distributeItems()
+            updateColumnHeights()
+          }, 100)
+        }
       }
     } catch (error) {
       console.error('加载书签失败:', error)
@@ -129,6 +253,21 @@
 
   onMounted(() => {
     loadBookmarks()
+    // 监听窗口大小变化
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', handleResize)
+    }
+  })
+
+  onUnmounted(() => {
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('resize', handleResize)
+      // 清理 resize 定时器，防止内存泄漏
+      if (resizeTimer) {
+        clearTimeout(resizeTimer)
+        resizeTimer = null
+      }
+    }
   })
 </script>
 
@@ -141,7 +280,7 @@
 
   .tools-container {
     width: 100%;
-    max-width: 1000px;
+    max-width: 800px;
     margin: 0 auto;
     box-sizing: border-box;
   }
@@ -235,17 +374,31 @@
     text-align: center;
   }
 
-  .bookmarks-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 20px;
-    padding: 20px 0;
+  /* 瀑布流布局 */
+  .bookmarks-waterfall {
+    display: flex;
+    gap: 15px;
+    align-items: flex-start;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+
+  .waterfall-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   .bookmark-card {
+    width: 100%;
     display: flex;
-    align-items: flex-start;
-    gap: 16px;
+    flex-direction: column;
     padding: 20px;
     background: rgba(255, 255, 255, 0.8);
     border: 1px solid rgba(0, 0, 0, 0.08);
@@ -254,6 +407,8 @@
     color: inherit;
     transition: all 0.3s ease;
     cursor: pointer;
+    box-sizing: border-box;
+    margin-bottom: 0;
   }
 
   .bookmark-card:hover:not(.showing-confirm) {
@@ -272,6 +427,7 @@
     align-items: flex-start;
     gap: 16px;
     width: 100%;
+    flex-direction: column;
   }
 
   .bookmark-icon {
@@ -451,10 +607,13 @@
       padding: 30px 15px;
     }
 
-    .bookmarks-grid {
-      grid-template-columns: 1fr;
+    .bookmarks-waterfall {
+      flex-direction: column;
       gap: 15px;
-      padding: 15px 0;
+    }
+
+    .waterfall-column {
+      width: 100%;
     }
 
     .bookmark-card {

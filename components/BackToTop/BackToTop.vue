@@ -1,3 +1,18 @@
+<!--
+  回到顶部按钮组件
+  
+  功能：
+    - 当页面向下滚动超过300px时显示按钮
+    - 点击按钮平滑滚动到页面顶部
+    - 支持响应式设计，移动端和桌面端自适应
+    - 支持深色模式
+  
+  特性：
+    - 米白色纸张质感设计
+    - 漂浮动画效果
+    - 淡入淡出过渡动画
+    - 可访问性优化（aria-label）
+-->
 <template>
   <transition name="fade-slide">
     <button v-if="visible" class="back-to-top floating-button" @click="scrollToTop" title="回到顶部" aria-label="回到顶部">

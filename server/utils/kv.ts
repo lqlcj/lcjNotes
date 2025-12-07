@@ -17,9 +17,7 @@ export function getKVStorage(event: any) {
         `);
       } catch (e: any) {
         // 表可能已存在，或者需要先创建数据库
-        if (!e.message?.includes('already exists')) {
-          console.log('D2 table initialization note:', e.message || e);
-        }
+        // 静默处理表已存在的情况
       }
     };
     

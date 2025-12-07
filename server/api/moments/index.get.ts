@@ -24,7 +24,6 @@ export default defineEventHandler(async (event) => {
         // 恢复列表
         momentsList = recoveredIds;
         await kv.setItem(momentsListKey, momentsList);
-        console.log(`恢复了 ${recoveredIds.length} 条旧朋友圈数据`);
       }
     }
     

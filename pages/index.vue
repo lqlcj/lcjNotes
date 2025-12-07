@@ -1,3 +1,16 @@
+<!--
+  首页入口页面（欢迎页）
+  
+  功能：
+    - 欢迎页面，引导用户进入主页
+    - 滚动动画效果
+    - 进入主页按钮
+  
+  特性：
+    - 宫崎骏风格背景
+    - Intersection Observer 滚动动画
+    - 响应式设计
+-->
 <template>
   <div class="ghibli-container">
     <div class="sky-background"></div>

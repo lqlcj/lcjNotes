@@ -1,4 +1,17 @@
-﻿<template>
+﻿<!--
+  友链页面组件
+  
+  功能：
+    - 左侧：朋友圈动态列表
+    - 右侧：友链列表和申请表单
+    - 申请友链按钮（带烟花效果）
+  
+  特性：
+    - 左右分栏布局（PC端）
+    - 移动端垂直堆叠
+    - 响应式设计
+-->
+<template>
   <div v-if="isPageReady" class="friends-page">
     <div class="friends-container">
       <!-- 页面标题 -->
@@ -58,7 +71,6 @@
       await nextTick()
       // 等待一个渲染周期，确保所有异步组件加载完成
       await new Promise(resolve => setTimeout(resolve, 200))
-      console.log('Friends page fully mounted')
     } catch (error) {
       console.error('Friends page mount error:', error)
     }

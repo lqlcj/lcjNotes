@@ -1,3 +1,18 @@
+<!--
+  文章阅读模态框组件
+  
+  功能：
+    - 在模态框中显示文章详情
+    - Markdown 内容渲染
+    - 文章封面、标题、元信息显示
+    - 加载状态和错误处理
+  
+  特性：
+    - Teleport 到 body
+    - 毛玻璃效果
+    - 响应式设计
+    - 代码块和表格横向滚动处理
+-->
 <template>
   <Teleport to="body">
     <Transition name="modal">

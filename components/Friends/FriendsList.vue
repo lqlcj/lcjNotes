@@ -1,4 +1,18 @@
-﻿<template>
+﻿<!--
+  友链列表组件
+  
+  功能：
+    - 显示已批准的友链列表
+    - 点击卡片显示确认对话框
+    - 外部链接跳转确认
+  
+  特性：
+    - 网格布局
+    - 图片加载错误处理（使用默认头像）
+    - 确认对话框防止误点
+    - 响应式设计
+-->
+<template>
   <div class="friends-list">
     <div v-if="isLoading" class="loading-state">
       <p>加载中...</p>

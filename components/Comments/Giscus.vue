@@ -1,3 +1,18 @@
+<!--
+  Giscus 评论系统组件
+  
+  功能：
+    - 集成 Giscus (基于 GitHub Discussions 的评论系统)
+    - 动态加载 Giscus 脚本
+    - 错误处理和重试机制
+    - 加载状态显示
+  
+  特性：
+    - 自动检测 Giscus iframe 加载状态
+    - 10秒超时检测
+    - 路由变化时自动重新加载
+    - 优雅的错误提示界面
+-->
 <template>
   <div class="comments-container">
     <div class="comments-header">

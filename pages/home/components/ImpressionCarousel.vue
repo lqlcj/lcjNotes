@@ -1,4 +1,20 @@
-﻿<template>
+﻿<!--
+  印象派风格轮播图组件
+  
+  功能：
+    - 无缝循环轮播
+    - 自动播放（4秒切换）
+    - 手动切换（左右按钮、指示器）
+    - 触摸滑动支持（移动端）
+    - 鼠标悬停暂停
+  
+  特性：
+    - 克隆首尾图片实现无缝循环
+    - 印象派模糊层效果
+    - 响应式设计
+    - 支持减少动画偏好设置
+-->
+<template>
   <div class="carousel-container" v-if="images.length > 0">
     <div class="carousel-wrapper" @mouseenter="pauseAutoPlay" @mouseleave="resumeAutoPlay">
       <!-- 轮播图片容器 -->

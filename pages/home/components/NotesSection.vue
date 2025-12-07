@@ -1,3 +1,19 @@
+<!--
+  文章笔记瀑布流组件（小红书风格）
+  
+  功能：
+    - 瀑布流布局展示文章列表
+    - 分页功能（每页12条）
+    - 点击文章打开阅读模态框
+    - 图片懒加载和错误处理
+  
+  特性：
+    - 响应式列数（桌面3列，移动端2列）
+    - 动态高度计算和分配
+    - 图片加载占位符
+    - 卡片动画效果
+    - 窗口大小变化时重新布局
+-->
 <template>
   <div class="notes-section">
     <div class="notes-bg-layer"></div>
@@ -33,7 +49,7 @@
                 fetchpriority="auto" />
               <div class="img-overlay">
                 <div class="read-btn">
-                  <span>looklook</span>
+                  <span>go~</span>
                 </div>
               </div>
             </div>
@@ -130,10 +146,8 @@
   })
 
   onMounted(async () => {
-    console.log('[NotesSection] 组件已挂载，开始加载数据')
     // 异步加载数据
     await loadData()
-    console.log('[NotesSection] 数据加载完成，文章数量:', allData.value.length, 'isLoading:', isLoading.value, 'hasError:', hasError.value)
     // 监听窗口大小变化
     if (typeof window !== 'undefined') {
       window.addEventListener('resize', handleResize)
@@ -142,27 +156,22 @@
 
   // 异步加载数据
   const loadData = async () => {
-    console.log('[NotesSection] 开始加载数据...')
     isLoading.value = true
     hasError.value = false
     errorMessage.value = ''
 
     try {
       await notesStore.initPosts()
-      console.log('[NotesSection] Store 初始化完成，文章数量:', notesStore.allPosts.length)
       // 等待数据加载完成
       await new Promise(resolve => setTimeout(resolve, 100))
-      console.log('[NotesSection] 数据加载完成，allData.length:', allData.value.length)
 
       // 数据加载完成后，确保分配数据
       if (allData.value.length > 0) {
-        console.log('[NotesSection] 开始分配数据到列...')
         cardRefs.value.clear()
         distributeItems()
         await nextTick()
         setTimeout(() => {
           updateColumnHeights()
-          console.log('[NotesSection] 数据分配完成，columnItems:', columnItems.value.map(col => col.length))
         }, 100)
       }
     } catch (error) {
@@ -171,7 +180,6 @@
       errorMessage.value = error.message || '加载失败，请稍后重试'
     } finally {
       isLoading.value = false
-      console.log('[NotesSection] 加载状态结束，isLoading:', isLoading.value)
     }
   }
 
@@ -183,6 +191,11 @@
   onUnmounted(() => {
     if (typeof window !== 'undefined') {
       window.removeEventListener('resize', handleResize)
+      // 清理 resize 定时器，防止内存泄漏
+      if (resizeTimer) {
+        clearTimeout(resizeTimer)
+        resizeTimer = null
+      }
     }
   })
 
@@ -323,24 +336,20 @@
   watch([currentPageData, columnCount], () => {
     // 如果正在加载，延迟执行
     if (isLoading.value) {
-      console.log('[NotesSection] Watch: 正在加载中，跳过数据分配')
       return
     }
 
     // 如果没有数据，不执行分配
     if (currentPageData.value.length === 0) {
-      console.log('[NotesSection] Watch: 当前页数据为空，跳过数据分配')
       return
     }
 
-    console.log('[NotesSection] Watch: 数据变化，重新分配数据，currentPageData.length:', currentPageData.value.length)
     cardRefs.value.clear() // 清空卡片引用
     distributeItems()
     nextTick(() => {
       // 等待图片加载和 DOM 更新
       setTimeout(() => {
         updateColumnHeights()
-        console.log('[NotesSection] Watch: 数据分配完成，columnItems:', columnItems.value.map(col => col.length))
       }, 300)
     })
   }, { immediate: false }) // 改为 false，避免在数据加载前触发

@@ -1,4 +1,17 @@
-﻿<template>
+﻿<!--
+  页面全局加载遮罩组件
+  
+  功能：
+    - 全屏加载遮罩层
+    - 与全局 loading store 集成
+    - 显示加载动画和提示文字
+  
+  特性：
+    - 淡入淡出动画
+    - 毛玻璃效果
+    - 固定定位，覆盖整个页面
+-->
+<template>
   <transition name="page-loading-fade">
     <div v-if="visible" class="page-loading-overlay">
       <div class="spinner"></div>

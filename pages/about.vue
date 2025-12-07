@@ -1,4 +1,19 @@
-﻿<template>
+﻿<!--
+  关于页面组件
+  
+  功能：
+    - 网站介绍和特性说明
+    - 技术栈展示
+    - 联系方式（邮箱复制、GitHub跳转）
+    - 留言板集成
+  
+  特性：
+    - 玻璃态卡片设计
+    - 交互式按钮（邮箱显示/复制、GitHub确认）
+    - 淡入动画效果
+    - 响应式设计
+-->
+<template>
   <div class="about-page">
     <div class="bg-gradient"></div>
 

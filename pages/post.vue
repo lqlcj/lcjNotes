@@ -1,4 +1,19 @@
-﻿<template>
+﻿<!--
+  文章详情页面组件
+  
+  功能：
+    - 显示单篇文章的完整内容
+    - Markdown 渲染
+    - 返回列表按钮
+    - 加载状态和错误处理
+  
+  特性：
+    - 玻璃态卡片设计
+    - 代码块和表格横向滚动处理
+    - 响应式设计
+    - 3秒后自动返回（错误时）
+-->
+<template>
   <div class="post-page-bg">
     <div class="post-container">
       <div class="nav-bar">
@@ -67,23 +82,15 @@
       const postId = route.query.id ? String(route.query.id) : null;
       const filePath = route.query.path; // 兼容旧代码
 
-      console.log('加载文章，postId:', postId, '类型:', typeof postId, 'filePath:', filePath);
-
       if (postId) {
         // 优先使用 ID 从 API 获取文章
         try {
-          console.log('尝试从 API 加载文章:', `/api/posts/${postId}`);
           const response = await $fetch(`/api/posts/${postId}`);
-          console.log('API 响应:', response);
           
           if (response && response.success && response.data) {
             const postData = response.data;
-            // 初始化解析器
-            const md = new MarkdownIt({
-              html: true,
-              linkify: true,
-              typographer: true
-            });
+            // 初始化安全的解析器
+            const md = createSafeMarkdownIt();
             
             // 转换为兼容格式
             post.value = {
@@ -110,7 +117,6 @@
       // 兼容模式：使用 filePath（从本地文件或旧方式）
       if (filePath) {
         try {
-          console.log('尝试从 filePath 加载文章:', filePath);
           const parsed = await notesStore.getPostByPath(filePath);
           if (parsed) {
             // 初始化安全的解析器

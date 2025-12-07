@@ -1,3 +1,22 @@
+<!--
+  管理后台页面组件
+  
+  功能：
+    - 登录认证（带 Turnstile 验证）
+    - 文章管理（增删改查）
+    - 留言管理
+    - 友链管理（申请审核、已批准友链）
+    - 朋友圈管理
+    - 书签管理
+    - 图床管理（图片上传、删除、复制链接）
+  
+  特性：
+    - Tab 标签页切换
+    - 表单模态框
+    - 图片上传（支持拖拽）
+    - 成功提示 Toast
+    - 响应式设计
+-->
 <template>
   <div class="admin-page">
     <div class="admin-container">
@@ -861,7 +880,6 @@
         sitekey: turnstileSiteKey,
         callback: (token) => {
           turnstileToken.value = token;
-          console.log('Turnstile 验证成功');
         },
         'error-callback': () => {
           turnstileToken.value = '';
@@ -875,7 +893,6 @@
         theme: 'light',
         size: 'normal'
       });
-      console.log('Turnstile widget 已渲染');
     } catch (error) {
       console.error('渲染 Turnstile widget 失败:', error);
     }
