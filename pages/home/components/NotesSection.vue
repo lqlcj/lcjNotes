@@ -7,10 +7,7 @@
       <PageHeader title="My Stories" subtitle="记录生活，探索代码" />
 
       <!-- 加载状态 -->
-      <div v-if="isLoading" class="loading-container">
-        <div class="loading-spinner"></div>
-        <p class="loading-text">正在加载内容...</p>
-      </div>
+      <LoadingMessage v-if="isLoading" text="飘洋过海来看你~" />
 
       <!-- 错误状态 -->
       <div v-else-if="hasError" class="error-container glass-card">
@@ -114,6 +111,7 @@
   import { useNotesStore } from '~/stores/notesStore'
   import PageHeader from '~/components/HeaderBar/PageHeader.vue'
   import ArticleModal from './ArticleModal.vue'
+  import LoadingMessage from '~/components/Common/LoadingMessage.vue'
 
   // 使用 public 目录下的图片
   const defaultCover = '/images/loading.webp'
@@ -665,36 +663,6 @@
     border-radius: 12px;
   }
 
-  /* 加载状态样式 */
-  .loading-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 80px 20px;
-    min-height: 300px;
-  }
-
-  .loading-spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid rgba(0, 0, 0, 0.1);
-    border-top-color: #6c5ce7;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-
-  .loading-text {
-    margin-top: 20px;
-    color: #666;
-    font-size: 0.95rem;
-  }
-
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
 
   /* 错误状态样式 */
   .error-container {
@@ -792,20 +760,6 @@
 
   /* 移动端加载状态优化 */
   @media (max-width: 768px) {
-    .loading-container {
-      padding: 60px 15px;
-      min-height: 250px;
-    }
-
-    .loading-spinner {
-      width: 35px;
-      height: 35px;
-    }
-
-    .loading-text {
-      font-size: 0.85rem;
-      margin-top: 15px;
-    }
 
     .error-container {
       padding: 40px 15px;

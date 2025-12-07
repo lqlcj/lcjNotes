@@ -6,10 +6,7 @@
     </div>
 
     <!-- 加载中 -->
-    <div v-if="isLoading && !hasError" class="loading-state">
-      <div class="loading-spinner"></div>
-      <p>正在加载留言系统...</p>
-    </div>
+    <LoadingMessage v-if="isLoading && !hasError" text="飘洋过海来看你~" />
 
     <!-- Giscus 容器 -->
     <div v-show="!hasError" ref="giscusContainer" class="giscus-wrapper"></div>
@@ -34,6 +31,7 @@
 <script setup>
   import { ref, onMounted, watch, onBeforeUnmount } from 'vue'
   import { useRoute } from 'vue-router'
+  import LoadingMessage from '~/components/Common/LoadingMessage.vue'
 
   const props = defineProps({
     repo: { type: String, required: true },
@@ -312,76 +310,6 @@
     background-clip: padding-box;
   }
 
-  .loading-state {
-    padding: 60px 24px;
-    text-align: center;
-    color: #999;
-    position: relative;
-    min-height: 200px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .loading-spinner {
-    width: 48px;
-    height: 48px;
-    margin: 0 auto 20px;
-    position: relative;
-  }
-
-  .loading-spinner::before {
-    content: '';
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border: 4px solid rgba(162, 155, 254, 0.15);
-    border-top-color: #6c5ce7;
-    border-right-color: #a29bfe;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
-
-  .loading-spinner::after {
-    content: '';
-    position: absolute;
-    width: 60%;
-    height: 60%;
-    top: 20%;
-    left: 20%;
-    border: 3px solid rgba(162, 155, 254, 0.2);
-    border-bottom-color: #a29bfe;
-    border-left-color: #6c5ce7;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite reverse;
-  }
-
-  @keyframes spin {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
-  }
-
-  .loading-state p {
-    margin: 0;
-    font-size: 0.95rem;
-    color: #6c5ce7;
-    font-weight: 500;
-    animation: pulse 2s ease-in-out infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.6;
-    }
-  }
 
   .error-fallback {
     padding: 32px 24px;

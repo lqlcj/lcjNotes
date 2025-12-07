@@ -55,10 +55,7 @@
 
     <!-- 留言列表 -->
     <div class="comments-list">
-      <div v-if="loading" class="loading-state">
-        <div class="loading-spinner"></div>
-        <p>加载留言中...</p>
-      </div>
+      <LoadingMessage v-if="loading" text="飘洋过海来看你~" />
       <div v-else-if="messages.length === 0" class="empty-state">
         <p>还没有留言，快来成为第一个留言的人吧！</p>
       </div>
@@ -95,6 +92,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { useConfetti } from '~/composables/useConfetti';
+import LoadingMessage from '~/components/Common/LoadingMessage.vue';
 
 // 展开/收起状态
 const isExpanded = ref(false);
@@ -470,25 +468,10 @@ onUnmounted(() => {
   overflow-y: auto;
 }
 
-.loading-state,
 .empty-state {
   text-align: center;
   padding: 40px;
   color: #999;
-}
-
-.loading-spinner {
-  width: 40px;
-  height: 40px;
-  margin: 0 auto 15px;
-  border: 4px solid rgba(104, 68, 77, 0.2);
-  border-top-color: #68444d;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
 }
 
 .messages {
