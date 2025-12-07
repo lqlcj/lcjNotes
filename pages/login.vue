@@ -595,6 +595,19 @@
   const uploadingMomentImages = ref(false);
   const momentUploadProgress = ref(0);
 
+  // 成功提示相关
+  const showSuccessToast = ref(false);
+  const successMessage = ref('');
+
+  // 显示成功提示
+  const showSuccess = (message) => {
+    successMessage.value = message;
+    showSuccessToast.value = true;
+    setTimeout(() => {
+      showSuccessToast.value = false;
+    }, 2000);
+  };
+
   // 检查是否已登录
   onMounted(() => {
     const token = localStorage.getItem('admin_token');
