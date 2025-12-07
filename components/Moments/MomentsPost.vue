@@ -106,22 +106,59 @@
   // 数据状态
   const momentsDataFromAPI = ref([])
   const isLoadingData = ref(true)
+  
+  // 分页相关
+  const pageSize = 20 // 每页从 API 加载20条（与 API 默认值一致）
+  const currentOffset = ref(0)
+  const hasMoreData = ref(false)
+  const totalCount = ref(0)
+  const isLoading = ref(false)
 
-  // 从 API 加载数据
-  const loadMomentsFromAPI = async () => {
+  // 从 API 加载数据（支持分页）
+  const loadMomentsFromAPI = async (offset = 0, append = false) => {
     try {
-      isLoadingData.value = true
-      const response = await $fetch('/api/moments')
-      if (response.success && response.data && Array.isArray(response.data) && response.data.length > 0) {
-        momentsDataFromAPI.value = response.data
+      if (!append) {
+        isLoadingData.value = true
       } else {
-        momentsDataFromAPI.value = []
+        isLoading.value = true
+      }
+      
+      const response = await $fetch('/api/moments', {
+        query: {
+          offset: offset,
+          limit: pageSize
+        }
+      })
+      
+      if (response.success && response.data) {
+        const { moments, total, hasMore } = response.data
+        
+        if (append) {
+          // 追加数据
+          momentsDataFromAPI.value = [...momentsDataFromAPI.value, ...moments]
+        } else {
+          // 替换数据
+          momentsDataFromAPI.value = moments || []
+        }
+        
+        totalCount.value = total || 0
+        hasMoreData.value = hasMore || false
+        currentOffset.value = offset + (moments?.length || 0)
+      } else {
+        if (!append) {
+          momentsDataFromAPI.value = []
+        }
+        hasMoreData.value = false
       }
     } catch (error) {
       console.error('从 API 加载朋友圈数据失败:', error)
-      momentsDataFromAPI.value = []
+      if (!append) {
+        momentsDataFromAPI.value = []
+      }
+      hasMoreData.value = false
     } finally {
       isLoadingData.value = false
+      isLoading.value = false
     }
   }
 
@@ -139,42 +176,29 @@
     }
   })
 
-  // 分页相关
-  const pageSize = 10 // 每页显示10条
-  const currentPage = ref(1)
-  const isLoading = ref(false)
-
-  // 当前显示的文章列表（使用 computed 缓存，避免重复计算）
+  // 当前显示的文章列表（直接使用 API 返回的数据）
   const posts = computed(() => {
-    const start = 0
-    const end = currentPage.value * pageSize
-    return allPosts.value.slice(start, end)
+    return allPosts.value
   })
 
   // 是否还有更多
   const hasMore = computed(() => {
-    return allPosts.value.length > currentPage.value * pageSize
+    return hasMoreData.value
   })
 
-  // 加载更多（使用 requestAnimationFrame 优化性能）
-  const loadMore = () => {
+  // 加载更多（从 API 加载下一页数据）
+  const loadMore = async () => {
     if (isLoading.value || !hasMore.value) return
 
-    isLoading.value = true
-    // 使用 requestAnimationFrame 优化性能
-    requestAnimationFrame(() => {
-      setTimeout(() => {
-        currentPage.value++
-        isLoading.value = false
-        // 滚动到新加载的内容附近
-        nextTick(() => {
-          const loadMoreBtn = document.querySelector('.load-more-container')
-          if (loadMoreBtn) {
-            loadMoreBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-          }
-        })
-      }, 300)
-    })
+    // 从 API 加载下一页
+    await loadMomentsFromAPI(currentOffset.value, true)
+    
+    // 滚动到新加载的内容附近
+    await nextTick()
+    const loadMoreBtn = document.querySelector('.load-more-container')
+    if (loadMoreBtn) {
+      loadMoreBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }
   }
 
   // 图片预览相关

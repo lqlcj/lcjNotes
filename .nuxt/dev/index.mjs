@@ -2691,13 +2691,13 @@ const login_post = defineEventHandler(async (event) => {
   if (body.username !== adminUsername) {
     throw createError({
       statusCode: 401,
-      message: "\u7528\u6237\u540D\u9519\u8BEF"
+      message: "\u7528\u6237\u540D\u6216\u5BC6\u7801\u9519\u8BEF"
     });
   }
   if (body.password !== adminPassword) {
     throw createError({
       statusCode: 401,
-      message: "\u5BC6\u7801\u9519\u8BEF"
+      message: "\u7528\u6237\u540D\u6216\u5BC6\u7801\u9519\u8BEF"
     });
   }
   await createSession(event, {
@@ -3708,38 +3708,74 @@ const _id__put$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty
 const index_get$2 = defineEventHandler(async (event) => {
   try {
     const kv = getKVStorage(event);
+    const query = getQuery$1(event);
+    const offset = Math.max(0, parseInt(query.offset) || 0);
+    const limit = Math.min(Math.max(1, parseInt(query.limit) || 20), 100);
     const momentsListKey = "moments:list";
     let momentsList = await kv.getItem(momentsListKey) || [];
+    const recoveryFlagKey = "moments:recovery_attempted";
     if (momentsList.length === 0) {
-      const recoveredIds = [];
-      for (let id = 1; id <= 1e3; id++) {
-        const momentKey = `moment:${id}`;
-        const momentData = await kv.getItem(momentKey);
-        if (momentData) {
-          recoveredIds.push(String(id));
+      const recoveryAttempted = await kv.getItem(recoveryFlagKey);
+      if (!recoveryAttempted) {
+        await kv.setItem(recoveryFlagKey, true);
+        const recoveredIds = [];
+        const maxRecoveryId = 500;
+        for (let id = 1; id <= maxRecoveryId; id++) {
+          const momentKey = `moment:${id}`;
+          const momentData = await kv.getItem(momentKey);
+          if (momentData) {
+            recoveredIds.push(String(id));
+          }
+        }
+        if (recoveredIds.length > 0) {
+          momentsList = recoveredIds;
+          await kv.setItem(momentsListKey, momentsList);
         }
       }
-      if (recoveredIds.length > 0) {
-        momentsList = recoveredIds;
-        await kv.setItem(momentsListKey, momentsList);
+    }
+    if (momentsList.length === 0) {
+      return {
+        success: true,
+        data: {
+          moments: [],
+          total: 0,
+          offset,
+          limit,
+          hasMore: false
+        }
+      };
+    }
+    const momentsMetadata = [];
+    for (const id of momentsList) {
+      const momentKey = `moment:${id}`;
+      const momentData = await kv.getItem(momentKey);
+      if (momentData) {
+        const timestamp = momentData.timestamp ? new Date(momentData.timestamp.replace("\u521B\u5EFA\u65F6\u95F4: ", "")).getTime() : 0;
+        momentsMetadata.push({ id, timestamp });
       }
     }
+    momentsMetadata.sort((a, b) => b.timestamp - a.timestamp);
+    const total = momentsMetadata.length;
+    const startIndex = offset;
+    const endIndex = Math.min(offset + limit, total);
+    const paginatedIds = momentsMetadata.slice(startIndex, endIndex);
     const moments = [];
-    for (const id of momentsList) {
+    for (const { id } of paginatedIds) {
       const momentKey = `moment:${id}`;
       const momentData = await kv.getItem(momentKey);
       if (momentData) {
         moments.push(momentData);
       }
     }
-    moments.sort((a, b) => {
-      const timeA = a.timestamp ? new Date(a.timestamp.replace("\u521B\u5EFA\u65F6\u95F4: ", "")).getTime() : 0;
-      const timeB = b.timestamp ? new Date(b.timestamp.replace("\u521B\u5EFA\u65F6\u95F4: ", "")).getTime() : 0;
-      return timeB - timeA;
-    });
     return {
       success: true,
-      data: moments
+      data: {
+        moments,
+        total,
+        offset,
+        limit,
+        hasMore: endIndex < total
+      }
     };
   } catch (error) {
     handleApiError(error, "\u83B7\u53D6\u670B\u53CB\u5708\u52A8\u6001\u5931\u8D25", 500);

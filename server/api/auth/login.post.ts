@@ -46,14 +46,14 @@ export default defineEventHandler(async (event) => {
   if (body.username !== adminUsername) {
     throw createError({
       statusCode: 401,
-      message: '用户名错误'
+      message: '用户名或密码错误'
     });
   }
   
   if (body.password !== adminPassword) {
     throw createError({
       statusCode: 401,
-      message: '密码错误'
+      message: '用户名或密码错误'
     });
   }
   

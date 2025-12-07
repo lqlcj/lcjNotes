@@ -23,6 +23,7 @@ type NuxtAppInjections =
   InjectionType<typeof import("../../node_modules/nuxt/dist/app/plugins/warn.dev.server.js")> &
   InjectionType<typeof import("../../node_modules/nuxt/dist/app/plugins/check-if-layout-used.js")> &
   InjectionType<typeof import("../../plugins/console-setup.client.js")> &
+  InjectionType<typeof import("../../plugins/console-setup.client")> &
   InjectionType<typeof import("../../plugins/loading.client.js")>
 
 declare module '#app' {
