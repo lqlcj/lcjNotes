@@ -410,8 +410,8 @@
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
-    overflow-x: hidden;
-    /* 防止内容溢出导致横向滚动 */
+    overflow: hidden;
+    /* 完全隐藏滚动条，防止加载时闪烁 */
     /* 确保组件有最小高度，始终可见 */
     display: block;
     /* 确保显示 */
@@ -438,8 +438,8 @@
     padding: 20px 10px 80px;
     box-sizing: border-box;
     position: relative;
-    overflow-x: hidden;
-    /* 防止内容溢出导致横向滚动 */
+    overflow: hidden;
+    /* 完全隐藏滚动条，防止加载时闪烁 */
   }
 
   /* 瀑布流布局 - 小红书风格 */
