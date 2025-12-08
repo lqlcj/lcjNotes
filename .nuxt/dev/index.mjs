@@ -1461,16 +1461,16 @@ _KALrG6HWC5DsF1iB5xLtcxqD_gXRBB5_KIe3mv6Ln4
 const assets = {
   "/index.mjs": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"25b85-ddVYG3OY1EH7DclwM8y9+F567YY\"",
-    "mtime": "2025-12-07T22:17:18.930Z",
-    "size": 154501,
+    "etag": "\"25bfa-sI40WTv1sfDcdcitX+yfJq57o1E\"",
+    "mtime": "2025-12-08T00:17:17.848Z",
+    "size": 154618,
     "path": "index.mjs"
   },
   "/index.mjs.map": {
     "type": "application/json",
-    "etag": "\"8920d-W8Iul99xin55PySDmFoRg+wBXQo\"",
-    "mtime": "2025-12-07T22:17:18.931Z",
-    "size": 561677,
+    "etag": "\"89b27-fsHxY+LrajOvbl94poTWq0ebUa4\"",
+    "mtime": "2025-12-08T00:17:17.849Z",
+    "size": 564007,
     "path": "index.mjs.map"
   }
 };
@@ -2292,26 +2292,19 @@ function getR2Storage(event) {
   }
   throw new Error("R2 storage not available. Please configure BLOG_R2 binding in Cloudflare Pages.");
 }
-function generateUUID() {
-  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
-    const r = Math.random() * 16 | 0;
-    const v = c === "x" ? r : r & 3 | 8;
-    return v.toString(16);
-  });
-}
 function generateFileName(originalName) {
-  var _a;
+  const timestamp = Date.now();
+  const random = Math.random().toString(36).substring(2, 9);
+  const ext = originalName.split(".").pop() || "jpg";
+  return `covers/${timestamp}-${random}.${ext}`;
+}
+function generateAssetFileName(originalName) {
   const now = /* @__PURE__ */ new Date();
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, "0");
-  const uuid = generateUUID();
-  const ext = ((_a = originalName.split(".").pop()) == null ? void 0 : _a.toLowerCase()) || "jpg";
-  const validExts = ["jpg", "jpeg", "png", "webp", "gif"];
-  const finalExt = validExts.includes(ext) ? ext : "jpg";
-  return `assets/${year}-${month}/${uuid}.${finalExt}`;
-}
-function generateAssetFileName(originalName) {
-  return generateFileName(originalName);
+  const uuid = crypto.randomUUID();
+  const ext = originalName.split(".").pop() || "jpg";
+  return `assets/${year}-${month}/${uuid}.${ext}`;
 }
 function isValidImageType(mimeType) {
   const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];

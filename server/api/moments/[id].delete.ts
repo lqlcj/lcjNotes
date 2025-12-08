@@ -1,6 +1,5 @@
 // @ts-nocheck
 import { getKVStorage } from '~/server/utils/kv';
-import { getR2Storage, extractR2KeyFromUrl } from '~/server/utils/r2';
 import { handleApiError } from '~/server/utils/errorHandler';
 import { verifyAuth } from '~/server/utils/auth';
 
@@ -10,7 +9,6 @@ export default defineEventHandler(async (event) => {
   await verifyAuth(event);
 
   const id = getRouterParam(event, 'id');
-  const kv = getKVStorage(event);
   
   if (!id) {
     throw createError({
@@ -20,65 +18,8 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
+    const kv = getKVStorage(event);
     const momentKey = `moment:${id}`;
-    const momentData = await kv.getItem(momentKey) as any;
-    
-    if (!momentData) {
-      throw createError({
-        statusCode: 404,
-        message: '动态不存在'
-      });
-    }
-    
-    // 收集所有需要删除的图片 URL
-    const imageUrlsToDelete: string[] = [];
-    
-    // 添加朋友圈图片
-    if (momentData.images) {
-      console.log('朋友圈images数据:', momentData.images, '类型:', typeof momentData.images, '是否为数组:', Array.isArray(momentData.images));
-      
-      if (Array.isArray(momentData.images) && momentData.images.length > 0) {
-        for (const imageUrl of momentData.images) {
-          console.log('处理图片项:', imageUrl, '类型:', typeof imageUrl);
-          if (typeof imageUrl === 'string' && imageUrl.trim()) {
-            imageUrlsToDelete.push(imageUrl.trim());
-          }
-        }
-      }
-    }
-    
-    console.log('收集到的图片URL列表:', imageUrlsToDelete);
-    
-    // 删除所有 R2 图片
-    if (imageUrlsToDelete.length > 0) {
-      console.log(`开始删除朋友圈图片，共 ${imageUrlsToDelete.length} 张`);
-      try {
-        const r2 = getR2Storage(event);
-        
-        for (const imageUrl of imageUrlsToDelete) {
-          console.log(`处理图片URL: ${imageUrl}`);
-          const r2Key = extractR2KeyFromUrl(imageUrl);
-          
-          if (r2Key) {
-            console.log(`提取到R2 key: ${r2Key}`);
-            try {
-              await r2.delete(r2Key);
-              console.log(`✓ 已删除R2图片: ${r2Key}`);
-            } catch (deleteError) {
-              // 如果删除失败，记录日志但不中断流程
-              console.error(`✗ 删除R2图片失败 ${r2Key}:`, deleteError);
-            }
-          } else {
-            console.log(`⚠ 无法从URL提取R2 key，跳过: ${imageUrl}`);
-          }
-        }
-      } catch (r2Error) {
-        // R2操作失败，记录日志但不中断删除流程
-        console.error('删除朋友圈图片时出错:', r2Error);
-      }
-    } else {
-      console.log('朋友圈动态没有图片，跳过图片删除');
-    }
     
     // 删除动态
     await kv.removeItem(momentKey);
@@ -94,9 +35,6 @@ export default defineEventHandler(async (event) => {
       message: '删除成功'
     };
   } catch (error: any) {
-    if (error.statusCode) {
-      throw error;
-    }
     handleApiError(error, '删除朋友圈动态失败', 500);
   }
 });

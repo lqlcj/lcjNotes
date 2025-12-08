@@ -48,7 +48,6 @@ declare global {
   const fromNodeMiddleware: typeof import('../../node_modules/h3').fromNodeMiddleware
   const fromPlainHandler: typeof import('../../node_modules/h3').fromPlainHandler
   const fromWebHandler: typeof import('../../node_modules/h3').fromWebHandler
-  const generateAssetFileName: typeof import('../../server/utils/r2').generateAssetFileName
   const generateETag: typeof import('../../server/utils/cache').generateETag
   const generateFileName: typeof import('../../server/utils/r2').generateFileName
   const getCookie: typeof import('../../node_modules/h3').getCookie
@@ -56,7 +55,6 @@ declare global {
   const getHeaders: typeof import('../../node_modules/h3').getHeaders
   const getKVStorage: typeof import('../../server/utils/kv').getKVStorage
   const getMethod: typeof import('../../node_modules/h3').getMethod
-  const getMimeTypeFromExt: typeof import('../../server/utils/r2').getMimeTypeFromExt
   const getProxyRequestHeaders: typeof import('../../node_modules/h3').getProxyRequestHeaders
   const getQuery: typeof import('../../node_modules/h3').getQuery
   const getR2Storage: typeof import('../../server/utils/r2').getR2Storage
@@ -167,7 +165,7 @@ export { verifyAuth, isAdmin } from 'G:/lcjNotes/lcjNotes/server/utils/auth';
 export { setCacheHeaders, setPostsListCacheHeaders, setPostDetailCacheHeaders, checkETag, generateETag } from 'G:/lcjNotes/lcjNotes/server/utils/cache';
 export { createSafeError, handleApiError } from 'G:/lcjNotes/lcjNotes/server/utils/errorHandler';
 export { getKVStorage } from 'G:/lcjNotes/lcjNotes/server/utils/kv';
-export { getR2Storage, generateFileName, generateAssetFileName, isValidImageType, getMimeTypeFromExt } from 'G:/lcjNotes/lcjNotes/server/utils/r2';
+export { getR2Storage, generateFileName, isValidImageType } from 'G:/lcjNotes/lcjNotes/server/utils/r2';
 export { createSession, getUserSession, destroySession, isAuthenticated, requireAuth } from 'G:/lcjNotes/lcjNotes/server/utils/session';
 export { verifyTurnstile } from 'G:/lcjNotes/lcjNotes/server/utils/turnstile';
 export { FIELD_LIMITS, validateLength, validateAndTrim } from 'G:/lcjNotes/lcjNotes/server/utils/validation';
