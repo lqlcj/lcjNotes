@@ -270,16 +270,14 @@ const handleClose = () => {
 }
 
 /* 中文正文段首缩进两字符（不影响列表/代码块） */
-.markdown-body p {
-  text-indent: 2em;
+:deep(.markdown-body p) {
+  text-indent: 2em !important;
   margin: 0 0 1em 0;
 }
-.markdown-body li p {
-  text-indent: 0;
-}
-.markdown-body pre,
-.markdown-body code {
-  text-indent: 0;
+:deep(.markdown-body li p),
+:deep(.markdown-body pre),
+:deep(.markdown-body code) {
+  text-indent: 0 !important;
 }
 
 /* 防止代码块和表格导致横向滚动 */
