@@ -167,9 +167,9 @@
       let items = []
       let total = 0
       if (response?.success) {
-        if (Array.isArray(response.data)) {
+        if (Array.isArray(response?.data)) {
           items = response.data
-          total = response.total ?? response.data.length
+          total = response?.total ?? (response?.data?.length ?? 0)
         } else if (response?.data) {
           items = response.data.posts || response.data.items || response.data.list || []
           total = response.data.total ?? response.data.count ?? items.length
@@ -177,8 +177,8 @@
       }
 
       // 兜底：若未返回 total，用当前页累加估算
-      totalCount.value = Math.max(total, offset + items.length)
-      pageItems.value = items
+      totalCount.value = Math.max(total || 0, offset + (items?.length || 0))
+      pageItems.value = items || []
       currentPage.value = page
 
       cardRefs.value.clear()
