@@ -11,9 +11,6 @@
     <div class="message-item glass-card">
       <div class="message-header">
         <div class="message-author">
-          <div class="message-avatar">
-            {{ message.name.charAt(0).toUpperCase() }}
-          </div>
           <div class="message-info">
             <h4>{{ message.name }}</h4>
             <span class="message-date">{{ formatDate(message.date) }}</span>
@@ -56,10 +53,12 @@
           <div class="form-group">
             <div :ref="el => turnstileContainer = el" class="turnstile-container"></div>
           </div>
-          <button type="submit" class="submit-btn" :disabled="submitting || !replyTurnstileToken">
-            {{ submitting ? '提交中...' : '提交回复' }}
-          </button>
-          <p v-if="submitError" class="error-message">{{ submitError }}</p>
+          <div class="submit-wrapper">
+            <p v-if="submitError" class="error-message">{{ submitError }}</p>
+            <button type="submit" class="submit-btn" :disabled="submitting || !replyTurnstileToken">
+              {{ submitting ? '提交中...' : '提交回复' }}
+            </button>
+          </div>
         </form>
       </div>
     </div>
@@ -323,6 +322,24 @@ onUnmounted(() => {
   max-width: calc(100% - 30px);
 }
 
+/* 桌面端优化：回复卡片更紧凑 */
+@media (min-width: 769px) {
+  .message-item-wrapper {
+    margin-bottom: 12px;
+  }
+
+  .message-item-wrapper.is-reply {
+    margin-left: 24px;
+    margin-top: 12px;
+    padding-left: 12px;
+    max-width: calc(100% - 24px);
+  }
+
+  .replies-container {
+    margin-top: 12px;
+  }
+}
+
 .message-item {
   padding: 15px;
   margin: 0;
@@ -332,6 +349,98 @@ onUnmounted(() => {
   box-sizing: border-box;
   overflow-wrap: break-word;
   word-wrap: break-word;
+}
+
+/* 桌面端优化：更小巧的留言卡片 */
+@media (min-width: 769px) {
+  .message-item {
+    padding: 12px;
+    border-radius: 10px;
+  }
+
+  .message-header {
+    margin-bottom: 10px;
+  }
+
+  .message-info h4 {
+    font-size: 14px;
+    margin: 0 0 3px 0;
+  }
+
+  .message-date {
+    font-size: 11px;
+  }
+
+  .message-content {
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 10px;
+  }
+
+  .message-actions {
+    margin-top: 10px;
+    padding-top: 10px;
+  }
+
+  .reply-btn {
+    padding: 3px 8px;
+    font-size: 11px;
+    border-radius: 5px;
+  }
+
+  .message-website-link {
+    width: 28px;
+    height: 28px;
+    font-size: 16px;
+  }
+
+  .reply-form {
+    margin-top: 8px;
+    padding-top: 8px;
+  }
+
+  .form-row {
+    gap: 8px;
+  }
+
+  .form-group {
+    margin-bottom: 8px;
+  }
+
+  .form-group label {
+    font-size: 10px;
+    margin-bottom: 2px;
+  }
+
+  .form-group input,
+  .form-group textarea {
+    padding: 5px 7px;
+    font-size: 10px;
+    border-radius: 4px;
+  }
+
+  .form-group textarea {
+    min-height: 45px;
+  }
+
+  .submit-btn {
+    padding: 5px 10px;
+    font-size: 10px;
+    border-radius: 4px;
+  }
+
+  .submit-wrapper {
+    margin-top: 5px;
+    gap: 4px;
+  }
+
+  .error-message {
+    font-size: 10px;
+  }
+
+  .turnstile-container {
+    margin: 8px 0;
+  }
 }
 
 .message-item:hover {
@@ -352,31 +461,7 @@ onUnmounted(() => {
 .message-author {
   display: flex;
   align-items: center;
-  gap: 12px;
   flex: 1;
-}
-
-.message-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: #68444d;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  font-size: 16px;
-  flex-shrink: 0;
-  transition: all 0.3s ease;
-}
-
-.message-item:hover .message-avatar {
-  transform: scale(1.1);
-  background: linear-gradient(135deg, #68444d 0%, #8b5a6b 100%);
-  box-shadow:
-    0 2px 8px rgba(104, 68, 77, 0.3),
-    0 1px 4px rgba(255, 165, 0, 0.1);
 }
 
 .message-info h4 {
@@ -506,17 +591,25 @@ onUnmounted(() => {
   min-height: 60px;
 }
 
+.submit-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  margin-top: 8px;
+}
+
 .submit-btn {
-  width: 100%;
-  padding: 10px;
+  padding: 7px 14px;
   background: #68444d;
   color: white;
   border: none;
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: 6px;
+  font-size: 12px;
   cursor: pointer;
   transition: all 0.3s ease-in-out;
   font-weight: 500;
+  align-self: flex-end;
 }
 
 .submit-btn:hover:not(:disabled) {
@@ -534,8 +627,9 @@ onUnmounted(() => {
 
 .error-message {
   color: #e74c3c;
-  font-size: 14px;
-  margin-top: 10px;
+  font-size: 12px;
+  margin: 0;
+  align-self: flex-end;
 }
 
 .turnstile-container {
@@ -560,26 +654,65 @@ onUnmounted(() => {
 
 @media (max-width: 768px) {
   .message-item-wrapper.is-reply {
-    margin-left: 15px;
-    padding-left: 10px;
-    max-width: calc(100% - 15px);
+    margin-left: 12px;
+    padding-left: 8px;
+    max-width: calc(100% - 12px);
   }
 
   .message-item {
-    padding: 12px;
+    padding: 10px;
+    border-radius: 10px;
+  }
+
+  .message-header {
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .message-info h4 {
+    font-size: 13px;
+    margin: 0 0 2px 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .message-date {
+    font-size: 10px;
+  }
+
+  .message-content {
+    font-size: 12px;
+    line-height: 1.5;
+    margin-bottom: 8px;
+  }
+
+  .message-actions {
+    margin-top: 8px;
+    padding-top: 8px;
+  }
+
+  .reply-btn {
+    padding: 3px 8px;
+    font-size: 11px;
+    border-radius: 5px;
+  }
+
+  .message-website-link {
+    width: 26px;
+    height: 26px;
+    font-size: 15px;
   }
 
   .form-row {
     grid-template-columns: 1fr;
+    gap: 8px;
   }
 
   .message-item-wrapper {
     min-width: 0;
-  }
-
-  .message-header {
-    flex-wrap: wrap;
-    gap: 8px;
+    margin-bottom: 10px;
   }
 
   .message-author {
@@ -592,10 +725,63 @@ onUnmounted(() => {
     overflow: hidden;
   }
 
-  .message-info h4 {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  .reply-form {
+    margin-top: 8px;
+    padding-top: 8px;
+  }
+
+  .form-group {
+    margin-bottom: 8px;
+  }
+
+  .form-group label {
+    font-size: 11px;
+    margin-bottom: 3px;
+  }
+
+  .form-group input,
+  .form-group textarea {
+    padding: 6px 8px;
+    font-size: 11px;
+    border-radius: 5px;
+  }
+
+  .form-group textarea {
+    min-height: 50px;
+  }
+
+  .submit-wrapper {
+    align-items: stretch;
+    margin-top: 6px;
+    gap: 5px;
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 6px 12px;
+    font-size: 11px;
+    border-radius: 5px;
+    background: rgba(104, 68, 77, 0.1);
+    color: #68444d;
+    border: 1px solid rgba(104, 68, 77, 0.2);
+  }
+
+  .submit-btn:hover:not(:disabled) {
+    background: rgba(104, 68, 77, 0.2);
+    border-color: rgba(104, 68, 77, 0.3);
+    transform: translateY(-1px);
+  }
+
+  .error-message {
+    font-size: 11px;
+  }
+
+  .turnstile-container {
+    margin: 8px 0;
+  }
+
+  .replies-container {
+    margin-top: 10px;
   }
 }
 </style>

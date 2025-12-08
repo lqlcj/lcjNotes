@@ -20,8 +20,9 @@ export default defineEventHandler(async (event) => {
   
   try {
     const postKey = `post:${id}`;
-    const existingPost = await kv.getItem(postKey);
     
+    // 检查文章是否存在
+    const existingPost = await kv.getItem(postKey);
     if (!existingPost) {
       throw createError({
         statusCode: 404,

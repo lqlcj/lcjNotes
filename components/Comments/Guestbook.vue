@@ -56,11 +56,13 @@
             <div ref="turnstileContainer" class="turnstile-container"></div>
           </div>
 
-          <button type="submit" class="submit-btn" :disabled="submitting || !turnstileToken">
-            {{ submitting ? '提交中...' : '提交留言' }}
-          </button>
-          <p v-if="submitError" class="error-message">{{ submitError }}</p>
-          <p v-if="submitSuccess" class="success-message">留言提交成功！</p>
+          <div class="submit-wrapper">
+            <p v-if="submitError" class="error-message">{{ submitError }}</p>
+            <p v-if="submitSuccess" class="success-message">留言提交成功！</p>
+            <button type="submit" class="submit-btn" :disabled="submitting || !turnstileToken">
+              {{ submitting ? '提交中...' : '提交留言' }}
+            </button>
+          </div>
         </form>
       </div>
 
@@ -71,13 +73,8 @@
           <p>还没有留言，快来成为第一个留言的人吧！</p>
         </div>
         <div v-else class="messages">
-          <MessageItem
-            v-for="message in messages"
-            :key="message.id"
-            :message="message"
-            :turnstile-site-key="turnstileSiteKey"
-            @reload="loadMessages"
-          />
+          <MessageItem v-for="message in messages" :key="message.id" :message="message"
+            :turnstile-site-key="turnstileSiteKey" @reload="loadMessages" />
         </div>
       </div>
     </div>
@@ -454,6 +451,14 @@
 
   .comment-form {
     margin-bottom: 0;
+    max-width: 90%;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    margin-top: 20px;
+  }
+
+  .comment-form.glass-card {
+    margin: 20px auto;
   }
 
   .form-row {
@@ -508,28 +513,97 @@
     min-height: 80px;
   }
 
+  /* 桌面端优化：更小巧的表单 */
+  @media (min-width: 769px) {
+    .glass-card {
+      padding: 16px;
+      margin: 16px;
+      border-radius: 10px;
+    }
+
+    .comment-form.glass-card {
+      margin: 16px auto;
+    }
+
+    .comment-form {
+      max-width: 90%;
+    }
+
+    .messages {
+      max-width: 85%;
+    }
+
+    .form-row {
+      gap: 12px;
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .form-group label {
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      padding: 8px 10px;
+      font-size: 13px;
+      border-radius: 6px;
+    }
+
+    .form-group textarea {
+      min-height: 70px;
+    }
+
+    .submit-btn {
+      padding: 8px 16px;
+      font-size: 13px;
+      border-radius: 6px;
+      background: rgba(104, 68, 77, 0.1);
+      color: #68444d;
+      border: 1px solid rgba(104, 68, 77, 0.2);
+    }
+
+    .submit-btn:hover:not(:disabled) {
+      background: rgba(104, 68, 77, 0.2);
+      border-color: rgba(104, 68, 77, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .submit-wrapper {
+      margin-top: 8px;
+      gap: 6px;
+    }
+
+    .error-message,
+    .success-message {
+      font-size: 12px;
+    }
+
+    .turnstile-container {
+      margin: 12px 0;
+    }
+  }
+
   .submit-btn {
-    width: 100%;
-    padding: 12px;
-    background: #68444d;
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-size: 16px;
+    padding: 10px 20px;
+    background: rgba(104, 68, 77, 0.1);
+    color: #68444d;
+    border: 1px solid rgba(104, 68, 77, 0.2);
+    border-radius: 8px;
+    font-size: 14px;
     cursor: pointer;
     transition: all 0.3s ease-in-out;
     font-weight: 500;
-    box-shadow:
-      0 4px 12px rgba(104, 68, 77, 0.2),
-      0 2px 6px rgba(255, 165, 0, 0.1);
+    align-self: flex-end;
   }
 
   .submit-btn:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow:
-      0 6px 16px rgba(104, 68, 77, 0.3),
-      0 3px 8px rgba(255, 165, 0, 0.15);
-    background: #5a3a42;
+    transform: translateY(-1px);
+    background: rgba(104, 68, 77, 0.2);
+    border-color: rgba(104, 68, 77, 0.3);
   }
 
   .submit-btn:disabled {
@@ -539,14 +613,16 @@
 
   .error-message {
     color: #e74c3c;
-    font-size: 14px;
-    margin-top: 10px;
+    font-size: 13px;
+    margin: 0;
+    align-self: flex-end;
   }
 
   .success-message {
     color: #27ae60;
-    font-size: 14px;
-    margin-top: 10px;
+    font-size: 13px;
+    margin: 0;
+    align-self: flex-end;
   }
 
   .comments-list {
@@ -556,6 +632,17 @@
     overflow-x: hidden;
     width: 100%;
     box-sizing: border-box;
+  }
+
+  /* 桌面端优化：更紧凑的列表 */
+  @media (min-width: 769px) {
+    .comments-list {
+      padding: 16px;
+    }
+
+    .messages {
+      gap: 12px;
+    }
   }
 
   /* 自定义滚动条样式 - 桌面端 */
@@ -598,7 +685,8 @@
     flex-direction: column;
     gap: 15px;
     width: 100%;
-    max-width: 100%;
+    max-width: 90%;
+    margin: 0 auto;
     box-sizing: border-box;
     overflow-x: hidden;
   }
@@ -612,15 +700,21 @@
   @media (max-width: 768px) {
     .form-row {
       grid-template-columns: 1fr;
+      gap: 10px;
     }
 
     .glass-card {
-      margin: 15px;
-      padding: 15px;
+      margin: 12px;
+      padding: 12px;
+      border-radius: 10px;
+    }
+
+    .comment-form.glass-card {
+      margin: 12px auto;
     }
 
     .comments-list {
-      padding: 15px;
+      padding: 12px;
       overflow-x: hidden;
     }
 
@@ -631,6 +725,66 @@
 
     .comments-content {
       overflow-x: hidden;
+    }
+
+    .form-group {
+      margin-bottom: 10px;
+    }
+
+    .form-group label {
+      font-size: 12px;
+      margin-bottom: 3px;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      padding: 7px 9px;
+      font-size: 12px;
+      border-radius: 6px;
+    }
+
+    .form-group textarea {
+      min-height: 60px;
+    }
+
+    .submit-wrapper {
+      align-items: stretch;
+      margin-top: 8px;
+      gap: 6px;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 8px 16px;
+      font-size: 13px;
+      border-radius: 6px;
+      background: rgba(104, 68, 77, 0.1);
+      color: #68444d;
+      border: 1px solid rgba(104, 68, 77, 0.2);
+    }
+
+    .submit-btn:hover:not(:disabled) {
+      background: rgba(104, 68, 77, 0.2);
+      border-color: rgba(104, 68, 77, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .error-message,
+    .success-message {
+      font-size: 12px;
+    }
+
+    .turnstile-container {
+      margin: 10px 0;
+    }
+
+    .messages {
+      gap: 10px;
+      max-width: 92%;
+    }
+
+    .comment-form {
+      max-width: 90%;
     }
   }
 </style>
