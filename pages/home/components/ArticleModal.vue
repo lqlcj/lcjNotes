@@ -55,7 +55,7 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { useNotesStore } from '~/stores/notesStore'
 // 使用 public 目录下的图片
 const defaultCover = '/images/loading.webp'
@@ -80,6 +80,7 @@ const post = ref(null)
 const htmlContent = ref('')
 const loading = ref(false)
 const errorMessage = ref('')
+let teardownCopy = null
 
 const coverSrc = computed(() => post.value?.attributes.cover || defaultCover)
 
@@ -128,6 +129,7 @@ const loadArticle = async (postId) => {
         }
         htmlContent.value = md.render(postData.body)
         errorMessage.value = ''
+        await refreshCopyButtons()
       } else {
         errorMessage.value = '文章加载失败，请检查文章是否存在'
       }
@@ -146,6 +148,56 @@ const loadArticle = async (postId) => {
 const handleClose = () => {
   emit('close')
 }
+
+const attachCopyButtons = () => {
+  const pres = document.querySelectorAll('.markdown-body pre')
+  const disposers = []
+  pres.forEach(pre => {
+    if (pre.dataset.copyAttached) return
+    pre.dataset.copyAttached = '1'
+    pre.style.position = 'relative'
+    const btn = document.createElement('button')
+    btn.type = 'button'
+    btn.className = 'code-copy-btn'
+    btn.textContent = '复制'
+    const onClick = () => {
+      const text = pre.innerText || ''
+      navigator.clipboard?.writeText(text).then(() => {
+        btn.textContent = '已复制'
+        setTimeout(() => { btn.textContent = '复制' }, 1200)
+      }).catch(() => {
+        btn.textContent = '失败'
+        setTimeout(() => { btn.textContent = '复制' }, 1200)
+      })
+    }
+    btn.addEventListener('click', onClick)
+    pre.appendChild(btn)
+    disposers.push(() => {
+      btn.removeEventListener('click', onClick)
+      btn.remove()
+      delete pre.dataset.copyAttached
+    })
+  })
+  return () => disposers.forEach(fn => fn())
+}
+
+const refreshCopyButtons = async () => {
+  await nextTick()
+  if (teardownCopy) teardownCopy()
+  teardownCopy = attachCopyButtons()
+}
+
+watch(htmlContent, async (val) => {
+  if (val) await refreshCopyButtons()
+})
+
+onMounted(() => {
+  refreshCopyButtons()
+})
+
+onBeforeUnmount(() => {
+  if (teardownCopy) teardownCopy()
+})
 </script>
 
 <style scoped>
@@ -281,28 +333,32 @@ const handleClose = () => {
 }
 
 /* 防止代码块和表格导致横向滚动 */
-.markdown-body pre,
-.markdown-body code {
+:deep(.markdown-body pre),
+:deep(.markdown-body code) {
   max-width: 100%;
   overflow-x: auto;
   word-wrap: normal;
   word-break: normal;
 }
 
-.markdown-body pre {
+:deep(.markdown-body pre) {
   white-space: pre;
-  background: #f6f8fa;
-  border-radius: 6px;
-  padding: 16px;
+  background: #0d1117;
+  color: #e6edf3;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 16px 18px 18px;
   overflow-x: auto;
-  line-height: 1.45;
+  line-height: 1.55;
   margin: 16px 0;
+  position: relative;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
 }
 
-.markdown-body pre code {
+:deep(.markdown-body pre code) {
   background: transparent;
   padding: 0;
-  font-size: 85%;
+  font-size: 90%;
   line-height: inherit;
   color: inherit;
   border-radius: 0;
@@ -310,17 +366,12 @@ const handleClose = () => {
   word-break: normal;
 }
 
-.markdown-body code {
+:deep(.markdown-body code) {
   background: rgba(175, 184, 193, 0.2);
   padding: 0.2em 0.4em;
   border-radius: 3px;
-  font-size: 85%;
+  font-size: 90%;
   font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
-}
-
-.markdown-body pre code {
-  background: transparent;
-  padding: 0;
 }
 
 .markdown-body table {
