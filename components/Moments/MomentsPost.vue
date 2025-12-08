@@ -56,10 +56,12 @@
         </button>
       </div>
 
-      <!-- 图片预览遮罩层 -->
-      <div v-if="viewerImage" class="image-viewer" @click="closeImageViewer">
-        <img :src="viewerImage" alt="预览图片" class="viewer-image" />
-      </div>
+      <!-- 图片预览遮罩层 - 使用 Teleport 渲染到 body，避免受父元素 transform 影响 -->
+      <Teleport to="body">
+        <div v-if="viewerImage" class="image-viewer" @click="closeImageViewer">
+          <img :src="viewerImage" alt="预览图片" class="viewer-image" />
+        </div>
+      </Teleport>
     </template>
   </div>
 </template>
@@ -472,8 +474,7 @@
   /* 图片预览遮罩层 */
   .image-viewer {
     position: fixed;
-    top: 0;
-    left: 0;
+    inset: 0;
     width: 100vw;
     height: 100vh;
     background-color: transparent;
