@@ -96,7 +96,6 @@
 
 <script setup>
   import { ref, computed, onMounted, nextTick, watch, onUnmounted } from 'vue'
-  import { useNotesStore } from '~/stores/notesStore'
   import PageHeader from '~/components/HeaderBar/PageHeader.vue'
   import ArticleModal from './ArticleModal.vue'
   import LoadingMessage from '~/components/Common/LoadingMessage.vue'
@@ -105,12 +104,12 @@
   const defaultCover = '/images/loading.webp'
   const defaultAvatar = '/images/lcj.svg'
 
-  const notesStore = useNotesStore()
-
   const containerRef = ref(null)
   const waterfallRef = ref(null)
   const currentPage = ref(1)
   const PAGE_SIZE = 12
+  const totalCount = ref(0)
+  const pageItems = ref([])
 
   // Modal 相关状态
   const modalVisible = ref(false)
@@ -146,40 +145,55 @@
   })
 
   onMounted(async () => {
-    // 异步加载数据
-    await loadData()
-    // 监听窗口大小变化
+    await loadData(1)
     if (typeof window !== 'undefined') {
       window.addEventListener('resize', handleResize)
     }
   })
 
-  // 异步加载数据
-  const loadData = async () => {
-    isLoading.value = true
+  // 异步加载指定页数据（懒加载）
+  const loadData = async (page = 1) => {
+    isLoading.value = page === 1
+    isChangingPage.value = page !== 1
     hasError.value = false
     errorMessage.value = ''
 
     try {
-      await notesStore.initPosts()
-      // 等待数据加载完成
-      await new Promise(resolve => setTimeout(resolve, 100))
+      const offset = (page - 1) * PAGE_SIZE
+      const response = await $fetch('/api/posts', {
+        query: { offset, limit: PAGE_SIZE }
+      })
 
-      // 数据加载完成后，确保分配数据
-      if (allData.value.length > 0) {
-        cardRefs.value.clear()
-        distributeItems()
-        await nextTick()
-        setTimeout(() => {
-          updateColumnHeights()
-        }, 100)
+      let items = []
+      let total = 0
+      if (response?.success) {
+        if (Array.isArray(response.data)) {
+          items = response.data
+          total = response.total ?? response.data.length
+        } else if (response?.data) {
+          items = response.data.posts || response.data.items || response.data.list || []
+          total = response.data.total ?? response.data.count ?? items.length
+        }
       }
+
+      // 兜底：若未返回 total，用当前页累加估算
+      totalCount.value = Math.max(total, offset + items.length)
+      pageItems.value = items
+      currentPage.value = page
+
+      cardRefs.value.clear()
+      distributeItems()
+      await nextTick()
+      setTimeout(() => {
+        updateColumnHeights()
+      }, 100)
     } catch (error) {
       console.error('[NotesSection] 加载数据失败:', error)
       hasError.value = true
       errorMessage.value = error.message || '加载失败，请稍后重试'
     } finally {
       isLoading.value = false
+      isChangingPage.value = false
     }
   }
 
@@ -199,27 +213,12 @@
     }
   })
 
-  // 确保数据按日期降序排序（最新的在前）
-  const allData = computed(() => {
-    const posts = [...notesStore.allPosts]
-    // 按日期降序排序，确保新发布的内容在最前面
-    return posts.sort((a, b) => {
-      const dateA = a.date ? new Date(a.date).getTime() : 0
-      const dateB = b.date ? new Date(b.date).getTime() : 0
-      return dateB - dateA // 降序：最新的在前
-    })
-  })
-
   // 视觉逻辑：定义比例模式，制造瀑布流的错落感
   const ratioPattern = [0.75, 1.0, 0.75, 1.33, 0.6, 0.75, 1.0, 0.8, 1.2, 0.9]
 
   // 当前页的数据（带视觉比例）
   const currentPageData = computed(() => {
-    const start = (currentPage.value - 1) * PAGE_SIZE
-    const end = start + PAGE_SIZE
-    // 确保使用已排序的数据
-    const pageData = allData.value.slice(start, end)
-
+    const pageData = pageItems.value || []
     return pageData.map((item, index) => {
       const visualRatio = item.aspectRatio || ratioPattern[index % ratioPattern.length]
       const avatar = item.avatar || defaultAvatar
@@ -234,7 +233,7 @@
     })
   })
 
-  const totalPages = computed(() => Math.ceil(allData.value.length / PAGE_SIZE))
+  const totalPages = computed(() => Math.max(1, Math.ceil(totalCount.value / PAGE_SIZE)))
 
   // 设置列引用
   const setColumnRef = (el, index) => {
@@ -356,37 +355,27 @@
 
   const changePage = async (page) => {
     if (page < 1 || page > totalPages.value || isChangingPage.value) return
+    await loadData(page)
 
-    isChangingPage.value = true
+    // 清空图片加载状态，重新加载
+    loadedImages.value.clear()
+    imageLoadedMap.value = {}
+    imageErrorMap.value = {}
 
-    try {
-      currentPage.value = page
+    await nextTick()
 
-      // 清空图片加载状态，重新加载
-      loadedImages.value.clear()
-      imageLoadedMap.value = {}
-      imageErrorMap.value = {}
-
-      // 等待 DOM 更新
-      await nextTick()
-
-      // 滚动到 Notes 区域而不是页面顶部
-      const notesSection = document.querySelector('.notes-section')
-      if (notesSection) {
-        const notesTop = notesSection.offsetTop - 100 // 减去100px作为偏移量
-        window.scrollTo({
-          top: notesTop,
-          behavior: 'smooth'
-        })
-      } else {
-        window.scrollTo({ top: 0, behavior: 'smooth' })
-      }
-
-      // 等待图片加载
-      await new Promise(resolve => setTimeout(resolve, 300))
-    } finally {
-      isChangingPage.value = false
+    const notesSection = document.querySelector('.notes-section')
+    if (notesSection) {
+      const notesTop = notesSection.offsetTop - 100
+      window.scrollTo({
+        top: notesTop,
+        behavior: 'smooth'
+      })
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     }
+
+    await new Promise(resolve => setTimeout(resolve, 300))
   }
 
   const handleClick = (item) => {
