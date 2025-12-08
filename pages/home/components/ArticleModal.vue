@@ -264,6 +264,7 @@ const handleClose = () => {
   overflow-x: hidden;
   word-wrap: break-word;
   word-break: break-word;
+  white-space: pre-wrap; /* 保留换行与空格，避免内容挤在一起 */
   max-width: 100%;
   margin: 0 auto;
 }
