@@ -104,7 +104,7 @@
 </template>
 
 <script setup>
-  import { reactive, ref, onMounted, onUnmounted, watch } from 'vue'
+  import { reactive, ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 
   const config = useRuntimeConfig();
   const turnstileSiteKey = config.public.turnstileSiteKey;
@@ -132,6 +132,9 @@
   const turnstileToken = ref('')
   const showCopyTip = ref(false)
   let turnstileWidgetId = null
+  let copyTipTimer = null
+  let copyDebounceTimer = null
+  const isCopying = ref(false)
 
   // 关闭表单
   const handleClose = () => {
@@ -287,17 +290,77 @@
     // 注意：不自动收起表单，让用户可以选择继续申请
   }
 
-  // 复制到剪贴板
+  // 复制到剪贴板（带防抖）
   const copyToClipboard = async (text) => {
-    try {
-      await navigator.clipboard.writeText(text)
-      showCopyTip.value = true
-      setTimeout(() => {
-        showCopyTip.value = false
-      }, 2000)
-    } catch (err) {
-      console.error('复制失败:', err)
+    // 如果正在复制中，忽略本次点击
+    if (isCopying.value) {
+      return
     }
+
+    // 清除之前的防抖定时器
+    if (copyDebounceTimer) {
+      clearTimeout(copyDebounceTimer)
+    }
+
+    // 设置防抖：300ms 内只执行一次
+    copyDebounceTimer = setTimeout(async () => {
+      isCopying.value = true
+
+      try {
+        // 清除之前的提示定时器
+        if (copyTipTimer) {
+          clearTimeout(copyTipTimer)
+          copyTipTimer = null
+        }
+
+        // 先设置为 false，确保 Vue 能检测到变化
+        showCopyTip.value = false
+
+        // 使用 nextTick 确保 DOM 更新后再显示
+        await nextTick()
+
+        // 复制到剪贴板
+        await navigator.clipboard.writeText(text)
+
+        // 显示提示
+        showCopyTip.value = true
+
+        // 2秒后隐藏
+        copyTipTimer = setTimeout(() => {
+          showCopyTip.value = false
+          copyTipTimer = null
+        }, 2000)
+      } catch (err) {
+        console.error('复制失败:', err)
+        // 如果 clipboard API 失败，尝试使用 fallback 方法
+        try {
+          const textArea = document.createElement('textarea')
+          textArea.value = text
+          textArea.style.position = 'fixed'
+          textArea.style.opacity = '0'
+          document.body.appendChild(textArea)
+          textArea.select()
+          document.execCommand('copy')
+          document.body.removeChild(textArea)
+
+          // 显示提示
+          showCopyTip.value = false
+          await nextTick()
+          showCopyTip.value = true
+          copyTipTimer = setTimeout(() => {
+            showCopyTip.value = false
+            copyTipTimer = null
+          }, 2000)
+        } catch (fallbackErr) {
+          console.error('Fallback 复制也失败:', fallbackErr)
+        }
+      } finally {
+        // 复制完成后，延迟重置状态（防止快速连续点击）
+        setTimeout(() => {
+          isCopying.value = false
+        }, 300)
+      }
+    }, 300)
   }
 
   // 监听表单展开状态，展开时加载 Turnstile
