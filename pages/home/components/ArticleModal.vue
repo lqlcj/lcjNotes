@@ -269,6 +269,19 @@ const handleClose = () => {
   margin: 0 auto;
 }
 
+/* 中文正文段首缩进两字符（不影响列表/代码块） */
+.markdown-body p {
+  text-indent: 2em;
+  margin: 0 0 1em 0;
+}
+.markdown-body li p {
+  text-indent: 0;
+}
+.markdown-body pre,
+.markdown-body code {
+  text-indent: 0;
+}
+
 /* 防止代码块和表格导致横向滚动 */
 .markdown-body pre,
 .markdown-body code {
