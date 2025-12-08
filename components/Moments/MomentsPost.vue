@@ -110,7 +110,7 @@
   const isLoadingData = ref(true)
   
   // 分页相关
-  const pageSize = 20 // 每页从 API 加载20条（与 API 默认值一致）
+  const pageSize = 10 // 每页从 API 加载10条
   const currentOffset = ref(0)
   const hasMoreData = ref(false)
   const totalCount = ref(0)
