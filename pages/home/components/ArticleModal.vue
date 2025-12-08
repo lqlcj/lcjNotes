@@ -343,16 +343,17 @@ onBeforeUnmount(() => {
 
 :deep(.markdown-body pre) {
   white-space: pre;
-  background: #0d1117;
-  color: #e6edf3;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
+  background: #f4f6fb; /* 柔和浅色底，避免突兀 */
+  color: #1f2933;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
   padding: 16px 18px 18px;
   overflow-x: auto;
   line-height: 1.55;
   margin: 16px 0;
   position: relative;
   font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
 }
 
 :deep(.markdown-body pre code) {
@@ -367,9 +368,9 @@ onBeforeUnmount(() => {
 }
 
 :deep(.markdown-body code) {
-  background: rgba(175, 184, 193, 0.2);
+  background: rgba(31, 41, 51, 0.06);
   padding: 0.2em 0.4em;
-  border-radius: 3px;
+  border-radius: 4px;
   font-size: 90%;
   font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
 }
