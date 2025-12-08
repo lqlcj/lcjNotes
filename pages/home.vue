@@ -24,7 +24,7 @@
         <div class="homepage down">
           <div class="line text-blocks-line">
             <div class="text-block text-block-left">
-              <span class="homepage title">Hello, Traveler.</span>
+              <span class="homepage title">Hello, Traveler...</span>
               <span class="homepage description">
                 In an era shaped by algorithmic feeds, personal sites—kept alive only by interest and enthusiasm—feel
                 like small islands in a vast ocean.
@@ -34,7 +34,10 @@
               </span>
             </div>
             <div class="text-block text-block-right">
-              <span class="homepage title">欢迎来到我的小窝.</span>
+              <span class="homepage title typewriter">
+                {{ displayTitle }}
+                <span v-if="typewriterOptions.enabled" class="caret"></span>
+              </span>
               <span class="homepage description wenkai-font">
                 在这个只有算法推荐的时代，靠兴趣发电的个人小站就像汪洋中的一座座渺小岛屿。
                 <br></br>
@@ -65,7 +68,7 @@
 </template>
 
 <script setup>
-  import { computed } from 'vue'
+  import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
   import { layoutConfig } from '~/config/layout'
   import HomeBanner from './home/components/HomeBanner.vue'
   import NotesSection from './home/components/NotesSection.vue'
@@ -82,6 +85,84 @@
     '--button-bg': 'url(/images/home/button.png)',
     '--shadow-button-bg': 'url(/images/home/shadow-button-download.png)'
   }))
+
+  // Typewriter state for the right-hand title
+  const typewriterOptions = reactive({
+    enabled: true,       // 是否开启打字机
+    speed: 280,          // 每个字符的间隔（毫秒）
+    repeat: 1,    // 循环次数，Infinity 为无限循环
+    pauseBetweenRuns: 400 // 每轮结束后的停顿（毫秒）
+  })
+
+  const originalTitle = 'Watch(you, () => { smile() })..'
+  const typedTitle = ref('')
+  const displayTitle = computed(() =>
+    typewriterOptions.enabled ? typedTitle.value : originalTitle
+  )
+
+  let timerId = null
+  let index = 0
+  let finishedRuns = 0
+
+  const clearTimer = () => {
+    if (timerId) {
+      clearTimeout(timerId)
+      timerId = null
+    }
+  }
+
+  const scheduleNext = () => {
+    timerId = setTimeout(tick, typewriterOptions.speed)
+  }
+
+  const tick = () => {
+    if (!typewriterOptions.enabled) {
+      clearTimer()
+      typedTitle.value = originalTitle
+      return
+    }
+
+    if (index <= originalTitle.length) {
+      typedTitle.value = originalTitle.slice(0, index)
+      index += 1
+      scheduleNext()
+      return
+    }
+
+    // 一轮结束
+    finishedRuns += 1
+    if (finishedRuns < typewriterOptions.repeat || typewriterOptions.repeat === Infinity) {
+      index = 0
+      timerId = setTimeout(tick, typewriterOptions.pauseBetweenRuns)
+    } else {
+      clearTimer()
+    }
+  }
+
+  const startTypewriter = () => {
+    clearTimer()
+    typedTitle.value = ''
+    index = 0
+    finishedRuns = 0
+    if (typewriterOptions.enabled) {
+      scheduleNext()
+    } else {
+      typedTitle.value = originalTitle
+    }
+  }
+
+  watch(
+    () => [typewriterOptions.enabled, typewriterOptions.speed, typewriterOptions.repeat],
+    () => startTypewriter()
+  )
+
+  onMounted(() => {
+    startTypewriter()
+  })
+
+  onBeforeUnmount(() => {
+    clearTimer()
+  })
 </script>
 
 <style scoped>
@@ -206,7 +287,7 @@
 
   /* 标题和描述样式 */
   .homepage.title {
-    font-size: 34px;
+    font-size: 22px;
     font-family: 'Conv_FuturaStd-Light', Arial;
     text-align: center;
     line-height: 36pt;
@@ -215,6 +296,18 @@
     overflow-wrap: break-word;
     display: block;
     margin-bottom: 20px;
+  }
+
+  /* 左侧英文标题与打字机字体统一 */
+  .text-block-left .homepage.title {
+    font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', 'Source Han Sans SC', Arial, sans-serif;
+    font-weight: 400;
+  }
+
+  /* 桌面端中文标题字体优化 */
+  .text-block-right .homepage.title {
+    font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', 'Source Han Sans SC', Arial, sans-serif;
+    font-weight: 400;
   }
 
   .homepage.description {
@@ -232,6 +325,28 @@
   /* 系统楷体样式 */
   .wenkai-font {
     font-family: 'KaiTi', 'STKaiti', 'Kaiti SC', '楷体', '楷体-简', 'AR PL UKai CN', serif;
+  }
+
+  /* Typewriter cursor */
+  .typewriter {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .typewriter .caret {
+    display: inline-block;
+    width: 2px;
+    height: 1.1em;
+    background: #68444d;
+    animation: blink 0.8s steps(1) infinite;
+  }
+
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
   }
 
 
