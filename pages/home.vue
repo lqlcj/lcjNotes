@@ -94,7 +94,7 @@
     pauseBetweenRuns: 400 // 每轮结束后的停顿（毫秒）
   })
 
-  const originalTitle = 'Watch(you, () => { smile() })..'
+  const originalTitle = 'watch(you, () => { smile() })..'
   const typedTitle = ref('')
   const displayTitle = computed(() =>
     typewriterOptions.enabled ? typedTitle.value : originalTitle
