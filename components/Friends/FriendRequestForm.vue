@@ -40,7 +40,7 @@
                 <span class="site-info-value" @click="copyToClipboard('小小后花园～')">小小后花园～</span>
               </div>
             </div>
-            <div class="site-info-note">长时间无法正常访问的站点会被移除～</div>
+            <div class="site-info-note">长时间无法正常访问的站点会被移除喔～</div>
           </div>
           <!-- 复制提示 -->
           <transition name="fade">
