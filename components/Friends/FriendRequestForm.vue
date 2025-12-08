@@ -28,7 +28,8 @@
               </div>
               <div class="site-info-item">
                 <span class="site-info-label">图标:</span>
-                <span class="site-info-value" @click="copyToClipboard('https://photo.lcjlq.com/lcj.svg')">https://photo.lcjlq.com/lcj.svg</span>
+                <span class="site-info-value"
+                  @click="copyToClipboard('https://photo.lcjlq.com/lcj.svg')">https://photo.lcjlq.com/lcj.svg</span>
               </div>
               <div class="site-info-item">
                 <span class="site-info-label">链接:</span>
@@ -43,7 +44,10 @@
           </div>
           <!-- 复制提示 -->
           <transition name="fade">
-            <div v-if="showCopyTip" class="copy-tip">已复制到剪贴板</div>
+            <div v-if="showCopyTip" class="copy-tip">
+              <span class="copy-icon">✓</span>
+              <span>已复制</span>
+            </div>
           </transition>
           <p class="form-subtitle">填写以下信息，我会尽快审核并添加你的网站</p>
           <button @click="handleClose" class="close-btn" aria-label="收起表单">×</button>
@@ -83,7 +87,7 @@
             <span v-if="!isSubmitting">提交申请</span>
             <span v-else>提交中...</span>
           </button>
-          
+
           <p v-if="submitError" class="error-message">{{ submitError }}</p>
         </form>
 
@@ -474,14 +478,40 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: rgba(44, 62, 80, 0.9);
+    background: rgba(44, 62, 80, 0.95);
     color: white;
-    padding: 8px 16px;
-    border-radius: 6px;
-    font-size: 0.85rem;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 0.9rem;
     z-index: 10000;
     pointer-events: none;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+    animation: copyTipPop 0.3s ease-out;
+  }
+
+  .copy-icon {
+    font-size: 1.1rem;
+    color: #4ade80;
+  }
+
+  @keyframes copyTipPop {
+    0% {
+      transform: translate(-50%, -50%) scale(0.8);
+      opacity: 0;
+    }
+
+    50% {
+      transform: translate(-50%, -50%) scale(1.05);
+    }
+
+    100% {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+    }
   }
 
   .fade-enter-active,
