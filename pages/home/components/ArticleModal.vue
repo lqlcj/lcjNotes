@@ -279,6 +279,36 @@ const handleClose = () => {
 
 .markdown-body pre {
   white-space: pre;
+  background: #f6f8fa;
+  border-radius: 6px;
+  padding: 16px;
+  overflow-x: auto;
+  line-height: 1.45;
+  margin: 16px 0;
+}
+
+.markdown-body pre code {
+  background: transparent;
+  padding: 0;
+  font-size: 85%;
+  line-height: inherit;
+  color: inherit;
+  border-radius: 0;
+  word-wrap: normal;
+  word-break: normal;
+}
+
+.markdown-body code {
+  background: rgba(175, 184, 193, 0.2);
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-size: 85%;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+}
+
+.markdown-body pre code {
+  background: transparent;
+  padding: 0;
 }
 
 .markdown-body table {

@@ -115,6 +115,37 @@ export function createSafeMarkdownIt() {
     return self.renderToken(tokens, idx, options)
   }
 
+  // 确保代码块安全：移除所有属性，只保留纯文本内容
+  // markdown-it 默认会转义代码块内容，但我们额外确保安全
+  const defaultCodeBlockRender = md.renderer.rules.fence || function(tokens, idx, options, env, self) {
+    return self.renderToken(tokens, idx, options)
+  }
+
+  md.renderer.rules.fence = function(tokens, idx, options, env, self) {
+    const token = tokens[idx]
+    // 移除所有属性，防止通过属性注入
+    if (token.attrs) {
+      token.attrs = []
+    }
+    // markdown-it 已经转义了代码块内容，直接使用默认渲染
+    return defaultCodeBlockRender(tokens, idx, options, env, self)
+  }
+
+  // 确保行内代码安全
+  const defaultCodeInlineRender = md.renderer.rules.code_inline || function(tokens, idx, options, env, self) {
+    return self.renderToken(tokens, idx, options)
+  }
+
+  md.renderer.rules.code_inline = function(tokens, idx, options, env, self) {
+    const token = tokens[idx]
+    // 移除所有属性
+    if (token.attrs) {
+      token.attrs = []
+    }
+    // markdown-it 已经转义了行内代码内容
+    return defaultCodeInlineRender(tokens, idx, options, env, self)
+  }
+
   return md
 }
 
