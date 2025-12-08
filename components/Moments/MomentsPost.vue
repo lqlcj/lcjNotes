@@ -58,7 +58,7 @@
 
       <!-- 图片预览遮罩层 -->
       <div v-if="viewerImage" class="image-viewer" @click="closeImageViewer">
-        <img :src="viewerImage" alt="预览图片" class="viewer-image" @click.stop />
+        <img :src="viewerImage" alt="预览图片" class="viewer-image" />
       </div>
     </template>
   </div>
@@ -474,11 +474,9 @@
     position: fixed;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
     width: 100vw;
     height: 100vh;
-    background-color: rgba(0, 0, 0, 0.9);
+    background-color: transparent;
     z-index: 9999;
     display: flex;
     align-items: center;
@@ -487,6 +485,7 @@
     animation: fadeIn 0.2s ease;
     margin: 0;
     padding: 0;
+    overflow: hidden;
   }
 
   .viewer-image {
@@ -495,10 +494,11 @@
     width: auto;
     height: auto;
     object-fit: contain;
-    cursor: default;
+    cursor: pointer;
     animation: zoomIn 0.3s ease;
     display: block;
-    margin: auto;
+    margin: 0;
+    pointer-events: auto;
   }
 
   @keyframes fadeIn {
