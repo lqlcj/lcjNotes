@@ -1,20 +1,4 @@
-﻿<!--
-  印象派风格轮播图组件
-  
-  功能：
-    - 无缝循环轮播
-    - 自动播放（4秒切换）
-    - 手动切换（左右按钮、指示器）
-    - 触摸滑动支持（移动端）
-    - 鼠标悬停暂停
-  
-  特性：
-    - 克隆首尾图片实现无缝循环
-    - 印象派模糊层效果
-    - 响应式设计
-    - 支持减少动画偏好设置
--->
-<template>
+﻿<template>
   <div class="carousel-container" v-if="images.length > 0">
     <div class="carousel-wrapper" @mouseenter="pauseAutoPlay" @mouseleave="resumeAutoPlay">
       <!-- 轮播图片容器 -->
@@ -65,6 +49,11 @@
 </template>
 
 <script setup>
+  /**
+   * 印象派风格轮播图组件。
+   *
+   * 功能：提供无缝循环轮播与自动/手动切换，支持触摸滑动。
+   */
   import { ref, onMounted, onUnmounted, computed } from 'vue'
 
   // 使用 public 目录下的图片，直接使用路径数组
@@ -103,28 +92,18 @@
 
   // 处理过渡结束事件
   const handleTransitionEnd = () => {
-    // "下一页"逻辑：从真实的最后一张图（索引length）滑动到克隆的第一张图（索引length+1）
-    // 在 transitionend 事件后，立即执行无缝跳转
+    // 克隆页到真实页的无缝跳转（避免首尾闪烁）
     if (currentIndex.value === images.value.length + 1) {
-      // 1. 设置 transition: none; （取消过渡动画）
       skipTransition.value = true
-      // 2. 将 translateX 瞬间"跳"回到真实的第一张图（索引1）
       currentIndex.value = 1
-      // 3. 恢复 transition 属性（在下一帧）
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           skipTransition.value = false
         })
       })
-    }
-    // "上一页"逻辑：从真实的第一张图（索引1）滑动到克隆的最后一张图（索引0）
-    // 在 transitionend 事件后，立即执行无缝跳转
-    else if (currentIndex.value === 0) {
-      // 1. 设置 transition: none; （取消过渡动画）
+    } else if (currentIndex.value === 0) {
       skipTransition.value = true
-      // 2. 将 translateX 瞬间"跳"回到真实的最后一张图（索引length）
       currentIndex.value = images.value.length
-      // 3. 恢复 transition 属性（在下一帧）
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           skipTransition.value = false
@@ -198,7 +177,8 @@
 
   // 触摸开始
   const handleTouchStart = (e) => {
-    pauseAutoPlay() // 暂停自动播放
+    // 进入拖拽时暂停自动轮播
+    pauseAutoPlay()
     touchStartX.value = e.touches[0].clientX
     touchStartY.value = e.touches[0].clientY
     touchStartTime.value = Date.now()
@@ -257,7 +237,8 @@
     // 重置状态
     isDragging.value = false
     dragOffset.value = 0
-    resumeAutoPlay() // 恢复自动播放
+    // 结束拖拽后恢复自动播放
+    resumeAutoPlay()
   }
 
   onMounted(() => {

@@ -1,18 +1,3 @@
-<!--
-  文章阅读模态框组件
-  
-  功能：
-    - 在模态框中显示文章详情
-    - Markdown 内容渲染
-    - 文章封面、标题、元信息显示
-    - 加载状态和错误处理
-  
-  特性：
-    - Teleport 到 body
-    - 毛玻璃效果
-    - 响应式设计
-    - 代码块和表格横向滚动处理
--->
 <template>
   <Teleport to="body">
     <Transition name="modal">
@@ -55,6 +40,11 @@
 </template>
 
 <script setup>
+/**
+ * 文章阅读模态框组件。
+ *
+ * 功能：在模态框中加载并展示文章详情，完成 Markdown 渲染与复制按钮挂载。
+ */
 import { ref, watch, computed, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { useNotesStore } from '~/stores/notesStore'
 // 使用 public 目录下的图片
@@ -84,7 +74,7 @@ let teardownCopy = null
 
 const coverSrc = computed(() => post.value?.attributes.cover || defaultCover)
 
-// 监听 visible 和 articleId 变化，加载文章
+// 监听 visible 和 articleId 变化，按需加载并清理内容
 watch([() => props.visible, () => props.articleId], async ([newVisible, newId]) => {
   if (newVisible && newId) {
     await loadArticle(newId)
@@ -97,6 +87,7 @@ watch([() => props.visible, () => props.articleId], async ([newVisible, newId]) 
 }, { immediate: true })
 
 const loadArticle = async (postId) => {
+  // 重置本轮加载状态
   loading.value = true
   errorMessage.value = ''
   post.value = null
@@ -111,12 +102,12 @@ const loadArticle = async (postId) => {
     // 从 API 获取文章
     try {
       const response = await $fetch(`/api/posts/${postId}`)
-      
+
       if (response && response.success && response.data) {
         const postData = response.data
         // 初始化安全的解析器
         const md = createSafeMarkdownIt()
-        
+
         // 转换为兼容格式
         post.value = {
           attributes: {
@@ -187,6 +178,7 @@ const refreshCopyButtons = async () => {
   teardownCopy = attachCopyButtons()
 }
 
+// 内容渲染完成后重新挂载复制按钮
 watch(htmlContent, async (val) => {
   if (val) await refreshCopyButtons()
 })

@@ -1,21 +1,4 @@
-﻿<!--
-  朋友圈动态组件
-  
-  功能：
-    - 显示朋友圈动态列表
-    - 支持文本和图片内容
-    - 图片预览功能
-    - 分页加载（每页10条）
-    - XSS防护（内容清理）
-  
-  特性：
-    - 微信风格的朋友圈布局
-    - 单图和多图网格布局
-    - 图片点击预览（全屏遮罩）
-    - 懒加载优化
-    - 响应式设计
--->
-<template>
+﻿<template>
   <div class="moments-list">
     <!-- Loading 状态 -->
     <LoadingMessage v-if="isLoadingData" text="飘洋过海来看你~" />
@@ -67,6 +50,11 @@
 </template>
 
 <script setup>
+  /**
+   * 朋友圈动态组件。
+   *
+   * 功能：加载并展示动态列表，支持分页加载、图片预览与内容安全清理。
+   */
   import { ref, onBeforeUnmount, computed, onMounted, nextTick } from 'vue'
   import LoadingMessage from '~/components/Common/LoadingMessage.vue'
   // 使用 public 目录下的图片
@@ -78,12 +66,12 @@
     if (!content || typeof content !== 'string') {
       return ''
     }
-    
+
     // 危险标签列表
     const dangerousTags = ['script', 'iframe', 'object', 'embed', 'form', 'input', 'button', 'select', 'textarea', 'meta', 'link', 'style', 'base', 'frame', 'frameset']
-    
+
     let safeContent = content
-    
+
     // 移除危险标签
     dangerousTags.forEach(tag => {
       const regex = new RegExp(`<${tag}[^>]*>.*?</${tag}>`, 'gis')
@@ -91,24 +79,24 @@
       const selfClosingRegex = new RegExp(`<${tag}[^>]*/?>`, 'gi')
       safeContent = safeContent.replace(selfClosingRegex, '')
     })
-    
+
     // 移除所有 on* 事件处理器属性
     safeContent = safeContent.replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '')
     safeContent = safeContent.replace(/\s*on\w+\s*=\s*[^\s>]*/gi, '')
-    
+
     // 移除 javascript: 协议
     safeContent = safeContent.replace(/javascript:/gi, '')
-    
+
     // 将换行符转换为 <br/>
     safeContent = safeContent.replace(/\n/g, '<br/>')
-    
+
     return safeContent
   }
 
   // 数据状态
   const momentsDataFromAPI = ref([])
   const isLoadingData = ref(true)
-  
+
   // 分页相关
   const pageSize = 10 // 每页从 API 加载10条
   const currentOffset = ref(0)
@@ -124,17 +112,17 @@
       } else {
         isLoading.value = true
       }
-      
+
       const response = await $fetch('/api/moments', {
         query: {
           offset: offset,
           limit: pageSize
         }
       })
-      
+
       if (response.success && response.data) {
         const { moments, total, hasMore } = response.data
-        
+
         if (append) {
           // 追加数据
           momentsDataFromAPI.value = [...momentsDataFromAPI.value, ...moments]
@@ -142,7 +130,7 @@
           // 替换数据
           momentsDataFromAPI.value = moments || []
         }
-        
+
         totalCount.value = total || 0
         hasMoreData.value = hasMore || false
         currentOffset.value = offset + (moments?.length || 0)
@@ -194,7 +182,7 @@
 
     // 从 API 加载下一页
     await loadMomentsFromAPI(currentOffset.value, true)
-    
+
     // 滚动到新加载的内容附近
     await nextTick()
     const loadMoreBtn = document.querySelector('.load-more-container')

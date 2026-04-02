@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * 登录接口。
+ *
+ * 功能：校验账号密码与 Turnstile，成功后创建加密 Session Cookie。
+ */
 import { verifyTurnstile } from '~/server/utils/turnstile';
 import { createSession } from '~/server/utils/session';
 
@@ -19,22 +24,22 @@ export default defineEventHandler(async (event) => {
   const turnstileSecretKey = useRuntimeConfig().turnstileSecretKey || process.env.TURNSTILE_SECRET_KEY;
   if (turnstileSecretKey) {
     const turnstileToken = body.turnstileToken;
-    
+
     if (!turnstileToken) {
       throw createError({
         statusCode: 400,
         message: '请完成人机验证'
       });
     }
-    
+
     // 获取客户端 IP
-    const clientIP = getHeader(event, 'cf-connecting-ip') || 
-                     getHeader(event, 'x-forwarded-for')?.split(',')[0]?.trim() || 
+    const clientIP = getHeader(event, 'cf-connecting-ip') ||
+                     getHeader(event, 'x-forwarded-for')?.split(',')[0]?.trim() ||
                      'unknown';
-    
+
     // 验证 Turnstile token
     const isValid = await verifyTurnstile(turnstileToken, turnstileSecretKey, clientIP);
-    
+
     if (!isValid) {
       throw createError({
         statusCode: 400,

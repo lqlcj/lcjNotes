@@ -1,15 +1,3 @@
-<!--
-  主页组件
-  
-  功能：
-    - 整合首页各个组件（Banner、文本块、文章列表、留言板）
-    - 双语文案展示
-    - 分隔线装饰
-  
-  特性：
-    - 响应式布局
-    - 移动端文本块垂直堆叠
--->
 <template>
   <div class="preview-page">
     <div class="preview-container">
@@ -68,6 +56,11 @@
 </template>
 
 <script setup>
+  /**
+   * 主页组件。
+   *
+   * 功能：整合 Banner、文章瀑布流与留言板，并提供双语文案与打字机效果。
+   */
   import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
   import { layoutConfig } from '~/config/layout'
   import HomeBanner from './home/components/HomeBanner.vue'

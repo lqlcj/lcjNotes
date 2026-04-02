@@ -1,18 +1,3 @@
-<!--
-  Giscus 评论系统组件
-  
-  功能：
-    - 集成 Giscus (基于 GitHub Discussions 的评论系统)
-    - 动态加载 Giscus 脚本
-    - 错误处理和重试机制
-    - 加载状态显示
-  
-  特性：
-    - 自动检测 Giscus iframe 加载状态
-    - 10秒超时检测
-    - 路由变化时自动重新加载
-    - 优雅的错误提示界面
--->
 <template>
   <div class="comments-container">
     <div class="comments-header">
@@ -44,6 +29,11 @@
 </template>
 
 <script setup>
+  /**
+   * Giscus 评论系统组件。
+   *
+   * 功能：动态加载 Giscus 脚本，监听加载状态并提供超时/错误重试。
+   */
   import { ref, onMounted, watch, onBeforeUnmount } from 'vue'
   import { useRoute } from 'vue-router'
   import LoadingMessage from '~/components/Common/LoadingMessage.vue'
@@ -69,6 +59,7 @@
   let loadTimeout = null
   let checkInterval = null
 
+  // 检测 Giscus iframe 是否完成渲染
   const checkGiscusLoaded = () => {
     if (!giscusContainer.value) return false
     const iframe = giscusContainer.value.querySelector('iframe.giscus-frame')
@@ -78,6 +69,7 @@
           return true
         }
       } catch (e) {
+        // 跨域限制下读取失败也视为加载完成
         return true
       }
     }
@@ -88,6 +80,7 @@
     isLoading.value = true
     hasError.value = false
 
+    // 清理旧脚本与计时器，避免重复加载
     if (giscusScript) {
       giscusScript.remove()
       giscusScript = null
@@ -106,6 +99,7 @@
       giscusContainer.value.innerHTML = ''
     }
 
+    // 组装 Giscus 脚本与配置项
     giscusScript = document.createElement('script')
     giscusScript.src = 'https://giscus.app/client.js'
     giscusScript.setAttribute('data-repo', props.repo)
@@ -124,6 +118,7 @@
     giscusScript.async = true
 
     giscusScript.onload = () => {
+      // 周期检查 iframe 渲染状态
       checkInterval = setInterval(() => {
         if (checkGiscusLoaded()) {
           isLoading.value = false
@@ -139,6 +134,7 @@
         }
       }, 500)
 
+      // 超时判定，避免长时间加载无反馈
       loadTimeout = setTimeout(() => {
         if (isLoading.value) {
           isLoading.value = false
@@ -152,6 +148,7 @@
     }
 
     giscusScript.onerror = () => {
+      // 加载失败时直接进入错误态
       isLoading.value = false
       hasError.value = true
       if (loadTimeout) {
@@ -168,6 +165,7 @@
       giscusContainer.value.appendChild(giscusScript)
     }
 
+    // 再做一次兜底超时，避免间隔检查失效
     setTimeout(() => {
       if (isLoading.value && !checkGiscusLoaded()) {
         isLoading.value = false
@@ -187,6 +185,7 @@
   watch(
     () => route.fullPath,
     () => {
+      // 路由变化后短延迟重载，确保容器已更新
       setTimeout(() => {
         loadGiscus()
       }, 100)
@@ -198,6 +197,7 @@
   })
 
   onBeforeUnmount(() => {
+    // 卸载时清理脚本与计时器
     if (giscusScript) {
       giscusScript.remove()
       giscusScript = null

@@ -1,17 +1,4 @@
-﻿<!--
-  页面全局加载遮罩组件
-  
-  功能：
-    - 全屏加载遮罩层
-    - 与全局 loading store 集成
-    - 显示加载动画和提示文字
-  
-  特性：
-    - 淡入淡出动画
-    - 毛玻璃效果
-    - 固定定位，覆盖整个页面
--->
-<template>
+﻿<template>
   <transition name="page-loading-fade">
     <div v-if="visible" class="page-loading-overlay">
       <div class="spinner"></div>
@@ -21,11 +8,17 @@
 </template>
 
 <script setup>
+  /**
+   * 页面全局加载遮罩组件。
+   *
+   * 功能：结合全局 loading store 控制显示，提供全屏遮罩与加载动画。
+   */
   import { computed } from "vue";
   import { useLoadingStore } from "~/stores/loadingStore";
 
   const loadingStore = useLoadingStore();
 
+  // 监听全局 loading 状态，决定遮罩显示
   const visible = computed(() => loadingStore.globalLoading);
 </script>
 

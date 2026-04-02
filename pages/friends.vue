@@ -1,17 +1,4 @@
-﻿<!--
-  友链页面组件
-  
-  功能：
-    - 左侧：朋友圈动态列表
-    - 右侧：友链列表和申请表单
-    - 申请友链按钮（带烟花效果）
-  
-  特性：
-    - 左右分栏布局（PC端）
-    - 移动端垂直堆叠
-    - 响应式设计
--->
-<template>
+﻿<template>
   <div v-if="isPageReady" class="friends-page">
     <div class="friends-container">
       <!-- 页面标题 -->
@@ -51,6 +38,11 @@
 </template>
 
 <script setup>
+  /**
+   * 友链页面组件。
+   *
+   * 功能：展示朋友圈动态与友链列表，支持申请表单与烟花交互。
+   */
   import { ref, onMounted, nextTick } from 'vue'
   import PageHeader from '~/components/HeaderBar/PageHeader.vue'
   import FriendsList from '~/components/Friends/FriendsList.vue'
@@ -84,7 +76,7 @@
     const wasExpanded = isFormExpanded.value
     toggleForm()
 
-    // 如果是从关闭状态变为打开状态，触发烟花效果
+    // 从关闭切换到打开时触发烟花
     if (!wasExpanded && isFormExpanded.value) {
       // 获取按钮的位置
       const button = event.currentTarget || (buttonRef.value?.$el) || buttonRef.value

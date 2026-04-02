@@ -1,19 +1,3 @@
-<!--
-  留言板组件 (Guestbook)
-  
-  功能：
-    - 可折叠的留言板界面
-    - 留言提交表单（支持姓名、邮箱、网站、内容）
-    - 留言列表展示
-    - Cloudflare Turnstile 人机验证
-    - 展开时触发烟花效果
-  
-  特性：
-    - 展开/收起动画
-    - 表单验证
-    - 错误处理和成功提示
-    - 响应式设计
--->
 <template>
   <div class="comments-container">
     <!-- 标题栏（可点击展开/收起） -->
@@ -82,7 +66,12 @@
 </template>
 
 <script setup>
-  import { ref, onMounted, onUnmounted, watch } from 'vue';
+  /**
+   * 留言板组件。
+   *
+   * 功能：提供可折叠留言表单与留言列表，集成 Turnstile 验证并支持提交反馈。
+   */
+  import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue';
   import { useConfetti } from '~/composables/useConfetti';
   import LoadingMessage from '~/components/Common/LoadingMessage.vue';
   import MessageItem from '~/components/Comments/MessageItem.vue';
@@ -90,7 +79,7 @@
   // 展开/收起状态
   const isExpanded = ref(false);
 
-  // 烟花效果
+  // 展开时触发烟花效果
   const { birthday } = useConfetti();
 
   // 切换展开/收起
@@ -98,15 +87,14 @@
     const wasExpanded = isExpanded.value;
     isExpanded.value = !isExpanded.value;
 
-    // 如果是从关闭状态变为打开状态，触发烟花效果
+    // 从关闭到打开时触发烟花
     if (!wasExpanded && isExpanded.value) {
-      // 延迟一点触发，让展开动画先开始
       setTimeout(() => {
         birthday();
       }, 200);
     }
 
-    // 如果展开，延迟加载 Turnstile（确保 DOM 已渲染）
+    // 展开后延迟加载 Turnstile（确保 DOM 已渲染）
     if (isExpanded.value) {
       setTimeout(() => {
         loadTurnstile();
@@ -152,7 +140,7 @@
   const loadTurnstile = () => {
     if (!turnstileSiteKey) {
       console.warn('Turnstile Site Key 未配置，跳过验证');
-      turnstileToken.value = 'skip'; // 允许跳过验证（开发环境）
+      turnstileToken.value = 'skip';
       return;
     }
 
@@ -164,9 +152,8 @@
       return;
     }
 
-    // 检查脚本是否已经存在
+    // 检查脚本是否已存在，等待加载完成
     if (document.querySelector('script[src="https://challenges.cloudflare.com/turnstile/v0/api.js"]')) {
-      // 脚本已存在，等待加载完成
       const checkInterval = setInterval(() => {
         if (window.turnstile) {
           clearInterval(checkInterval);
@@ -215,6 +202,7 @@
     }
 
     try {
+      // 渲染验证码并回填 token
       turnstileWidgetId = window.turnstile.render(turnstileContainer.value, {
         sitekey: turnstileSiteKey,
         callback: (token) => {
@@ -276,18 +264,17 @@
 
       if (response.success) {
         submitSuccess.value = true;
-        // 清空表单
+        // 清空表单并重置验证
         form.value = {
           name: '',
           email: '',
           website: '',
           content: ''
         };
-        // 重置 Turnstile
         resetTurnstile();
         // 重新加载留言列表
         await loadMessages();
-        // 3秒后隐藏成功提示
+        // 3 秒后隐藏成功提示
         setTimeout(() => {
           submitSuccess.value = false;
         }, 3000);

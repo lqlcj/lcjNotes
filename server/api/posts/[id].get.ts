@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * 文章详情接口。
+ *
+ * 功能：读取单篇文章详情，并使用 ETag 缓存。
+ */
 import { getKVStorage } from '~/server/utils/kv';
 import { handleApiError } from '~/server/utils/errorHandler';
 import { setPostDetailCacheHeaders, generateETag, checkETag } from '~/server/utils/cache';
@@ -32,17 +37,17 @@ export default defineEventHandler(async (event) => {
       success: true,
       data: postData
     };
-    
+
     // 生成 ETag 并检查条件请求
     const etag = generateETag(responseData);
     if (checkETag(event, etag)) {
       return; // 返回 304 Not Modified
     }
-    
+
     // 设置缓存头
     setPostDetailCacheHeaders(event);
     setHeader(event, 'ETag', etag);
-    
+
     return responseData;
   } catch (error: any) {
     if (error.statusCode) {

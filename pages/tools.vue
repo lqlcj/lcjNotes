@@ -1,19 +1,4 @@
-﻿<!--
-  工具页面组件
-  
-  功能：
-    - Tab 标签页切换（书签、管理后台）
-    - 书签列表展示
-    - 书签点击确认对话框
-    - 集成管理后台页面
-  
-  特性：
-    - 标签页切换动画
-    - 书签卡片网格布局
-    - 外部链接跳转确认
-    - 响应式设计
--->
-<template>
+﻿<template>
   <div class="tools-page">
     <div class="tools-container">
       <div class="tools-box">
@@ -90,6 +75,11 @@
 </template>
 
 <script setup>
+  /**
+   * 工具页面组件。
+   *
+   * 功能：提供书签瀑布流与管理后台入口，支持标签切换与外链确认。
+   */
   import { ref, onMounted, onUnmounted, watch, computed, nextTick } from 'vue'
   import PageHeader from '~/components/HeaderBar/PageHeader.vue'
   import AdminPanel from '~/pages/me.vue'
@@ -228,14 +218,14 @@
     }
   }
 
-  // 监听标签切换，加载书�?
+  // 监听标签切换，加载书签
   watch(activeTab, (newTab) => {
     if (newTab === 'bookmarks' && bookmarks.value.length === 0) {
       loadBookmarks()
     }
   })
 
-  // 显示确认�?
+  // 显示确认框
   const showConfirm = (bookmarkId) => {
     confirmingBookmarkId.value = bookmarkId
   }

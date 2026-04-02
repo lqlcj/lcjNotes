@@ -1,23 +1,3 @@
-<!--
-  通用边框按钮组件
-  
-  功能：简洁的边框样式按钮，符合页面主题风格
-  
-  使用示例：
-  <OutlineButton @click="handleClick">
-    <template #icon>+</template>
-    申请友链
-  </OutlineButton>
-  
-  <OutlineButton @click="handleClick" icon="→">
-    查看更多
-  </OutlineButton>
-  
-  Props:
-  - icon: 图标内容（可选，也可以通过 slot 传入）
-  - size: 按钮尺寸 'small' | 'medium' | 'large' (默认 'medium')
-  - disabled: 是否禁用
--->
 
 <template>
   <button :class="['outline-btn', `size-${size}`, { disabled: disabled }]" :disabled="disabled"
@@ -32,6 +12,16 @@
 </template>
 
 <script setup>
+  /**
+   * 通用边框按钮组件。
+   *
+   * 功能：简洁的边框样式按钮，适配页面主题风格。
+   *
+   * Props：
+   * - icon：图标内容（可选，也可通过 slot 传入）
+   * - size：按钮尺寸 'small' | 'medium' | 'large'
+   * - disabled：是否禁用
+   */
   defineProps({
     icon: {
       type: String,

@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * 删除留言接口。
+ *
+ * 功能：鉴权后删除留言并更新列表。
+ */
 import { getKVStorage } from '~/server/utils/kv';
 import { handleApiError } from '~/server/utils/errorHandler';
 import { verifyAuth } from '~/server/utils/auth';

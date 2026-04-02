@@ -1,16 +1,3 @@
-<!--
-  网站头部导航组件
-  
-  功能：
-    - 网站 Logo 和导航菜单
-    - 路由高亮显示
-    - 响应式设计（移动端固定在底部）
-  
-  特性：
-    - PC端：顶部导航栏
-    - 移动端：底部固定导航栏
-    - 路由激活状态检测
--->
 <template>
   <header class="header">
     <div class="logo">
@@ -41,12 +28,21 @@
 </template>
 
 <script setup>
+  /**
+   * 网站头部导航组件。
+   *
+   * 功能：
+   * - 展示 Logo 与主导航菜单
+   * - 根据路由高亮激活态
+   * - 适配移动端底部固定导航
+   */
   import { computed } from 'vue'
   // 使用 public 目录下的图片
   const logoImage = '/images/logo.webp'
-  
+
   const route = useRoute()
 
+  // 根据路径前缀判断 Friends 菜单的激活状态
   const isFriendsGroupActive = computed(() => route.path.startsWith('/friends'))
 </script>
 

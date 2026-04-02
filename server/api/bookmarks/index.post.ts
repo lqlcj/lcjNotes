@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * 创建书签接口。
+ *
+ * 功能：鉴权后写入书签并更新列表。
+ */
 import { getKVStorage } from '~/server/utils/kv';
 import { validateAndTrim, FIELD_LIMITS } from '~/server/utils/validation';
 import { handleApiError } from '~/server/utils/errorHandler';
@@ -40,10 +45,10 @@ export default defineEventHandler(async (event) => {
     // 生成新的书签 ID
     const bookmarksListKey = 'bookmarks:list';
     const bookmarksList = await kv.getItem(bookmarksListKey) as string[] || [];
-    const newId = bookmarksList.length > 0 
+    const newId = bookmarksList.length > 0
       ? String(Math.max(...bookmarksList.map(id => parseInt(id))) + 1)
       : '1';
-    
+
     // 构建书签数据
     const bookmarkData = {
       id: newId,
@@ -53,15 +58,15 @@ export default defineEventHandler(async (event) => {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
-    
+
     // 保存书签详情
     const bookmarkKey = `bookmark:${newId}`;
     await kv.setItem(bookmarkKey, bookmarkData);
-    
+
     // 添加到书签列表
     bookmarksList.push(newId);
     await kv.setItem(bookmarksListKey, bookmarksList);
-    
+
     return {
       success: true,
       data: bookmarkData,

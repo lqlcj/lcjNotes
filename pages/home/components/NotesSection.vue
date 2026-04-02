@@ -1,19 +1,3 @@
-<!--
-  文章笔记瀑布流组件（小红书风格）
-  
-  功能：
-    - 瀑布流布局展示文章列表
-    - 分页功能（每页12条）
-    - 点击文章打开阅读模态框
-    - 图片懒加载和错误处理
-  
-  特性：
-    - 响应式列数（桌面3列，移动端2列）
-    - 动态高度计算和分配
-    - 图片加载占位符
-    - 卡片动画效果
-    - 窗口大小变化时重新布局
--->
 <template>
   <div class="notes-section">
     <div class="notes-bg-layer"></div>
@@ -95,15 +79,20 @@
 </template>
 
 <script setup>
+/**
+ * 文章笔记瀑布流组件（小红书风格）。
+ *
+ * 功能：分页加载文章并按瀑布流布局渲染，支持图片占位、模态阅读与自适应列数。
+ */
 import { ref, computed, onMounted, nextTick, watch, onUnmounted } from 'vue'
 import { useNotesStore } from '~/stores/notesStore'
 import PageHeader from '~/components/HeaderBar/PageHeader.vue'
 import ArticleModal from './ArticleModal.vue'
 import LoadingMessage from '~/components/Common/LoadingMessage.vue'
 
-  // 使用 public 目录下的图片
-  const defaultCover = '/images/loading.webp'
-  const defaultAvatar = '/images/lcj.svg'
+// 使用 public 目录下的图片
+const defaultCover = '/images/loading.webp'
+const defaultAvatar = '/images/lcj.svg'
 
 const notesStore = useNotesStore()
 const containerRef = ref(null)
@@ -111,38 +100,38 @@ const waterfallRef = ref(null)
 const currentPage = ref(1)
 const PAGE_SIZE = 12
 
-  // Modal 相关状态
-  const modalVisible = ref(false)
-  const selectedArticleId = ref(null)
+// Modal 相关状态
+const modalVisible = ref(false)
+const selectedArticleId = ref(null)
 
-  // 瀑布流相关状态
-  const columnRefs = ref([])
-  const cardRefs = ref(new Map())
-  const columnItems = ref([]) // 每列的数据 [[], [], []]
-  const columnHeights = ref([]) // 每列的高度 [0, 0, 0]
-  const loadedImages = ref(new Set()) // 已加载的图片ID
-  const imageLoadedMap = ref({}) // 图片加载状态映射
-  const imageErrorMap = ref({}) // 图片错误状态映射
+// 瀑布流相关状态
+const columnRefs = ref([])
+const cardRefs = ref(new Map())
+const columnItems = ref([]) // 每列的数据 [[], [], []]
+const columnHeights = ref([]) // 每列的高度 [0, 0, 0]
+const loadedImages = ref(new Set()) // 已加载的图片ID
+const imageLoadedMap = ref({}) // 图片加载状态映射
+const imageErrorMap = ref({}) // 图片错误状态映射
 
-  // 异步加载状态
-  const isLoading = ref(true) // 初始为true，确保显示加载状态
-  const hasError = ref(false)
-  const errorMessage = ref('')
-  const isChangingPage = ref(false)
+// 异步加载状态
+const isLoading = ref(true) // 初始为true，确保显示加载状态
+const hasError = ref(false)
+const errorMessage = ref('')
+const isChangingPage = ref(false)
 
-  // 响应式列数
-  const columnCount = computed(() => {
-    if (typeof window === 'undefined') return 3 // SSR 默认3列
-    const width = window.innerWidth
-    // 超小屏：2列
-    if (width < 480) return 2
-    // 小屏手机：2列
-    if (width < 640) return 2
-    // 平板：2列
-    if (width < 1024) return 2
-    // 桌面：3列
-    return 3
-  })
+// 响应式列数
+const columnCount = computed(() => {
+  if (typeof window === 'undefined') return 3 // SSR 默认3列
+  const width = window.innerWidth
+  // 超小屏：2列
+  if (width < 480) return 2
+  // 小屏手机：2列
+  if (width < 640) return 2
+  // 平板：2列
+  if (width < 1024) return 2
+  // 桌面：3列
+  return 3
+})
 
 onMounted(async () => {
   await loadData()
@@ -178,21 +167,21 @@ const loadData = async () => {
   }
 }
 
-  // 重试加载
-  const retryLoad = async () => {
-    await loadData()
-  }
+// 重试加载
+const retryLoad = async () => {
+  await loadData()
+}
 
-  onUnmounted(() => {
-    if (typeof window !== 'undefined') {
-      window.removeEventListener('resize', handleResize)
-      // 清理 resize 定时器，防止内存泄漏
-      if (resizeTimer) {
-        clearTimeout(resizeTimer)
-        resizeTimer = null
-      }
+onUnmounted(() => {
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('resize', handleResize)
+    // 清理 resize 定时器，防止内存泄漏
+    if (resizeTimer) {
+      clearTimeout(resizeTimer)
+      resizeTimer = null
     }
-  })
+  }
+})
 
 // 确保数据按日期降序排序（最新的在前）
 const allData = computed(() => {
@@ -204,8 +193,8 @@ const allData = computed(() => {
   })
 })
 
-  // 视觉逻辑：定义比例模式，制造瀑布流的错落感
-  const ratioPattern = [0.75, 1.0, 0.75, 1.33, 0.6, 0.75, 1.0, 0.8, 1.2, 0.9]
+// 视觉逻辑：定义比例模式，制造瀑布流的错落感
+const ratioPattern = [0.75, 1.0, 0.75, 1.33, 0.6, 0.75, 1.0, 0.8, 1.2, 0.9]
 
 // 当前页的数据（带视觉比例）
 const currentPageData = computed(() => {
@@ -214,138 +203,139 @@ const currentPageData = computed(() => {
   const pageData = allData.value.slice(start, end)
 
   return pageData.map((item, index) => {
-      const visualRatio = item.aspectRatio || ratioPattern[index % ratioPattern.length]
-      const avatar = item.avatar || defaultAvatar
-      const img = item.img || defaultCover
-      return {
-        ...item,
-        visualRatio,
-        avatar,
-        img,
-        animationDelay: index * 0.05
-      }
-    })
+    const visualRatio = item.aspectRatio || ratioPattern[index % ratioPattern.length]
+    const avatar = item.avatar || defaultAvatar
+    const img = item.img || defaultCover
+    return {
+      ...item,
+      visualRatio,
+      avatar,
+      img,
+      animationDelay: index * 0.05
+    }
   })
+})
 
 const totalPages = computed(() => Math.ceil(allData.value.length / PAGE_SIZE))
 
-  // 设置列引用
-  const setColumnRef = (el, index) => {
-    if (el) {
-      columnRefs.value[index] = el
-    }
+// 设置列引用
+const setColumnRef = (el, index) => {
+  if (el) {
+    columnRefs.value[index] = el
   }
+}
 
-  // 设置卡片引用
-  const setCardRef = (el, id) => {
-    if (el) {
-      cardRefs.value.set(id, el)
-    }
+// 设置卡片引用
+const setCardRef = (el, id) => {
+  if (el) {
+    cardRefs.value.set(id, el)
   }
+}
 
-  // 获取指定列的数据
-  const getColumnItems = (colIndex) => {
-    return columnItems.value[colIndex] || []
-  }
+// 获取指定列的数据
+const getColumnItems = (colIndex) => {
+  return columnItems.value[colIndex] || []
+}
 
-  // 初始化列数据
-  const initColumns = () => {
-    const count = columnCount.value
-    columnItems.value = Array(count).fill(null).map(() => [])
-    columnHeights.value = Array(count).fill(0)
-  }
+// 初始化列数据
+const initColumns = () => {
+  const count = columnCount.value
+  columnItems.value = Array(count).fill(null).map(() => [])
+  columnHeights.value = Array(count).fill(0)
+}
 
-  // 将数据分配到最短的列
-  const distributeItems = () => {
-    initColumns()
-    const items = currentPageData.value
+// 将数据分配到最短的列
+const distributeItems = () => {
+  initColumns()
+  const items = currentPageData.value
 
-    items.forEach((item, index) => {
-      // 找到最短的列
-      const shortestColIndex = columnHeights.value.indexOf(Math.min(...columnHeights.value))
+  items.forEach((item) => {
+    // 找到最短的列
+    const shortestColIndex = columnHeights.value.indexOf(Math.min(...columnHeights.value))
 
-      // 添加到最短列
-      columnItems.value[shortestColIndex].push(item)
+    // 添加到最短列
+    columnItems.value[shortestColIndex].push(item)
 
-      // 估算高度（基于视觉比例，实际高度会在图片加载后更新）
-      const estimatedHeight = 200 * item.visualRatio + 80 // 图片高度 + 内容高度
-      columnHeights.value[shortestColIndex] += estimatedHeight
+    // 估算高度（基于视觉比例，实际高度会在图片加载后更新）
+    const estimatedHeight = 200 * item.visualRatio + 80 // 图片高度 + 内容高度
+    columnHeights.value[shortestColIndex] += estimatedHeight
+  })
+}
+
+// 图片加载完成后更新列高度
+const handleImageLoad = (itemId) => {
+  if (loadedImages.value.has(itemId)) return
+  loadedImages.value.add(itemId)
+  imageLoadedMap.value[itemId] = true
+
+  // 延迟更新，确保 DOM 已渲染
+  nextTick(() => {
+    setTimeout(() => {
+      updateColumnHeights()
+    }, 50)
+  })
+}
+
+// 图片加载错误处理
+const handleImageError = (itemId) => {
+  imageErrorMap.value[itemId] = true
+  imageLoadedMap.value[itemId] = true // 标记为已处理，避免重复显示占位符
+}
+
+// 更新所有列的实际高度
+const updateColumnHeights = () => {
+  const count = columnCount.value
+  columnHeights.value = Array(count).fill(0)
+
+  columnItems.value.forEach((items, colIndex) => {
+    let totalHeight = 0
+    items.forEach(item => {
+      const cardEl = cardRefs.value.get(item.id)
+      if (cardEl) {
+        totalHeight += cardEl.offsetHeight + 15 // 15px 是 margin-bottom
+      }
     })
-  }
+    columnHeights.value[colIndex] = totalHeight
+  })
+}
 
-  // 图片加载完成后更新列高度
-  const handleImageLoad = (itemId) => {
-    if (loadedImages.value.has(itemId)) return
-    loadedImages.value.add(itemId)
-    imageLoadedMap.value[itemId] = true
-
-    // 延迟更新，确保 DOM 已渲染
-    nextTick(() => {
-      setTimeout(() => {
-        updateColumnHeights()
-      }, 50)
-    })
-  }
-
-  // 图片加载错误处理
-  const handleImageError = (itemId) => {
-    imageErrorMap.value[itemId] = true
-    imageLoadedMap.value[itemId] = true // 标记为已处理，避免重复显示占位符
-  }
-
-  // 更新所有列的实际高度
-  const updateColumnHeights = () => {
-    const count = columnCount.value
-    columnHeights.value = Array(count).fill(0)
-
-    columnItems.value.forEach((items, colIndex) => {
-      let totalHeight = 0
-      items.forEach(item => {
-        const cardEl = cardRefs.value.get(item.id)
-        if (cardEl) {
-          totalHeight += cardEl.offsetHeight + 15 // 15px 是 margin-bottom
-        }
-      })
-      columnHeights.value[colIndex] = totalHeight
-    })
-  }
-
-  // 窗口大小变化处理（防抖）
-  let resizeTimer = null
-  const handleResize = () => {
-    if (resizeTimer) clearTimeout(resizeTimer)
-    resizeTimer = setTimeout(() => {
-      loadedImages.value.clear()
-      distributeItems()
-      nextTick(() => {
-        setTimeout(() => {
-          updateColumnHeights()
-        }, 100)
-      })
-    }, 150)
-  }
-
-  // 监听当前页数据变化和列数变化
-  watch([currentPageData, columnCount], () => {
-    // 如果正在加载，延迟执行
-    if (isLoading.value) {
-      return
-    }
-
-    // 如果没有数据，不执行分配
-    if (currentPageData.value.length === 0) {
-      return
-    }
-
-    cardRefs.value.clear() // 清空卡片引用
+// 窗口大小变化处理（防抖）
+let resizeTimer = null
+const handleResize = () => {
+  if (resizeTimer) clearTimeout(resizeTimer)
+  resizeTimer = setTimeout(() => {
+    // 重置已加载状态并重新分配
+    loadedImages.value.clear()
     distributeItems()
     nextTick(() => {
-      // 等待图片加载和 DOM 更新
       setTimeout(() => {
         updateColumnHeights()
-      }, 300)
+      }, 100)
     })
-  }, { immediate: false }) // 改为 false，避免在数据加载前触发
+  }, 150)
+}
+
+// 监听当前页数据变化和列数变化
+watch([currentPageData, columnCount], () => {
+  // 如果正在加载，延迟执行
+  if (isLoading.value) {
+    return
+  }
+
+  // 如果没有数据，不执行分配
+  if (currentPageData.value.length === 0) {
+    return
+  }
+
+  cardRefs.value.clear() // 清空卡片引用
+  distributeItems()
+  nextTick(() => {
+    // 等待图片加载和 DOM 更新
+    setTimeout(() => {
+      updateColumnHeights()
+    }, 300)
+  })
+}, { immediate: false }) // 改为 false，避免在数据加载前触发
 
 const changePage = async (page) => {
   if (page < 1 || page > totalPages.value || isChangingPage.value) return
@@ -382,16 +372,16 @@ const changePage = async (page) => {
   }
 }
 
-  const handleClick = (item) => {
-    // 打开 modal 显示文章
-    selectedArticleId.value = item.id
-    modalVisible.value = true
-  }
+const handleClick = (item) => {
+  // 打开 modal 显示文章
+  selectedArticleId.value = item.id
+  modalVisible.value = true
+}
 
-  const closeModal = () => {
-    modalVisible.value = false
-    selectedArticleId.value = null
-  }
+const closeModal = () => {
+  modalVisible.value = false
+  selectedArticleId.value = null
+}
 </script>
 
 <style scoped>

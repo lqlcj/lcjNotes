@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * 创建朋友圈动态接口。
+ *
+ * 功能：鉴权后写入动态数据并更新列表。
+ */
 import { getKVStorage } from '~/server/utils/kv';
 import { validateAndTrim, FIELD_LIMITS } from '~/server/utils/validation';
 import { handleApiError } from '~/server/utils/errorHandler';
@@ -38,14 +43,14 @@ export default defineEventHandler(async (event) => {
     // 生成新的动态 ID（参考 Notes 的简单方式）
     const momentsListKey = 'moments:list';
     const momentsList = await kv.getItem(momentsListKey) as string[] || [];
-    const newId = momentsList.length > 0 
+    const newId = momentsList.length > 0
       ? String(Math.max(...momentsList.map(id => parseInt(id) || 0)) + 1)
       : '1';
-    
+
     // 构建动态数据
     const now = new Date();
     const timestamp = `创建时间: ${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
-    
+
     const momentData = {
       id: parseInt(newId),
       author: {
@@ -56,14 +61,14 @@ export default defineEventHandler(async (event) => {
       timestamp: body.timestamp || timestamp,
       images: body.images || []
     };
-    
+
     // 保存动态详情
     await kv.setItem(`moment:${newId}`, momentData);
-    
+
     // 更新动态列表
     momentsList.push(newId);
     await kv.setItem(momentsListKey, momentsList);
-    
+
     return {
       success: true,
       data: momentData,

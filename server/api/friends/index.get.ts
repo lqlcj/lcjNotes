@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * 友链列表接口（公开）。
+ *
+ * 功能：读取已批准友链并随机排序返回。
+ */
 import { getKVStorage } from '~/server/utils/kv';
 import { handleApiError } from '~/server/utils/errorHandler';
 
@@ -18,10 +23,10 @@ export default defineEventHandler(async (event) => {
         friends.push(friendData);
       }
     }
-    
+
     // 随机排序
     friends.sort(() => Math.random() - 0.5);
-    
+
     return {
       success: true,
       data: friends

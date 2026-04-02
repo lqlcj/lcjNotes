@@ -1,19 +1,4 @@
-﻿<!--
-  友链申请表单组件
-  
-  功能：
-    - 友链申请表单（网站名称、链接、描述、图标）
-    - Cloudflare Turnstile 人机验证
-    - 表单验证和提交
-    - 成功提示
-  
-  特性：
-    - 展开/收起动画
-    - 表单验证（URL格式等）
-    - 错误处理和提示
-    - 响应式设计
--->
-<template>
+﻿<template>
   <transition name="slide-down">
     <div v-if="isExpanded" class="request-form glass-panel">
       <div class="form-content">
@@ -152,6 +137,11 @@
 </template>
 
 <script setup>
+/**
+ * 友链申请表单组件。
+ *
+ * 功能：提供友链申请表单，集成 Turnstile 校验、表单验证与提交反馈。
+ */
 import { reactive, ref, onMounted, onUnmounted, watch } from "vue";
 
 const config = useRuntimeConfig();
@@ -303,9 +293,8 @@ const handleSubmit = async () => {
     });
 
     if (response.success) {
-      // 显示成功提示
+      // 显示成功提示并重置验证
       showSuccess.value = true;
-      // 重置 Turnstile
       resetTurnstile();
       // 3秒后自动重置表单
       setTimeout(() => {

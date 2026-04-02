@@ -1,22 +1,3 @@
-<!--
-  管理后台页面组件
-  
-  功能：
-    - 登录认证（带 Turnstile 验证）
-    - 文章管理（增删改查）
-    - 留言管理
-    - 友链管理（申请审核、已批准友链）
-    - 朋友圈管理
-    - 书签管理
-    - 图床管理（图片上传、删除、复制链接）
-  
-  特性：
-    - Tab 标签页切换
-    - 表单模态框
-    - 图片上传（支持拖拽）
-    - 成功提示 Toast
-    - 响应式设计
--->
 <template>
   <div class="admin-page">
     <div class="admin-container">
@@ -626,6 +607,11 @@
 </template>
 
 <script setup>
+  /**
+   * 管理后台页面组件。
+   *
+   * 功能：提供登录认证与内容管理（文章、留言、友链、朋友圈、书签、图床）。
+   */
   import { ref, computed, onMounted, nextTick, watch } from 'vue';
 
   definePageMeta({
@@ -644,6 +630,8 @@
   const turnstileContainer = ref(null);
   const turnstileToken = ref('');
   let turnstileWidgetId = null;
+
+  // Tabs 切换入口
 
   const activeTab = ref('posts'); // 'posts' 或 'messages'
 
@@ -798,7 +786,7 @@
     }, 2000);
   };
 
-  // 加载 Turnstile
+  // Turnstile：脚本加载、渲染与重置
   const loadTurnstile = async () => {
     if (!turnstileSiteKey) {
       console.warn('Turnstile Site Key 未配置，跳过验证');
@@ -906,7 +894,7 @@
     }
   };
 
-  // 检查是否已登录（通过 API 检查 session cookie）
+  // 登录态检查：已登录则批量拉取数据，否则加载 Turnstile
   onMounted(async () => {
     try {
       const response = await $fetch('/api/auth/check');
@@ -947,7 +935,7 @@
     }
   });
 
-  // 登录
+  // 登录（含 Turnstile token 校验）
   const handleLogin = async () => {
     // 验证 Turnstile token
     if (turnstileSiteKey && !turnstileToken.value) {
@@ -1003,7 +991,7 @@
     posts.value = [];
   };
 
-  // 加载文章列表
+  // 文章列表：拉取列表并更新状态
   const loadPosts = async () => {
     loading.value = true;
     try {
@@ -1068,7 +1056,7 @@
     }
   };
 
-  // 提交表单
+  // 提交表单（创建/更新文章）
   const handleSubmit = async () => {
     submitting.value = true;
     // 使用 session cookie，无需手动设置 token
@@ -1164,7 +1152,7 @@
     await uploadImage(file);
   };
 
-  // 上传图片到 R2
+  // 上传图片到 R2（用于文章封面）
   const uploadImage = async (file) => {
     uploading.value = true;
     uploadProgress.value = 0;
@@ -1266,7 +1254,7 @@
     }
   };
 
-  // 上传朋友圈图片到 R2
+  // 上传朋友圈图片到 R2（批量上传中的单个文件）
   const uploadMomentImage = async (file) => {
     uploadingMomentImages.value = true;
     momentUploadProgress.value = 0;
@@ -1933,7 +1921,7 @@
     }
   };
 
-  // 处理拖拽上传
+  // 处理拖拽上传（图床）
   const handleDrop = async (event) => {
     isDragging.value = false;
     const files = Array.from(event.dataTransfer.files || []);
@@ -1999,7 +1987,7 @@
     }
   };
 
-  // 加载图片列表
+  // 加载图片列表（支持游标分页）
   const loadAssets = async (cursor = null) => {
     assetsLoading.value = true;
     try {
@@ -2090,7 +2078,7 @@
     event.target.src = '/images/placeholder.png'; // 可以设置一个占位图
   };
 
-  // 监听标签页切换，加载图床数据
+  // 监听标签页切换，按需加载图床数据
   watch(activeTab, (newTab) => {
     if (newTab === 'assets' && assets.value.length === 0) {
       loadAssets();

@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * 更新朋友圈动态接口。
+ *
+ * 功能：鉴权后按字段更新动态内容。
+ */
 import { getKVStorage } from '~/server/utils/kv';
 import { validateAndTrim, FIELD_LIMITS } from '~/server/utils/validation';
 import { handleApiError } from '~/server/utils/errorHandler';
@@ -36,7 +41,7 @@ export default defineEventHandler(async (event) => {
     let avatar = momentData.author?.avatar || '/images/lcj.svg'
     let content = momentData.content
     let images = momentData.images || []
-    
+
     if (body.author?.nickname !== undefined) {
       nickname = validateAndTrim(body.author.nickname, FIELD_LIMITS.MOMENT_NICKNAME, '昵称')
     }
@@ -55,7 +60,7 @@ export default defineEventHandler(async (event) => {
       }
       images = body.images
     }
-    
+
     // 更新数据（保留原有数据，只更新提供的字段）
     const updatedData = {
       ...momentData,

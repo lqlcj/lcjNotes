@@ -1,16 +1,4 @@
-﻿<!--
-  友链列表组件
-  
-  功能：
-    - 显示已批准的友链列表
-    - 点击卡片直接在新页面跳转
-  
-  特性：
-    - 网格布局
-    - 图片加载错误处理（使用默认头像）
-    - 响应式设计
--->
-<template>
+﻿<template>
   <div class="friends-list">
     <div v-if="isLoading" class="loading-state">
       <p>加载中...</p>
@@ -48,6 +36,11 @@
 </template>
 
 <script setup>
+  /**
+   * 友链列表组件。
+   *
+   * 功能：加载并展示已审核的友链列表，支持图片兜底与卡片跳转。
+   */
   import { ref, onMounted } from 'vue'
   // 使用 public 目录下的图片
   const defaultAvatar = '/images/home/avatar.webp'

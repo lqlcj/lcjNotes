@@ -1,18 +1,3 @@
-<!--
-  回到顶部按钮组件
-  
-  功能：
-    - 当页面向下滚动超过300px时显示按钮
-    - 点击按钮平滑滚动到页面顶部
-    - 支持响应式设计，移动端和桌面端自适应
-    - 支持深色模式
-  
-  特性：
-    - 米白色纸张质感设计
-    - 漂浮动画效果
-    - 淡入淡出过渡动画
-    - 可访问性优化（aria-label）
--->
 <template>
   <transition name="fade-slide">
     <button v-if="visible" class="back-to-top floating-button" @click="scrollToTop" title="回到顶部" aria-label="回到顶部">
@@ -26,31 +11,39 @@
 </template>
 
 <script setup>
+  /**
+   * 回到顶部按钮组件。
+   *
+   * 功能：
+   * - 页面向下滚动超过阈值时显示按钮
+   * - 点击后平滑滚动回顶部
+   * - 适配响应式与深色模式
+   */
   import { ref, onMounted, onUnmounted } from 'vue'
 
   const visible = ref(false)
 
-  // 监听滚动事件
+  // 监听滚动事件，超过阈值时展示按钮
   const handleScroll = () => {
-    // 当向下滚动超过 300px 时显示按钮
     visible.value = window.scrollY > 300
   }
 
-  // 核心功能：平滑滚动到顶部
+  // 触发平滑滚动到顶部
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
-      behavior: 'smooth' // 关键：平滑滚动
+      behavior: 'smooth'
     })
   }
 
   onMounted(() => {
+    // 挂载时绑定滚动监听并立即同步可见状态
     window.addEventListener('scroll', handleScroll)
-    // 初始检查
     handleScroll()
   })
 
   onUnmounted(() => {
+    // 组件卸载时移除监听，避免内存泄漏
     window.removeEventListener('scroll', handleScroll)
   })
 </script>

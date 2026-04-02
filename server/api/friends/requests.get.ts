@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * 友链申请列表接口。
+ *
+ * 功能：鉴权后读取友链申请并按时间倒序返回。
+ */
 import { getKVStorage } from '~/server/utils/kv';
 import { handleApiError } from '~/server/utils/errorHandler';
 import { verifyAuth } from '~/server/utils/auth';

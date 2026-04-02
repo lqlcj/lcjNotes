@@ -1,15 +1,4 @@
-﻿<!--
-  首页横幅组件
-  
-  功能：
-    - 显示网站 Logo
-    - 淡入向上动画效果
-  
-  特性：
-    - 响应式设计
-    - 支持减少动画偏好设置
--->
-<template>
+﻿<template>
   <div class="banner-wrapper">
     <div class="banner-content">
       <img :src="logoImage" alt="Logo" class="banner-logo" />
@@ -18,6 +7,11 @@
 </template>
 
 <script setup>
+  /**
+   * 首页横幅组件。
+   *
+   * 功能：展示站点 Logo 与基础入场动画。
+   */
   // 使用 public 目录下的图片
   const logoImage = '/images/Logo2.webp'
 </script>

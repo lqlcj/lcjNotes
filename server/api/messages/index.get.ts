@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * 留言列表接口。
+ *
+ * 功能：读取留言数据并构建树形结构，按时间倒序返回。
+ */
 import { getKVStorage } from '~/server/utils/kv';
 import { handleApiError } from '~/server/utils/errorHandler';
 
@@ -10,7 +15,7 @@ export default defineEventHandler(async (event) => {
     // 从 KV 获取所有留言的 ID 列表
     const messagesListKey = 'messages:list';
     const messagesList = await kv.getItem(messagesListKey) as string[] || [];
-    
+
     // 获取所有留言的详细信息
     const messages = [];
     for (const messageId of messagesList) {
@@ -30,16 +35,16 @@ export default defineEventHandler(async (event) => {
         });
       }
     }
-    
+
     // 构建树形结构
     const messageMap = new Map();
     const rootMessages = [];
-    
+
     // 先创建所有消息的映射
     messages.forEach(msg => {
       messageMap.set(msg.id, msg);
     });
-    
+
     // 构建树形结构
     messages.forEach(msg => {
       if (msg.parentId && messageMap.has(msg.parentId)) {
@@ -54,7 +59,7 @@ export default defineEventHandler(async (event) => {
         rootMessages.push(msg);
       }
     });
-    
+
     // 对顶级留言和回复都按日期降序排序
     const sortMessages = (msgs) => {
       msgs.sort((a, b) => {
@@ -69,9 +74,9 @@ export default defineEventHandler(async (event) => {
         }
       });
     };
-    
+
     sortMessages(rootMessages);
-    
+
     return {
       success: true,
       data: rootMessages

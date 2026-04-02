@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * 书签列表接口（公开）。
+ *
+ * 功能：读取书签详情并按创建时间倒序返回。
+ */
 import { getKVStorage } from '~/server/utils/kv';
 import { handleApiError } from '~/server/utils/errorHandler';
 
@@ -18,14 +23,14 @@ export default defineEventHandler(async (event) => {
         bookmarks.push(bookmarkData);
       }
     }
-    
+
     // 按创建时间倒序排序（最新的在前）
     bookmarks.sort((a: any, b: any) => {
       const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
       const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
       return timeB - timeA;
     });
-    
+
     return {
       success: true,
       data: bookmarks

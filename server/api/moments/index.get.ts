@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * 朋友圈列表接口（公开）。
+ *
+ * 功能：分页读取动态列表，并在需要时尝试恢复列表索引。
+ */
 import { getKVStorage } from '~/server/utils/kv';
 import { handleApiError } from '~/server/utils/errorHandler';
 
@@ -15,19 +20,19 @@ export default defineEventHandler(async (event) => {
     const momentsListKey = 'moments:list';
     let momentsList = await kv.getItem(momentsListKey) as string[] || [];
     
-    // 🔥 优化：只在列表为空且没有恢复标志时尝试恢复数据
+    // 列表为空且未尝试恢复时，从常见范围重建索引
     const recoveryFlagKey = 'moments:recovery_attempted';
     if (momentsList.length === 0) {
       const recoveryAttempted = await kv.getItem(recoveryFlagKey);
-      
+
       if (!recoveryAttempted) {
         // 标记已尝试恢复，避免每次都执行
         await kv.setItem(recoveryFlagKey, true);
-        
+
         // 尝试从常见的 ID 范围恢复（限制范围，提高效率）
         const recoveredIds: string[] = [];
         const maxRecoveryId = 500; // 限制恢复范围，避免性能问题
-        
+
         for (let id = 1; id <= maxRecoveryId; id++) {
           const momentKey = `moment:${id}`;
           const momentData = await kv.getItem(momentKey);
@@ -35,7 +40,7 @@ export default defineEventHandler(async (event) => {
             recoveredIds.push(String(id));
           }
         }
-        
+
         if (recoveredIds.length > 0) {
           // 恢复列表
           momentsList = recoveredIds;

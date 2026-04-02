@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * 单条朋友圈接口（公开）。
+ *
+ * 功能：按 ID 读取单条动态详情。
+ */
 import { getKVStorage } from '~/server/utils/kv';
 import { handleApiError } from '~/server/utils/errorHandler';
 

@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * 管理员新增友链接口。
+ *
+ * 功能：鉴权后直接写入友链数据（无需申请流程）。
+ */
 import { getKVStorage } from '~/server/utils/kv';
 import { validateAndTrim, FIELD_LIMITS } from '~/server/utils/validation';
 import { handleApiError } from '~/server/utils/errorHandler';
@@ -41,10 +46,10 @@ export default defineEventHandler(async (event) => {
     // 生成新的友链 ID
     const friendsListKey = 'friends:list';
     const friendsList = await kv.getItem(friendsListKey) as string[] || [];
-    const newId = friendsList.length > 0 
+    const newId = friendsList.length > 0
       ? String(Math.max(...friendsList.map(id => parseInt(id))) + 1)
       : '1';
-    
+
     // 构建友链数据
     const friendData = {
       id: newId,
@@ -54,15 +59,15 @@ export default defineEventHandler(async (event) => {
       avatar: avatar,
       date: new Date().toISOString().split('T')[0]
     };
-    
+
     // 保存友链详情
     const friendKey = `friend:${newId}`;
     await kv.setItem(friendKey, friendData);
-    
+
     // 添加到友链列表
     friendsList.push(newId);
     await kv.setItem(friendsListKey, friendsList);
-    
+
     return {
       success: true,
       data: friendData,

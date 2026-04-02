@@ -1,20 +1,4 @@
-﻿<!--
-  错误边界组件 - 全局错误处理
-  
-  用途：
-    捕获子组件中未处理的错误，防止整个应用崩溃
-    显示友好的错误提示界面，提供恢复选项
-  
-  工作原理：
-    使用 Vue 3 的 onErrorCaptured 生命周期钩子捕获子组件错误
-    当捕获到错误时，显示错误提示界面而不是白屏
-  
-  使用方式：
-    <ErrorBoundary>
-      <YourComponent />
-    </ErrorBoundary>
--->
-<template>
+﻿<template>
   <div v-if="hasError" class="error-boundary">
     <div class="error-container">
       <div class="error-icon">⚠️</div>
@@ -51,13 +35,12 @@
 </template>
 
 <script setup>
-  import { ref, onErrorCaptured } from 'vue';
-
   /**
-   * 错误边界组件
-   * @component ErrorBoundary
-   * @description 捕获子组件中的错误，防止应用崩溃
+   * 错误边界组件。
+   *
+   * 用途：捕获子组件未处理的错误，显示友好提示并提供恢复操作。
    */
+  import { ref, onErrorCaptured } from 'vue';
 
   // 错误状态
   const hasError = ref(false);
@@ -65,18 +48,14 @@
   const showDetails = ref(false);
 
   /**
-   * 捕获子组件中的错误
-   * @param {Error} err - 错误对象
-   * @param {Component} instance - 出错的组件实例
-   * @param {string} info - 错误信息
-   * @returns {boolean} 返回 false 表示已处理错误，阻止错误继续传播
+   * 捕获子组件中的错误，阻止错误继续向上传播。
    */
   onErrorCaptured((err, instance, info) => {
     console.error('错误边界捕获到错误:', err);
     console.error('组件实例:', instance);
     console.error('错误信息:', info);
 
-    // 记录错误信息
+    // 汇总错误详情，供用户展开查看
     errorInfo.value = `
 错误类型: ${err.name}
 错误消息: ${err.message}
@@ -85,29 +64,27 @@
 时间: ${new Date().toLocaleString()}
     `.trim();
 
-    // 标记为有错误
+    // 标记为有错误，切换到错误展示界面
     hasError.value = true;
 
-    // 返回 false 阻止错误继续向上传播
     return false;
   });
 
   /**
-   * 重试：清除错误状态，重新渲染子组件
+   * 重试：清空错误状态并刷新页面。
    */
   const handleRetry = () => {
     hasError.value = false;
     errorInfo.value = '';
     showDetails.value = false;
-    
-    // 强制刷新当前页面
+
     if (process.client) {
       window.location.reload();
     }
   };
 
   /**
-   * 返回首页
+   * 返回首页并重置错误状态。
    */
   const handleGoHome = () => {
     hasError.value = false;
@@ -117,7 +94,7 @@
   };
 
   /**
-   * 切换错误详情显示
+   * 切换错误详情显示。
    */
   const toggleDetails = () => {
     showDetails.value = !showDetails.value;

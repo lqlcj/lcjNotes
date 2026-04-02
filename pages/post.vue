@@ -1,19 +1,4 @@
-﻿<!--
-  文章详情页面组件
-  
-  功能：
-    - 显示单篇文章的完整内容
-    - Markdown 渲染
-    - 返回列表按钮
-    - 加载状态和错误处理
-  
-  特性：
-    - 玻璃态卡片设计
-    - 代码块和表格横向滚动处理
-    - 响应式设计
-    - 3秒后自动返回（错误时）
--->
-<template>
+﻿<template>
   <div class="post-page-bg">
     <div class="post-container">
       <div class="nav-bar">
@@ -56,6 +41,11 @@
 </template>
 
 <script setup>
+  /**
+   * 文章详情页面组件。
+   *
+   * 功能：加载单篇文章并渲染 Markdown，支持错误回退与返回列表定位。
+   */
   import { ref, onMounted, computed } from 'vue';
   import { useNotesStore } from '~/stores/notesStore';
   // 使用 public 目录下的图片
@@ -86,12 +76,12 @@
         // 优先使用 ID 从 API 获取文章
         try {
           const response = await $fetch(`/api/posts/${postId}`);
-          
+
           if (response && response.success && response.data) {
             const postData = response.data;
             // 初始化安全的解析器
             const md = createSafeMarkdownIt();
-            
+
             // 转换为兼容格式
             post.value = {
               attributes: {
@@ -134,7 +124,7 @@
       // 如果都失败了，显示错误信息而不是立即跳转
       errorMessage.value = '文章加载失败，请检查文章是否存在';
       console.error('文章加载失败，postId:', postId, 'filePath:', filePath);
-      
+
       // 3秒后自动跳回主页
       setTimeout(() => {
         navigateTo('/home');
@@ -142,7 +132,7 @@
     } catch (e) {
       console.error("Post loading error:", e);
       errorMessage.value = '加载文章时发生错误: ' + (e.message || '未知错误');
-      
+
       // 3秒后自动跳回主页
       setTimeout(() => {
         navigateTo('/home');

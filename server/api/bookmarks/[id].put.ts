@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * 更新书签接口。
+ *
+ * 功能：鉴权后更新书签数据。
+ */
 import { getKVStorage } from '~/server/utils/kv';
 import { validateAndTrim, FIELD_LIMITS } from '~/server/utils/validation';
 import { handleApiError } from '~/server/utils/errorHandler';
@@ -62,9 +67,9 @@ export default defineEventHandler(async (event) => {
       description: description,
       updatedAt: new Date().toISOString()
     };
-    
+
     await kv.setItem(bookmarkKey, bookmarkData);
-    
+
     return {
       success: true,
       data: bookmarkData,

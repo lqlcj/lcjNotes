@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * 创建文章接口。
+ *
+ * 功能：鉴权后写入文章数据并更新文章列表。
+ */
 import { getKVStorage } from '~/server/utils/kv';
 import { validateAndTrim, validateLength, FIELD_LIMITS } from '~/server/utils/validation';
 import { handleApiError } from '~/server/utils/errorHandler';
@@ -31,10 +36,10 @@ export default defineEventHandler(async (event) => {
     // 生成新的文章 ID
     const postsListKey = 'posts:list';
     const postsList = await kv.getItem(postsListKey) as string[] || [];
-    const newId = postsList.length > 0 
+    const newId = postsList.length > 0
       ? String(Math.max(...postsList.map(id => parseInt(id))) + 1)
       : '1';
-    
+
     // 构建文章数据
     const postData = {
       id: newId,
@@ -47,15 +52,15 @@ export default defineEventHandler(async (event) => {
       likes: body.likes || 0,
       body: postBody
     };
-    
+
     // 保存文章
     const postKey = `post:${newId}`;
     await kv.setItem(postKey, postData);
-    
+
     // 更新文章列表
     postsList.push(newId);
     await kv.setItem(postsListKey, postsList);
-    
+
     return {
       success: true,
       data: postData

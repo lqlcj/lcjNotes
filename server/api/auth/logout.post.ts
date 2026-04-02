@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * 登出接口。
+ *
+ * 功能：清理 Session Cookie。
+ */
 import { destroySession } from '~/server/utils/session';
 
 // 登出接口

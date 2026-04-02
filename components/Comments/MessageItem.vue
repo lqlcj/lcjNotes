@@ -1,11 +1,3 @@
-<!--
-  留言项组件 (MessageItem)
-  
-  功能：
-    - 递归渲染留言和回复
-    - 支持回复功能
-    - 显示回复表单
--->
 <template>
   <div class="message-item-wrapper" :class="{ 'is-reply': isReply }">
     <div class="message-item glass-card">
@@ -78,6 +70,11 @@
 </template>
 
 <script setup>
+/**
+ * 留言项组件。
+ *
+ * 功能：递归渲染留言与回复，提供回复表单并接入 Turnstile 校验。
+ */
 import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue';
 
 const props = defineProps({
@@ -127,6 +124,7 @@ const toggleReplyForm = () => {
 };
 
 const loadTurnstile = () => {
+  // 未配置站点密钥时跳过校验
   if (!props.turnstileSiteKey) {
     replyTurnstileToken.value = 'skip';
     return;
@@ -197,6 +195,7 @@ const renderTurnstile = () => {
   }
 
   try {
+    // 渲染验证码并回填 token
     turnstileWidgetId = window.turnstile.render(turnstileContainer.value, {
       sitekey: props.turnstileSiteKey,
       callback: (token) => {
@@ -219,6 +218,7 @@ const renderTurnstile = () => {
 };
 
 const resetTurnstile = () => {
+  // 清理 widget 与 token
   if (turnstileWidgetId !== null && window.turnstile) {
     try {
       if (typeof window.turnstile.remove === 'function') {
@@ -230,14 +230,14 @@ const resetTurnstile = () => {
     turnstileWidgetId = null;
   }
   replyTurnstileToken.value = '';
-  
-  // 清空容器
+
   if (turnstileContainer.value) {
     turnstileContainer.value.innerHTML = '';
   }
 };
 
 const submitReply = async () => {
+  // 未通过验证时阻止提交
   if (props.turnstileSiteKey && !replyTurnstileToken.value) {
     submitError.value = '请完成人机验证';
     return;
@@ -260,7 +260,7 @@ const submitReply = async () => {
     });
 
     if (response.success) {
-      // 清空表单
+      // 清空表单与验证状态，通知父组件刷新
       replyForm.value = {
         name: '',
         email: '',
@@ -269,7 +269,6 @@ const submitReply = async () => {
       };
       resetTurnstile();
       showReplyForm.value = false;
-      // 触发父组件重新加载
       emit('reload');
     }
   } catch (error) {
@@ -294,10 +293,9 @@ const formatDate = (dateString) => {
   });
 };
 
-// 监听回复表单的显示状态，确保清理
+// 监听回复表单的显示状态，关闭时清理验证状态
 watch(showReplyForm, (newVal) => {
   if (!newVal) {
-    // 表单关闭时清理
     resetTurnstile();
   }
 });

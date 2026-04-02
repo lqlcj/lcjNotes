@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * 创建留言接口。
+ *
+ * 功能：校验输入与 Turnstile，支持管理员自定义时间与回复。
+ */
 import { getKVStorage } from '~/server/utils/kv';
 import { verifyTurnstile } from '~/server/utils/turnstile';
 import { validateAndTrim, validateLength, FIELD_LIMITS } from '~/server/utils/validation';
@@ -60,7 +65,7 @@ export default defineEventHandler(async (event) => {
   if (!isAdmin) {
     const turnstileSecretKey = useRuntimeConfig().turnstileSecretKey || process.env.TURNSTILE_SECRET_KEY;
     const turnstileToken = body.turnstileToken;
-    
+
     // 如果配置了 Turnstile，必须验证
     if (turnstileSecretKey) {
       if (!turnstileToken) {
@@ -69,15 +74,15 @@ export default defineEventHandler(async (event) => {
           message: '请完成人机验证'
         });
       }
-      
+
       // 获取客户端 IP
-      const clientIP = getHeader(event, 'cf-connecting-ip') || 
-                       getHeader(event, 'x-forwarded-for')?.split(',')[0]?.trim() || 
+      const clientIP = getHeader(event, 'cf-connecting-ip') ||
+                       getHeader(event, 'x-forwarded-for')?.split(',')[0]?.trim() ||
                        'unknown';
-      
+
       // 验证 Turnstile token
       const isValid = await verifyTurnstile(turnstileToken, turnstileSecretKey, clientIP);
-      
+
       if (!isValid) {
         throw createError({
           statusCode: 400,
@@ -91,10 +96,10 @@ export default defineEventHandler(async (event) => {
     // 生成新的留言 ID
     const messagesListKey = 'messages:list';
     const messagesList = await kv.getItem(messagesListKey) as string[] || [];
-    const newId = messagesList.length > 0 
+    const newId = messagesList.length > 0
       ? String(Math.max(...messagesList.map(id => parseInt(id))) + 1)
       : '1';
-    
+
     // 构建留言数据
     // 如果是管理员且提供了自定义时间，使用自定义时间；否则使用当前时间
     let messageDate = new Date().toISOString();
@@ -105,7 +110,7 @@ export default defineEventHandler(async (event) => {
         messageDate = customDate.toISOString();
       }
     }
-    
+
     const messageData = {
       id: newId,
       name: name,
@@ -117,15 +122,15 @@ export default defineEventHandler(async (event) => {
       parentId: parentId || null,
       ip: isAdmin ? 'admin' : (event.headers.get('cf-connecting-ip') || event.headers.get('x-forwarded-for') || 'unknown')
     };
-    
+
     // 保存留言
     const messageKey = `message:${newId}`;
     await kv.setItem(messageKey, messageData);
-    
+
     // 更新留言列表
     messagesList.push(newId);
     await kv.setItem(messagesListKey, messagesList);
-    
+
     return {
       success: true,
       data: {

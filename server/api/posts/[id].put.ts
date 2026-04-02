@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * 更新文章接口。
+ *
+ * 功能：鉴权后按字段更新文章数据。
+ */
 import { getKVStorage } from '~/server/utils/kv';
 import { validateAndTrim, validateLength, FIELD_LIMITS } from '~/server/utils/validation';
 import { handleApiError } from '~/server/utils/errorHandler';
@@ -57,7 +62,7 @@ export default defineEventHandler(async (event) => {
     if (body.likes !== undefined) {
       updates.likes = body.likes
     }
-    
+
     // 更新文章数据（保留原有数据，只更新提供的字段）
     const updatedPost = {
       ...existingPost,

@@ -1,16 +1,3 @@
-<!--
-  网站底部组件
-  
-  功能：
-    - 显示版权信息
-    - 显示友情链接和隐私政策链接
-    - ICP备案信息
-  
-  特性：
-    - 响应式设计
-    - 左右布局（PC端）
-    - 垂直布局（移动端）
--->
 <template>
   <footer class="footer-container">
     <div class="footer-content">
@@ -51,7 +38,13 @@
   </footer>
 </template>
 
-<script setup></script>
+<script setup>
+  /**
+   * 网站底部组件。
+   *
+   * 功能：展示版权、备案与相关链接，并提供响应式布局。
+   */
+</script>
 
 <style scoped>
 /* --- 容器基础设置 --- */

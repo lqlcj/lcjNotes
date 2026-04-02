@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * 友链申请审核接口。
+ *
+ * 功能：鉴权后更新申请状态，批准时写入友链数据。
+ */
 import { getKVStorage } from '~/server/utils/kv';
 import { handleApiError } from '~/server/utils/errorHandler';
 import { verifyAuth } from '~/server/utils/auth';
@@ -40,19 +45,19 @@ export default defineEventHandler(async (event) => {
     // 更新申请状态
     requestData.status = body.status;
     requestData.reviewedAt = new Date().toISOString();
-    
+
     await kv.setItem(requestKey, requestData);
 
     // 如果批准，添加到已批准友链列表
     if (body.status === 'approved') {
       const friendsListKey = 'friends:list';
       const friendsList = await kv.getItem(friendsListKey) as string[] || [];
-      
+
       // 检查是否已存在
       if (!friendsList.includes(id)) {
         friendsList.push(id);
         await kv.setItem(friendsListKey, friendsList);
-        
+
         // 保存友链详情
         const friendKey = `friend:${id}`;
         const friendData = {
