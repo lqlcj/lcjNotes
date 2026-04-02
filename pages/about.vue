@@ -18,10 +18,10 @@
           </section>
 
           <section>
-            <h3>Powered By</h3>
+            <h3>关于这个站~</h3>
             <p>整个网站是我一点点搭出来的，算是把“喜欢折腾”这件事落地了。</p>
             <p>
-              如果你也有自己的小岛，欢迎来串门。我也很乐意把这儿当成你偶尔路过、顺手坐一会儿的地方。
+              欢迎来串门。我也很乐意把这儿当成你偶尔路过、顺手坐一会儿的地方。
             </p>
 
             <h4
@@ -38,10 +38,9 @@
               <li>
                 <strong>留言系统</strong>：用的是Cloudflare大善人的D1数据库
               </li>
-              <li><strong>响应式布局</strong>：完美适配桌面端和移动端</li>
+              <li><strong>响应式布局</strong>：适配桌面端和移动端</li>
               <li>
-                <strong>友链管理</strong>：使用的是 Cloudflare KV
-                的友链申请和管理
+                <strong>友链管理</strong>：用的是 Cloudflare KV 的友链申请和管理
               </li>
               <li><strong>性能优化</strong>：懒加载、异步组件加载</li>
               <li><strong>动画效果</strong>：使用的是 GSAP 和 CSS 动画</li>
@@ -61,14 +60,13 @@
             <ul class="feature-list">
               <li><strong>框架</strong> - Nuxt 3</li>
               <li><strong>Markdown 解析</strong> - markdown-it</li>
-              <li><strong>存储</strong> - Cloudflare KV+ Cloudflare R2</li>
-              <li><strong>Vite 7.2+</strong></li>
+              <li><strong>脚手架</strong> -Vite 7.2+</li>
             </ul>
 
             <h3>
               <img
                 src="/images/lcj.svg"
-                alt="作者"
+                alt="Me"
                 class="icon author-icon"
                 width="24"
                 height="24"
